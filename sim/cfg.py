@@ -152,7 +152,13 @@ elif cfg.cellsrec == 2: # record one cell of each cellMEtype
                 else:
                     numberME+=int(cfg.cellNumber[metype]/5.0)
 
-cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
+#cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
+# record up to axon, dend, and apic 1000
+for i in range(0, 1000):
+    cfg.recordTraces['Vsoma_'+str(i)] = {'sec':'soma_'+str(i),'loc':0.5,'var':'v'}
+    cfg.recordTraces['Vdend_'+str(i)] = {'sec':'dend_'+str(i),'loc':0.5,'var':'v'}
+    cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
+    cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
 cfg.recordStim = False			
 cfg.recordTime = False  		
 cfg.recordStep = 0.1            
