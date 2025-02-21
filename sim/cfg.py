@@ -21,7 +21,7 @@ cfg = specs.SimConfig()
 #------------------------------------------------------------------------------
 
 cfg.simType='S1_TH_coreneuron'
-cfg.coreneuron = True
+cfg.coreneuron = False
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -166,7 +166,7 @@ cfg.recordStep = 0.1
 #------------------------------------------------------------------------------
 # Saving
 #------------------------------------------------------------------------------
-cfg.simLabel = 'v7_batch0'
+cfg.simLabel = 'v7_batch1'
 cfg.saveFolder = '../data/'+cfg.simLabel
 # cfg.filename =                	## Set file output name
 cfg.savePickle = True         	## Save pkl file
@@ -193,7 +193,7 @@ cfg.analysis['plot2Dnet']   = {'include': cfg.allpops, 'saveFig': True, 'showCon
 #------------------------------------------------------------------------------
 # Network 
 #------------------------------------------------------------------------------
-cfg.scale = 1.0 # reduce size
+cfg.scale = 0.1 # reduce size
 cfg.sizeY = 2082.0
 cfg.sizeX = 420.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = 420.0
