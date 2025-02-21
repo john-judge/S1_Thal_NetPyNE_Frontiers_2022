@@ -159,8 +159,8 @@ for i in range(0, 1000):
     cfg.recordTraces['Vdend_'+str(i)] = {'sec':'dend_'+str(i),'loc':0.5,'var':'v'}
     cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
     cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
-cfg.recordStim = False			
-cfg.recordTime = False  		
+cfg.recordStim = True			
+cfg.recordTime = True  		
 cfg.recordStep = 0.1            
 
 #------------------------------------------------------------------------------
