@@ -57,7 +57,7 @@ def setRunCfg(b, type='mpi_bulletin'):
 
     elif type=='mpi_direct2':
         b.runCfg = {'type': 'mpi_direct',
-            'mpiCommand': 'mpirun -n 8 special -mpi -python init.py', 
+            'mpiCommand': 'mpiexec -n 8 nrniv -python -mpi init.py', 
             'skip': True}
 
     elif type=='hpc_slurm_gcp':
