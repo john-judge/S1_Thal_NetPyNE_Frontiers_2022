@@ -12,6 +12,8 @@ import pickle
 import os
 import numpy as np
 
+from recordTraceBatchSettings import record_trace_setting
+
 cfg = specs.SimConfig()  
 
 #------------------------------------------------------------------------------
@@ -154,11 +156,13 @@ elif cfg.cellsrec == 2: # record one cell of each cellMEtype
 
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
-#cfg.recordTraces['Vsoma'] = {'sec':'soma','loc':0.5,'var':'v'}
-for i in range(0, 1000):
-    cfg.recordTraces['Vdend_'+str(i)] = {'sec':'dend_'+str(i),'loc':0.5,'var':'v'}
-    #cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
-    #cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
+if record_trace_setting['compartment'] == 'soma' and ((record_trace_setting['cell_num_start'] is None) or (record_trace_setting['cell_num_end'] is None)):
+    cfg.recordTraces['V' + record_trace_setting['compartment']] = {'sec': record_trace_setting['compartment'],'loc':0.5,'var':'v'}
+else:
+    for i in range(record_trace_setting['cell_num_start'], record_trace_setting['cell_num_end'] + 1):
+        cfg.recordTraces['V' + record_trace_setting['compartment'] + '_'+str(i)] = {'sec':record_trace_setting['compartment'] + '_'+str(i),'loc':0.5,'var':'v'}
+        #cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
+        #cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
 
 cfg.recordStim = True			
 cfg.recordTime = True  		

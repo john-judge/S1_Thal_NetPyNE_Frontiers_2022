@@ -1,0 +1,1 @@
+record_trace_setting = {'compartment': 'soma', 'cell_num_start': 0, 'cell_num_end': 50}

@@ -13,14 +13,14 @@ import sys
 # ----------------------------------------------------------------------------------------------
 # Custom
 # ----------------------------------------------------------------------------------------------
-def custom(cfg_type):
+def custom():
     params = specs.ODict()
     
     # params[('seeds', 'conn')] =  [1234]
 
     params[('rateStimI')] = [9.0]
     params[('rateStimE')] = [9.0]
-    cfg_file = 'cfg_' + cfg_type + '.py'
+    cfg_file = 'cfg.py'
 
     b = Batch(params=params, netParamsFile='netParams.py', cfgFile=cfg_file)
 
@@ -79,14 +79,7 @@ def setRunCfg(b, type='mpi_bulletin'):
 # ----------------------------------------------------------------------------------------------
 if __name__ == '__main__': 
 
-    # take command line arg
-    
-    if len(sys.argv) > 1:
-        cfg_type = sys.argv[1]
-    else:
-        cfg_type = 'soma'
-
-    b = custom(cfg_type) #
+    b = custom() #
 
     b.batchLabel = 'v7_batch1'  
     b.saveFolder = '../data/'+b.batchLabel
