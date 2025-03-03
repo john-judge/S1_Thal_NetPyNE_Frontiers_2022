@@ -13,7 +13,7 @@ max_compartment_id = 500
 n_jobs = (max_compartment_id // n_compartment_ids_per_job)* 3 + 1  # all somas can go on 1 job
 
 if len(sys.argv) > 1:
-    job_id = sys.argv[1]
+    job_id = int(sys.argv[1])
 
 compartment = 'soma'
 cell_num_start = None
