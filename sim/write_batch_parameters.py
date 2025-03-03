@@ -6,6 +6,7 @@
     This script then assigns compartment, start_no (optional), and end_no (optional) based on job ID.
     '''
 import sys
+import os
 
 n_compartment_ids_per_job = 50
 max_compartment_id = 500
@@ -28,6 +29,9 @@ if job_id != 0:
         compartment = 'apic'
     cell_num_start = (job_id // 3) * n_compartment_ids_per_job
     cell_num_end = cell_num_start + n_compartment_ids_per_job
+
+if os.path.exists('recordTraceBatchSettings.py'):
+    os.remove('recordTraceBatchSettings.py')
 
 # write to file
 f = open('recordTraceBatchSettings.py', 'w')
