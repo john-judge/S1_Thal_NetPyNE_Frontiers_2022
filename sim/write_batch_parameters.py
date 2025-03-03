@@ -36,6 +36,7 @@ if cell_num_end is not None:
 output_file_name = "S1-Thal-output-"+output_file_name + ".tar.gz"
 # create the output file (empty file)
 open(output_file_name, 'w').close()
+print('Output file created:', output_file_name)
 
 
 if os.path.exists('recordTraceBatchSettings.py'):
