@@ -30,6 +30,14 @@ if job_id != 0:
     cell_num_start = (job_id // 3) * n_compartment_ids_per_job
     cell_num_end = cell_num_start + n_compartment_ids_per_job
 
+output_file_name = compartment
+if cell_num_end is not None:
+    output_file_name += '_'+str(cell_num_end)
+output_file_name = "S1-Thal-output-"+output_file_name + ".tar.gz"
+# create the output file (empty file)
+open(output_file_name, 'w').close()
+
+
 if os.path.exists('recordTraceBatchSettings.py'):
     os.remove('recordTraceBatchSettings.py')
 
