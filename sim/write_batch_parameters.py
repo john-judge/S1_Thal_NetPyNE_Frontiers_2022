@@ -28,6 +28,8 @@ if job_id != 0:
     else:
         compartment = 'apic'
     cell_num_start = (job_id // 3) * n_compartment_ids_per_job
+    if job_id % 3 == 0:
+        cell_num_start -= n_compartment_ids_per_job  # axon jobs are off by 1 since job_id = 0 is soma
     cell_num_end = cell_num_start + n_compartment_ids_per_job
 
 output_file_name = compartment
