@@ -8,9 +8,9 @@
 import sys
 import os
 
-n_compartment_ids_per_job = 50
-max_compartment_id = 500
-n_jobs = (max_compartment_id // n_compartment_ids_per_job)* 3 + 1  # all somas can go on 1 job
+n_compartment_ids_per_job = 20
+max_compartment_id = 200
+n_jobs = (max_compartment_id // n_compartment_ids_per_job)* 2 + 2  
 
 if len(sys.argv) > 1:
     job_id = int(sys.argv[1])
@@ -20,14 +20,22 @@ cell_num_start = None
 cell_num_end = None
 job_id %= n_jobs
 
-if job_id != 31:
-    if job_id % 3 == 0:
-        compartment = 'axon'
-    elif job_id % 3 == 1:
-        compartment = 'dend'
-    else:
+# soma: only 1
+# axons: 1
+# apic: <200
+# dend: <200
+
+if job_id == n_jobs: # last job is for all somas
+    compartment = 'soma'
+elif job_id == n_jobs - 1:  # penultimate job is for all axons
+    compartment = 'axon'
+else:
+    if job_id % 2 == 0:
         compartment = 'apic'
-    cell_num_start = (job_id // 3) * n_compartment_ids_per_job
+    else:
+        compartment = 'dend'
+
+    cell_num_start = (job_id // 2) * n_compartment_ids_per_job
     cell_num_end = cell_num_start + n_compartment_ids_per_job
 
 output_file_name = compartment
