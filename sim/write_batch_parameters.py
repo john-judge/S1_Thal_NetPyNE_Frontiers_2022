@@ -18,7 +18,7 @@ if len(sys.argv) > 1:
 compartment = 'soma'
 cell_num_start = None
 cell_num_end = None
-job_id %= n_jobs
+
 
 # soma: only 1
 # axons: 1
@@ -29,6 +29,8 @@ if job_id == n_jobs: # last job is for all somas
     compartment = 'soma'
 elif job_id == n_jobs - 1:  # penultimate job is for all axons
     compartment = 'axon'
+    cell_num_start = 0
+    cell_num_end = 10
 else:
     if job_id % 2 == 0:
         compartment = 'apic'

@@ -159,7 +159,7 @@ elif cfg.cellsrec == 2: # record one cell of each cellMEtype
 if record_trace_setting['compartment'] == 'soma' and ((record_trace_setting['cell_num_start'] is None) or (record_trace_setting['cell_num_end'] is None)):
     cfg.recordTraces['V' + record_trace_setting['compartment']] = {'sec': record_trace_setting['compartment'],'loc':0.5,'var':'v'}
 else:
-    for i in range(record_trace_setting['cell_num_start'], record_trace_setting['cell_num_end'] + 1):
+    for i in range(record_trace_setting['cell_num_start'], record_trace_setting['cell_num_end']):
         cfg.recordTraces['V' + record_trace_setting['compartment'] + '_'+str(i)] = {'sec':record_trace_setting['compartment'] + '_'+str(i),'loc':0.5,'var':'v'}
         #cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
         #cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
