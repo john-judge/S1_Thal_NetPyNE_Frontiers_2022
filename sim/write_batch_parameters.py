@@ -37,20 +37,20 @@ for i in range(4, 8):
 # for apic_40 to apic_100, increments of n_compartment_ids_per_job=20
 for i in range(8,11):
     i_apic = i - 8
-    job_id_to_task_map[i] = {'compartment': 'apic', 'cell_num_start': i_apic*20, 'cell_num_end': (i_apic+1)*20}
+    job_id_to_task_map[i] = {'compartment': 'apic', 'cell_num_start': 40+i_apic*20, 'cell_num_end': 40+(i_apic+1)*20}
 
 # for dend_40 to dend_100, increments of n_compartment_ids_per_job=20
 for i in range(11, 14):
     i_dend = i - 11
-    job_id_to_task_map[i] = {'compartment': 'dend', 'cell_num_start': i_dend*20, 'cell_num_end': (i_dend+1)*20}
+    job_id_to_task_map[i] = {'compartment': 'dend', 'cell_num_start': 40+i_dend*20, 'cell_num_end': 40+(i_dend+1)*20}
 
 # for apic_100 to apic_180, increments of n_compartment_ids_per_job=40
 for i in range(14, 16):
-    job_id_to_task_map[i] = {'compartment': 'apic', 'cell_num_start': (i-14)*40, 'cell_num_end': (i-13)*40}
+    job_id_to_task_map[i] = {'compartment': 'apic', 'cell_num_start': 100+(i-14)*40, 'cell_num_end': 100+(i-13)*40}
 
 # for dend_100 to dend_220, increments of n_compartment_ids_per_job=40
 for i in range(16, 19):
-    job_id_to_task_map[i] = {'compartment': 'dend', 'cell_num_start': (i-16)*40, 'cell_num_end': (i-15)*40}
+    job_id_to_task_map[i] = {'compartment': 'dend', 'cell_num_start': 100+(i-16)*40, 'cell_num_end': 100+(i-15)*40}
 
 
 task_selected = job_id_to_task_map[job_id]
