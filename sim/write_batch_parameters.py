@@ -20,10 +20,10 @@ compartment = 'soma'
 cell_num_start = None
 cell_num_end = None
 
-# soma: only 1 job
+# soma: only 1 job: 
 # axons: 1 job
-# apic: <200 segments, 10 jobs
-# dend: <200 segments, 10 jobs
+# apic: <180 segments, 9 jobs (IDs 11-19)
+# dend: >200 segments, 11 jobs (IDs 0-10)
 
 if job_id == n_jobs: # last job is for all somas
     compartment = 'soma'
@@ -32,13 +32,14 @@ elif job_id == n_jobs - 1:  # penultimate job is for all axons
     cell_num_start = 0
     cell_num_end = 10
 else:
-    if job_id % 2 == 0:
+    if job_id > 10:
         compartment = 'apic'
+        cell_num_start = (job_id - 10) * n_compartment_ids_per_job
+        cell_num_end = cell_num_start + n_compartment_ids_per_job
     else:
         compartment = 'dend'
-
-    cell_num_start = (job_id // 2) * n_compartment_ids_per_job
-    cell_num_end = cell_num_start + n_compartment_ids_per_job
+        cell_num_start = job_id * n_compartment_ids_per_job
+        cell_num_end = cell_num_start + n_compartment_ids_per_job
 
 output_file_name = compartment
 if cell_num_end is not None:
