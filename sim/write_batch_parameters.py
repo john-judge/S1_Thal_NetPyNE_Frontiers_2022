@@ -9,7 +9,7 @@ import sys
 import os
 
 n_compartment_ids_per_job = 10
-n_jobs = 42 # (IDs 0-41)
+n_jobs = 21 # (IDs 0-41)
 
 if len(sys.argv) > 1:
     job_id = int(sys.argv[1])
@@ -60,7 +60,7 @@ cell_num_end = task_selected['cell_num_end']
 
 output_file_name = compartment
 if cell_num_end is not None:
-    output_file_name += '_'+str(cell_num_end)
+    output_file_name += '_'+str(cell_num_start) + '_'+str(cell_num_end)
 output_file_name = "S1-Thal-output-"+output_file_name + ".tar.gz"
 # create the output file (empty file)
 open("../../" + output_file_name, 'w').close()
