@@ -14,16 +14,16 @@ n_jobs = (max_compartment_id // n_compartment_ids_per_job)* 2 + 2
 
 if len(sys.argv) > 1:
     job_id = int(sys.argv[1])
+job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 
 compartment = 'soma'
 cell_num_start = None
 cell_num_end = None
 
-
-# soma: only 1
-# axons: 1
-# apic: <200
-# dend: <200
+# soma: only 1 job
+# axons: 1 job
+# apic: <200 segments, 10 jobs
+# dend: <200 segments, 10 jobs
 
 if job_id == n_jobs: # last job is for all somas
     compartment = 'soma'
