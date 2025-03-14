@@ -132,27 +132,40 @@ cfg.cellParamLabels = cellParam
 #--------------------------------------------------------------------------
 # Recording 
 #--------------------------------------------------------------------------
+
+## only L4 SS and L4 PC
+target_me_types = ['L4_SS', 'L4_PC']  # only used if cfg.cellsrec = 2 or 3. if None, record all cells
+
 cfg.allpops = cfg.cellParamLabels
 cfg.cellsrec = 0
-if cfg.cellsrec == 0:  cfg.recordCells = cfg.allpops # record all cells
-elif cfg.cellsrec == 1: cfg.recordCells = [(pop,0) for pop in cfg.allpops] # record one cell of each pop
-elif cfg.cellsrec == 2: # record one cell of each cellMEtype 
+if cfg.cellsrec == 0 or (cfg.cellsrec == 3 and target_me_types is None):  
+    cfg.recordCells = cfg.allpops # record all cells
+elif cfg.cellsrec == 1 or (cfg.cellsrec == 2 and target_me_types is None): 
+    cfg.recordCells = [(pop,0) for pop in cfg.allpops] # record one cell of each pop
+elif cfg.cellsrec == 2: # record one cell of only target ME types
     cfg.recordCells = []
     for metype in cfg.cellParamLabels:
-        if cfg.cellNumber[metype] < 5:
+        if any([target in metype for target in target_me_types]):
+            if cfg.cellNumber[metype] < 5:
+                for numberME in range(cfg.cellNumber[metype]):
+                    cfg.recordCells.append((metype,numberME))
+            else:
+                numberME = 0
+                diference = cfg.cellNumber[metype] - 5.0*int(cfg.cellNumber[metype]/5.0)
+                
+                for number in range(5):            
+                    cfg.recordCells.append((metype,numberME))
+                    
+                    if number < diference:              
+                        numberME+=int(np.ceil(cfg.cellNumber[metype]/5.0))  
+                    else:
+                        numberME+=int(cfg.cellNumber[metype]/5.0)
+elif cfg.cellsrec == 3:  # record all cells of target ME types
+    cfg.recordCells = []
+    for metype in cfg.cellParamLabels:
+        if any([target in metype for target in target_me_types]):
             for numberME in range(cfg.cellNumber[metype]):
                 cfg.recordCells.append((metype,numberME))
-        else:
-            numberME = 0
-            diference = cfg.cellNumber[metype] - 5.0*int(cfg.cellNumber[metype]/5.0)
-            
-            for number in range(5):            
-                cfg.recordCells.append((metype,numberME))
-                
-                if number < diference:              
-                    numberME+=int(np.ceil(cfg.cellNumber[metype]/5.0))  
-                else:
-                    numberME+=int(cfg.cellNumber[metype]/5.0)
 
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
@@ -192,8 +205,8 @@ cfg.analysis['plot2Dnet']   = {'include': cfg.allpops, 'saveFig': True, 'showCon
 # cfg.analysis['plotConn'] = {'includePre': cfg.allpops, 'includePost': cfg.allpops, 'feature': 'numConns', 'groupBy': 'pop', 'figSize': (24,24), 'saveFig': True, 'orderBy': 'gid', 'graphType': 'matrix', 'saveData':'../data/v5_batch0/v5_batch0_matrix_numConn.json', 'fontSize': 18}
 # cfg.analysis['plotConn'] = {'includePre': ['L1_DAC_cNA','L23_MC_cAC','L4_SS_cAD','L4_NBC_cNA','L5_TTPC2_cAD', 'L5_LBC_cNA', 'L6_TPC_L4_cAD', 'L6_LBC_cNA', 'ss_RTN_o', 'ss_RTN_m', 'ss_RTN_i', 'VPL_sTC', 'VPM_sTC', 'POm_sTC_s1'], 'includePost': ['L1_DAC_cNA','L23_MC_cAC','L4_SS_cAD','L4_NBC_cNA','L5_TTPC2_cAD', 'L5_LBC_cNA', 'L6_TPC_L4_cAD', 'L6_LBC_cNA', 'ss_RTN_o', 'ss_RTN_m', 'ss_RTN_i', 'VPL_sTC', 'VPM_sTC', 'POm_sTC_s1'], 'feature': 'convergence', 'groupBy': 'pop', 'figSize': (24,24), 'saveFig': True, 'orderBy': 'gid', 'graphType': 'matrix', 'fontSize': 18}
 # cfg.analysis['plot2Dnet']   = {'include': ['L5_LBC', 'VPM_sTC', 'POm_sTC_s1'], 'saveFig': True, 'showConns': True, 'figSize': (24,24), 'fontSize':16}   # Plot 2D net cells and connections
-# cfg.analysis['plotShape'] = {'includePre': cfg.recordCells, 'includePost': cfg.recordCells, 'showFig': False, 'includeAxon': False, 
-                            # 'showSyns': False, 'saveFig': True, 'dist': 0.55, 'cvar': 'voltage', 'figSize': (24,12), 'dpi': 600}
+cfg.analysis['plotShape'] = {'includePre': cfg.recordCells, 'includePost': cfg.recordCells, 'showFig': False, 'includeAxon': True, 
+                            'showSyns': False, 'saveFig': True, 'dist': 0.55, 'cvar': 'voltage', 'figSize': (24,12), 'dpi': 600}
 
 #------------------------------------------------------------------------------
 # Network 
