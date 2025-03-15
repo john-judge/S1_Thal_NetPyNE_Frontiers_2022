@@ -135,6 +135,7 @@ cfg.cellParamLabels = cellParam
 
 ## only L4 SS and L4 PC
 target_me_types = ['L4_SS', 'L4_PC']  # only used if cfg.cellsrec = 2 or 3. if None, record all cells
+fraction_record = 0.6  # fraction of cells to record (randomly selected) only used if cfg.cellsrec = 3
 
 cfg.allpops = cfg.cellParamLabels
 cfg.cellsrec = 3
@@ -165,7 +166,8 @@ elif cfg.cellsrec == 3:  # record all cells of target ME types
     for metype in cfg.cellParamLabels:
         if any([target in metype for target in target_me_types]):
             for numberME in range(cfg.cellNumber[metype]):
-                cfg.recordCells.append((metype,numberME))
+                if np.random.rand() < fraction_record:
+                    cfg.recordCells.append((metype,numberME))
 
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
