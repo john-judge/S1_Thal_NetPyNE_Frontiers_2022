@@ -138,12 +138,15 @@ target_me_types = ['L4_SS', 'L4_PC']  # only used if cfg.cellsrec = 2 or 3. if N
 fraction_record = 0.6  # fraction of cells to record (randomly selected) only used if cfg.cellsrec = 3
 
 cfg.allpops = cfg.cellParamLabels
-cfg.cellsrec = 2
+cfg.cellsrec = 2.1
 if cfg.cellsrec == 0 or (cfg.cellsrec == 3 and target_me_types is None):  
     cfg.recordCells = cfg.allpops # record all cells
 elif cfg.cellsrec == 1 or (cfg.cellsrec == 2 and target_me_types is None): 
     cfg.recordCells = [(pop,0) for pop in cfg.allpops] # record one cell of each pop
-elif cfg.cellsrec == 2: # record one cell of only target ME types
+elif cfg.cellsrec == 2.1:  # record one cell of only target ME types, alternative way
+    cfg.recordCells = [(pop,0) for pop in cfg.allpops
+                            if any([target in pop for target in target_me_types])]
+elif cfg.cellsrec == 2: 
     cfg.recordCells = []
     for metype in cfg.cellParamLabels:
         if any([target in metype for target in target_me_types]):
