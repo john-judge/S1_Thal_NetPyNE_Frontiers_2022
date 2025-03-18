@@ -172,6 +172,9 @@ elif cfg.cellsrec == 3:  # record all cells of target ME types
                 if np.random.rand() < fraction_record:
                     cfg.recordCells.append((metype,numberME))
 
+# limit one rec cell total
+cfg.recordCells = cfg.recordCells[:1]
+
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
 if record_trace_setting['compartment'] == 'soma' and ((record_trace_setting['cell_num_start'] is None) or (record_trace_setting['cell_num_end'] is None)):
