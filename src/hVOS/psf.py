@@ -8,9 +8,13 @@ import src.hVOS.microscPSF as msPSF
 class PSF:
     """ https://kmdouglass.github.io/posts/implementing-a-fast-gibson-lanni-psf-solver-in-python/
     build a 3D point spread function (PSF) for widefield microscopy.
+
+    tissue is much more turbid than the medium in which the PSF was measured,
+    the PSF will be distorted by scattering and absorption in the tissue.
+    
     """
-    def __init__(self, radial_lim=(0, 5,0), # in um
-                    axial_lim=(-2.0, 2.0), # in um
+    def __init__(self, radial_lim=(0, 18,0), # in um
+                    axial_lim=(-12.0, 12.0), # in um
                  psf_resolution=1.0,
                   NA=1.02, magnification=20, wavelength=0.5, particle_z=0, plot=True):
         self.params = msPSF.m_params
@@ -24,9 +28,8 @@ class PSF:
         self.plot = plot
 
     def build_radial_psf(self):
-        # Radial PSF
+        # Radial PSF, axial (z) x radial (r)
         mp = msPSF.m_params
-        pixel_size = 0.05
         rv = numpy.arange(self.radial_lim[0], self.radial_lim[1], self.psf_resolution)
         zv = numpy.arange(self.axial_lim[0], self.axial_lim[1], self.psf_resolution)
 
@@ -51,14 +54,16 @@ class PSF:
 
         # 3D PSF by rotating the 2D PSF around the z-axis
         # (i.e. the optical axis of the microscope)
-        theta = numpy.linspace(0, 2*numpy.pi, 100)
         rv = numpy.arange(self.radial_lim[0], self.radial_lim[1], self.psf_resolution)
         zv = numpy.arange(self.axial_lim[0], self.axial_lim[1], self.psf_resolution)
         psf_3d = numpy.zeros((len(rv), len(rv), len(zv)))
+        xy_center = len(rv) // 2
         for x in range(len(rv)):
             for y in range(len(rv)):
                 # calculate radial distance from the center of the PSF
-                r = numpy.sqrt(rv[x]**2 + rv[y]**2)
-                # interpolate the 2D PSF to the radial distance
-                psf_3d[x, y, :] = numpy.interp(zv, rv, psf_radial[r, :])
+                r = numpy.sqrt((rv[x] - xy_center)**2 + (rv[y] - xy_center)**2)
+                # interpolate the 2D PSF to the radial distance r
+                for z in range(len(zv)):
+                    r_interp_psf = numpy.interp(r, rv, psf_radial[z, :])
+                    psf_3d[x, y, z] = r_interp_psf
         return psf_3d
