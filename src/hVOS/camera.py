@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import gc
+import cv2
+import imageio
 from skimage.measure import block_reduce
 
 
@@ -11,8 +13,6 @@ class Camera:
      Then renders frames at every time step to create a video of the 
      network activity seen through the optical traces. """
 
-     # TO DO: render all frames at once cell-by-cell to reduce need for
-     #    multiple out-of-bounds checks
      # TO DO: render each compartment as a separate recording array
      # TO DO: CHTC parallelize the render of each cell by writing to disk
     
@@ -25,7 +25,8 @@ class Camera:
                  psf=None,
                  psf_resolution=1.0, # um/pixel
                  decomposition=None, # 'compartment', 'activity_type', etc
-                 data_dir=''  # for storing memory-mapped numpy arrays
+                 data_dir='',  # for storing memory-mapped numpy arrays
+                 use_2d_psf=False  # flatten entire image to z=0
                  ):  
         self.target_cells = target_cells
         self.morphologies = morphologies
@@ -37,6 +38,7 @@ class Camera:
         self.camera_angle = camera_angle  # coronal: see all layers in y-z plane
         self.decomposition = decomposition
         self.data_dir = data_dir
+        self.use_2d_psf = use_2d_psf
 
         # make self.recordings into memory-mapped numpy arrays.
         self.recordings = None
@@ -135,6 +137,15 @@ class Camera:
             for key in self.recordings:
                 self.recordings[key].flush()
 
+    def close_memmaps(self):
+        """ Close the memory-mapped numpy arrays. """
+        if self.decomposition is None:
+            del self.recordings
+        else:
+            for key in self.recordings:
+                del self.recordings[key]
+        gc.collect()
+
     def draw_single_frame(self, time_step):
         """ Draw the camera view of the network at a single time step. 
             Loop over all segments of compartments of all cells in the target population.
@@ -154,7 +165,58 @@ class Camera:
             self._draw_cell(cell, time_step=None)
             self.flush_memmaps()
 
-    def _draw_cell(self, cell, time_step=0):
+
+    def add_time_annotations(self, frame_step_size, img_filenames):
+        # add time annotations
+        frames = []
+        final_images = []
+        t_frame = 0
+
+        for filename in img_filenames:
+            img = cv2.imread(filename)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            cv2.putText(img, str(round(t_frame,1)) + " ms",
+                (5, 25),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.0,
+                (255, 255, 255)
+            )
+            t_frame += (frame_step_size / 2)
+            cv2.imwrite(filename, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+
+            final_images.append(imageio.imread(filename))
+
+        return final_images
+
+    def animate_frames_to_video(self, recording, filename='camera_view.gif',
+                                frames=(0,1000), time_step_size=0.1):
+        """ Animate the frames to a video. """
+        # each timestep to a frame in a list of images
+        frames = [frames[0], max(frames[1], len(self.time))]
+        images = [recording[i, :, :].copy() for i in range(frames[0], frames[1])]
+
+        # write each image to a file and keep the filenames in a list
+        # then use imageio to create a video from the images
+        image_filenames = []
+        for i, img in enumerate(images):
+            plt.clf()
+            plt.imshow(img, vmin=0, vmax=0.1)
+            image_filename = 'frame_' + str(i) + '.png'
+            plt.savefig(image_filename)
+            
+            image_filenames.append(image_filename)
+
+        image_filenames = self.add_time_annotations(time_step_size, image_filenames)
+
+        try:
+            imageio.mimsave(filename, image_filenames)
+            print("CREATED MOVIE:", filename)
+
+        except Exception as e:
+            print("Not creating movie for " + filename)
+            print(e)
+
+    def _draw_cell(self, cell, time_step=None):
         """ Draw the camera view of a single cell at a single time step. 
         Returns true if the cell is within the camera view, false otherwise."""
         print("Drawing", cell)
@@ -446,6 +508,13 @@ class Camera:
             # (it was already rescaled to match the camera resolution)
             # make sure the PSF is centered at the point, and that the PSF's depth dimension
             # is the same as the camera view's depth dimension
+
+            # IF PSF size is bigger than camera view,
+            #   then the PSF is too big to fit in the camera view
+            if self.psf.shape[0] > self.camera_width or \
+                self.psf.shape[1] > self.camera_height:
+                raise ValueError("PSF is too big to fit in the camera view. "
+                "Just make the PSF smaller or the camera view bigger.")
             
             x_psf_shape, y_psf_shape, z_psf_shape = self.psf.shape
             x_psf_lim = [-x_psf_shape // 2, -x_psf_shape // 2 + x_psf_shape]
@@ -464,14 +533,31 @@ class Camera:
             z_fov = self.fov_center[2] / self.camera_resolution
 
             # if the point z is outside the PSF's z range, return False
-            if z < z_fov + z_psf_lim[0] or z > z_fov + z_psf_lim[1]:
+            xy_psf_weighted = None
+            if not self.use_2d_psf:
+                if z < z_fov + z_psf_lim[0] or z > z_fov + z_psf_lim[1]:
+                    return False
+            z_overlap = 0
+            if not self.use_2d_psf:
+                z_overlap = int(round(z - z_fov))
+
+            if z_overlap > self.psf[:, :, :].shape[2] // 2 - 1:
+                return False
+            if -z_overlap > self.psf[:, :, :].shape[2] // 2 - 1:
                 return False
             
-            xy_psf_weighted = None
             if t is None:
-                xy_psf_weighted = self.psf[:, :, int(round(z - z_fov))] * weight.rehape(1, 1, -1)
+                z_center_psf = self.psf.shape[2] // 2
+                z_overlap = z_center_psf + z_overlap
+                psf_slice = self.psf[:, :, z_overlap].copy()
+                
+                # If psf_slice shape is 18x18, and weight is 2000x1x1,
+                #   tile psf_slice to match the weights shape (2000 x 18 x 18)
+                psf_slice = np.tile(psf_slice, (weight.shape[0], 1, 1))
+                # element-wise multiplication of the PSF slice with the weight
+                xy_psf_weighted = psf_slice * weight.reshape(-1, 1, 1)
             else:
-                xy_psf_weighted = self.psf[:, :, int(round(z - z_fov))] * weight
+                xy_psf_weighted = self.psf[:, :, z_overlap] * weight
 
             # actual bounds
             i_bounds = [max(0, i + x_psf_lim[0]), min(self.camera_width, i + x_psf_lim[1])]
@@ -490,8 +576,8 @@ class Camera:
             x_psf_weighted_bounded = None
             if t is None:
                 x_psf_weighted_bounded = \
-                    xy_psf_weighted[x_psf_lim[0]-x_psf_lim[0]:x_psf_lim[1]-x_psf_lim[0],
-                                    y_psf_lim[0]-y_psf_lim[0]:y_psf_lim[1]-y_psf_lim[0], :]
+                    xy_psf_weighted[:, x_psf_lim[0]-x_psf_lim[0]:x_psf_lim[1]-x_psf_lim[0],
+                                    y_psf_lim[0]-y_psf_lim[0]:y_psf_lim[1]-y_psf_lim[0]]
             else:
                 x_psf_weighted_bounded = \
                     xy_psf_weighted[x_psf_lim[0]-x_psf_lim[0]:x_psf_lim[1]-x_psf_lim[0],
@@ -499,6 +585,8 @@ class Camera:
 
             self.record_point_intensity(None, None, x_psf_weighted_bounded, 
                                         t, i_bounds=i_bounds, j_bounds=j_bounds)
+            del xy_psf_weighted, x_psf_weighted_bounded, psf_slice
+            gc.collect()
             return True            
         
     def record_point_intensity(self, i, j, weights, t, i_bounds=None, j_bounds=None,

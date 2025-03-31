@@ -1,4 +1,4 @@
-import inspect
+from scipy.signal import convolve2d
 import numpy
 import matplotlib.pyplot as pyplot
 
@@ -13,7 +13,7 @@ class PSF:
     the PSF will be distorted by scattering and absorption in the tissue.
     
     """
-    def __init__(self, radial_lim=(0, 18,0), # in um
+    def __init__(self, radial_lim=(0, 18.0), # in um
                     axial_lim=(-12.0, 12.0), # in um
                  psf_resolution=1.0,
                   NA=1.02, magnification=20, wavelength=0.5, particle_z=0, plot=True):
@@ -26,6 +26,8 @@ class PSF:
         self.radial_lim = radial_lim
         self.axial_lim = axial_lim
         self.plot = plot
+
+        self.radial_psf = self.build_radial_psf()
 
     def build_radial_psf(self):
         # Radial PSF, axial (z) x radial (r)
@@ -47,10 +49,25 @@ class PSF:
             ax.set_ylabel(r'z, $\mu m$')
             pyplot.show()
         return psf_zr
+    
+    def get_radial_psf(self):
+        """ Get the radial PSF. """
+        return self.radial_psf
+    
+    def convolve_radial_psf(self, add_psf):
+        """ Convolve the radial PSF with another PSF of same resolution """
+        psf_radial = self.get_radial_psf()
+        psf_radial = convolve2d(psf_radial, add_psf, mode='same')  # preserve the size
+
+
+        # normalize the PSF to sum to 1
+        psf_radial = psf_radial / numpy.sum(psf_radial)
+        self.radial_psf = psf_radial
+        return psf_radial
 
     def build_3D_PSF(self):
         """ Build the 3D PSF. """
-        psf_radial = self.build_radial_psf()
+        psf_radial = self.get_radial_psf()
 
         # 3D PSF by rotating the 2D PSF around the z-axis
         # (i.e. the optical axis of the microscope)
