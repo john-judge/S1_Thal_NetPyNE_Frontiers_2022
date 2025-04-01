@@ -6,6 +6,8 @@ import cv2
 import imageio
 from skimage.measure import block_reduce
 
+from src.hVOS.cell_recording import CellRecording
+
 
 class Camera:
     """ A class that draws a camera view of each cell in the network,
@@ -13,7 +15,6 @@ class Camera:
      Then renders frames at every time step to create a video of the 
      network activity seen through the optical traces. """
 
-     # TO DO: render each compartment as a separate recording array
      # TO DO: CHTC parallelize the render of each cell by writing to disk
     
     def __init__(self, target_cells, morphologies, time, 
@@ -24,9 +25,9 @@ class Camera:
                  camera_angle='coronal', 
                  psf=None,
                  psf_resolution=1.0, # um/pixel
-                 decomposition=None, # 'compartment', 'activity_type', etc
                  data_dir='',  # for storing memory-mapped numpy arrays
-                 use_2d_psf=False  # flatten entire image to z=0
+                 use_2d_psf=False,  # flatten entire image to z=0
+                 spike_thresh=0.1674, # optial a.u., found in data['net']['params']['defaultThreshold'], then 0.196 + 0.00286 * -10 = 0.1674
                  ):  
         self.target_cells = target_cells
         self.morphologies = morphologies
@@ -36,51 +37,21 @@ class Camera:
         self.camera_height = camera_height
         self.camera_resolution = camera_resolution
         self.camera_angle = camera_angle  # coronal: see all layers in y-z plane
-        self.decomposition = decomposition
         self.data_dir = data_dir
         self.use_2d_psf = use_2d_psf
+        self.spike_thresh = spike_thresh  # optical units
 
-        # make self.recordings into memory-mapped numpy arrays.
-        self.recordings = None
-        if self.decomposition == 'compartment':
-            self.recordings = {
-                key: np.memmap(self.get_mmap_filename(decomp_type=key), dtype='float32',
-                                mode='w+', shape=(len(self.time), self.camera_width, self.camera_height))
-                for key in ['soma', 'axon', 'dend', 'apic']
-            }
-            # zero out the memory-mapped numpy arrays
-            for key in self.recordings:
-                self.recordings[key][:, :, :] = 0
-        elif self.decomposition == 'activity_type':
-            self.recordings = {
-                key: np.memmap(self.get_mmap_filename(decomp_type=key), dtype='float32',
-                                mode='w+', shape=(len(self.time), self.camera_width, self.camera_height))
-                for key in ['spiking', 'synaptic']
-            }
-            # zero out the memory-mapped numpy arrays
-            for key in self.recordings:
-                self.recordings[key][:, :, :] = 0
-        else:
-            mm_fp = self.get_mmap_filename(decomp_type=None)
-            self.recordings = np.memmap(mm_fp, dtype='float32', mode='w+', shape=(len(self.time), self.camera_width, self.camera_height))
-            # zero out the memory-mapped numpy array
-            self.recordings[:, :, :] = 0
+        # make memory-mapped numpy arrays.
+        self.cell_recordings = CellRecording(self.data_dir,
+                                             target_cells[0].get_cell_id(),
+                                             self.time,
+                                             camera_width=camera_width,
+                                             camera_height=camera_height)
         self.psf = psf
         self.psf_resolution = psf_resolution  # treat this as the axial resolution as well, which is realistically ~1 um
         self.rescale_psf()
         #self.orient_psf_to_camera()
 
-    def get_mmap_filename(self, decomp_type=None, file_keyword='model_rec'):
-        """ Get the filename of the memory-mapped numpy array. """
-        cell_ids = [cell.cell_id for cell in self.target_cells]
-        if len(cell_ids) > 1:
-            cell_id = 'multi' + str(len(cell_ids))
-        else:
-            cell_id = cell_ids[0]
-        if decomp_type is None:
-            return self.data_dir + str(cell_id) + '-' + file_keyword + '.npy'
-        return self.data_dir + str(cell_id) + '-' + file_keyword + '_' + decomp_type + '.npy'
-        
     def rescale_psf(self):
         ''' 
         The PSF is a 3D array, with the center of the PSF at the center of the array.
@@ -121,30 +92,17 @@ class Camera:
         else:
             raise NotImplementedError("Only coronal view is implemented.")
 
-    def get_recording(self, decomp_type=None):
-        """ Get the recording of the network activity. """
-        if self.decomposition is None:
-            return self.recordings
-        if decomp_type is None:
-            return sum([self.recordings[decomp] for decomp in self.recordings])
-        return self.recordings[decomp_type]
+    def get_cell_recording(self, decomp_type=None):
+        """ Get the recording of the network activity. Returns a CellRecording object"""
+        return self.cell_recordings 
     
     def flush_memmaps(self):
         """ Flush the memory-mapped numpy arrays to disk. """
-        if self.decomposition is None:
-            self.recordings.flush()
-        else:
-            for key in self.recordings:
-                self.recordings[key].flush()
+        self.cell_recordings.flush_memmaps()
 
     def close_memmaps(self):
         """ Close the memory-mapped numpy arrays. """
-        if self.decomposition is None:
-            del self.recordings
-        else:
-            for key in self.recordings:
-                del self.recordings[key]
-        gc.collect()
+        self.cell_recordings.close_memmaps()
 
     def draw_single_frame(self, time_step):
         """ Draw the camera view of the network at a single time step. 
@@ -168,7 +126,6 @@ class Camera:
 
     def add_time_annotations(self, frame_step_size, img_filenames):
         # add time annotations
-        frames = []
         final_images = []
         t_frame = 0
 
@@ -179,21 +136,22 @@ class Camera:
                 (5, 25),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1.0,
-                (255, 255, 255)
+                (0, 0, 0)
             )
-            t_frame += (frame_step_size / 2)
-            cv2.imwrite(filename, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+            t_frame += frame_step_size
+            cv2.imwrite(filename +"annotate.png", cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
 
-            final_images.append(imageio.imread(filename))
+            final_images.append(imageio.imread(filename +"annotate.png"))
 
         return final_images
 
     def animate_frames_to_video(self, recording, filename='camera_view.gif',
-                                frames=(0,1000), time_step_size=0.1):
+                                frames=(0,999), time_step_size=0.1, frame_stride=10):
         """ Animate the frames to a video. """
         # each timestep to a frame in a list of images
-        frames = [frames[0], max(frames[1], len(self.time))]
-        images = [recording[i, :, :].copy() for i in range(frames[0], frames[1])]
+        time_step_size *= frame_stride
+        frames = [frames[0], min(frames[1], len(self.time))]
+        images = [recording[i, :, :].copy() for i in range(frames[0], frames[1], frame_stride)]
 
         # write each image to a file and keep the filenames in a list
         # then use imageio to create a video from the images
@@ -216,6 +174,21 @@ class Camera:
             print("Not creating movie for " + filename)
             print(e)
 
+    def classify_compartment(self, compartment):
+        """ Classify the compartment of the cell. 
+        This is used to determine which compartment to draw in the camera view. """
+        print("classifying compartment", compartment)
+        if 'soma' in compartment:
+            return 'soma'
+        elif 'axon' in compartment:
+            return 'axon'
+        elif 'dend' in compartment:
+            return 'dend'
+        elif 'apic' in compartment:
+            return 'apic'
+        else:
+            raise ValueError("Unknown compartment type: " + compartment)
+
     def _draw_cell(self, cell, time_step=None):
         """ Draw the camera view of a single cell at a single time step. 
         Returns true if the cell is within the camera view, false otherwise."""
@@ -228,15 +201,18 @@ class Camera:
         # and drawing it on the camera view
         for compartment in structure:
             intensity_value = np.array(cell.get_optical_trace("V" + compartment))
+            spike_mask = intensity_value > self.spike_thresh
             if time_step is not None:
                 intensity_value = intensity_value[time_step]
             for segment_id in structure[compartment]:
-                
+
+                decomp_type = self.classify_compartment(compartment)
                 # draw the optical trace on the camera view
                 is_cell_in_bounds = \
                     self._draw_segment(structure[compartment][segment_id], 
                                    intensity_value,
-                                   x_soma, y_soma, z_soma, time_step) \
+                                   x_soma, y_soma, z_soma, time_step, 
+                                   decomp_type=decomp_type, spike_mask=spike_mask) \
                     or is_cell_in_bounds
             del intensity_value
             gc.collect()
@@ -244,7 +220,7 @@ class Camera:
         gc.collect()
         return is_cell_in_bounds
 
-    def _draw_segment(self, segment, intensity_value, x_soma, y_soma, z_soma, t):
+    def _draw_segment(self, segment, intensity_value, x_soma, y_soma, z_soma, t, decomp_type=None, spike_mask=None):
         """ draw the segment of the cell on the camera view. 
         Returns true if the segment is within the camera view, false otherwise."""
         x_seg_prox = float(segment['proximal']['x']) + x_soma
@@ -273,19 +249,25 @@ class Camera:
             # figure out what fraction of the segment falls into each pixel
             return self._draw_weighted_line(x_seg_prox, y_seg_prox, z_seg_prox,
                                             x_seg_dist, y_seg_dist, z_seg_dist,
-                                            intensity_value * area_lateral, t)
+                                            intensity_value * area_lateral, t,
+                                            decomp_type=decomp_type,
+                                            spike_mask=spike_mask)
         elif x_seg_dist == x_seg_prox and y_seg_dist == y_seg_prox and z_seg_dist == z_seg_prox:
             return self._draw_weighted_sphere(x_seg_prox, y_seg_prox, z_seg_prox, 
                                               max(diam_seg_prox / 2, diam_seg_dist / 2),
-                                              intensity_value * area_lateral, t)
+                                              intensity_value * area_lateral, t,
+                                              decomp_type=decomp_type,
+                                              spike_mask=spike_mask)
             
         else:   
             return self._draw_weighted_frustum(x_seg_prox, y_seg_prox, z_seg_prox,
                                             x_seg_dist, y_seg_dist, z_seg_dist,
                                             diam_seg_prox, diam_seg_dist,
-                                            intensity_value * area_lateral, t)
+                                            intensity_value * area_lateral, t,
+                                            decomp_type=decomp_type,
+                                            spike_mask=spike_mask)
         
-    def _draw_weighted_sphere(self, x, y, z, r, weight, t):
+    def _draw_weighted_sphere(self, x, y, z, r, weight, t, decomp_type=None, spike_mask=None):
         """ Draw a sphere on the camera view of this weight, weighted by weight.
             Determine what fraction of the sphere falls into each pixel.
             """
@@ -305,7 +287,9 @@ class Camera:
                 y1 = y + r * np.sin(ph) * np.sin(th)
                 z1 = z + r * np.cos(ph)
                 is_cell_in_bounds = \
-                    self._draw_weighted_point(x1, y1, z1, weight / (n_steps ** 2), t) \
+                    self._draw_weighted_point(x1, y1, z1, weight / (n_steps ** 2), t,
+                                              decomp_type=decomp_type,
+                                              spike_mask=spike_mask) \
                     or is_cell_in_bounds
         return is_cell_in_bounds
 
@@ -328,7 +312,8 @@ class Camera:
         points = np.stack([x, y, z], axis=-1)
         return points
         
-    def _draw_weighted_frustum(self, x1, y1, z1, x2, y2, z2, d1, d2, weight, t):
+    def _draw_weighted_frustum(self, x1, y1, z1, x2, y2, z2, d1, d2, 
+                               weight, t, decomp_type=None, spike_mask=None):
         """ Draw a frustum on the camera view of this weight, weighted by weight.
             Determine what fraction of the frustum falls into each pixel.
             
@@ -373,7 +358,9 @@ class Camera:
                                                          circle2_points[i_circle][0],
                                                          circle2_points[i_circle][1],
                                                          circle2_points[i_circle][2],
-                                                         weight / n_points, t) \
+                                                         weight / n_points, t,
+                                                         decomp_type=decomp_type,
+                                                         spike_mask=spike_mask) \
                 or is_cell_in_bounds
             
         del circle1_points, circle2_points
@@ -442,7 +429,8 @@ class Camera:
                 slope_error_new = slope_error_new - 2 * (x2 - x1) 
         return points
   
-    def _draw_weighted_line(self, x1, y1, z1, x2, y2, z2, weight, t):
+    def _draw_weighted_line(self, x1, y1, z1, x2, y2, z2, 
+                            weight, t, decomp_type=None, spike_mask=None):
         """ Draw a line on the camera view of this weight, weighted by weight.
             Determine what fraction of the line falls into each pixel."""
         # Bresenham's line algorithm
@@ -458,9 +446,15 @@ class Camera:
             if len(zv) <= 2:  # ... if it a very short line, treat as one point
                 del zv
                 gc.collect()
-                return self._draw_weighted_point(x1, y1, z1, weight, t, i=i_start, j=j_start)
+                return self._draw_weighted_point(x1, y1, z1, weight, t, 
+                                                 i=i_start, j=j_start, 
+                                                 decomp_type=decomp_type,
+                                                 spike_mask=spike_mask)
             for z_inter in zv:  # ... if it is a longer line, chunk into many points
-                is_cell_in_bounds = self._draw_weighted_point(x1, y1, z_inter, weight / len(zv), t) \
+                is_cell_in_bounds = self._draw_weighted_point(x1, y1, z_inter, 
+                                                              weight / len(zv), t,
+                                                              decomp_type=decomp_type,
+                                                              spike_mask=spike_mask) \
                     or is_cell_in_bounds
             return is_cell_in_bounds
 
@@ -473,25 +467,41 @@ class Camera:
         if len(pixels) <= 2:
             del pixels
             gc.collect()
-            r1 = self._draw_weighted_point(x1, y1, z1, weight / 2, t, i=i_start, j=j_start)
-            r2 = self._draw_weighted_point(x2, y2, z2, weight / 2, t, i=i_end, j=j_end)
+            r1 = self._draw_weighted_point(x1, y1, z1, weight / 2, t, 
+                                           i=i_start, j=j_start, 
+                                           decomp_type=decomp_type,
+                                           spike_mask=spike_mask)
+            r2 = self._draw_weighted_point(x2, y2, z2, weight / 2, t, 
+                                           i=i_end, j=j_end, 
+                                           decomp_type=decomp_type,
+                                           spike_mask=spike_mask)
             return r1 or r2
         else:
             weight_per_pixel = weight / (len(pixels) - 1)
             for i_px, pt in enumerate(pixels):
                 if i_px == 0 or i_px == len(pixels) - 1:
                     continue
-                is_cell_in_bounds = self._draw_weighted_point(x1, y1, z1, weight_per_pixel, t, i=pt[0], j=pt[1]) \
+                is_cell_in_bounds = self._draw_weighted_point(x1, y1, z1, weight_per_pixel, 
+                                                              t, i=pt[0], j=pt[1],
+                                                              decomp_type=decomp_type,
+                                                              spike_mask=spike_mask) \
                     or is_cell_in_bounds
                 
             del pixels
             gc.collect()
                 
-            r1 = self._draw_weighted_point(x1, y1, z1, weight_per_pixel / 2, t, i=i_start, j=j_start)
-            r2 = self._draw_weighted_point(x2, y2, z2, weight_per_pixel / 2, t, i=i_end, j=j_end)
+            r1 = self._draw_weighted_point(x1, y1, z1, weight_per_pixel / 2, t, 
+                                           i=i_start, j=j_start, 
+                                           decomp_type=decomp_type,
+                                           spike_mask=spike_mask)
+            r2 = self._draw_weighted_point(x2, y2, z2, weight_per_pixel / 2, t, 
+                                           i=i_end, j=j_end, 
+                                           decomp_type=decomp_type,
+                                           spike_mask=spike_mask)
             return r1 or r2 or is_cell_in_bounds
 
-    def _draw_weighted_point(self, x, y, z, weight, t, i=None, j=None):
+    def _draw_weighted_point(self, x, y, z, weight, t, i=None, j=None, 
+                             decomp_type=None, spike_mask=None):
         """ Draw a point on the camera view of this weight,
             convolved with the PSF. 
             Returns true if the point is within the camera view, false otherwise."""
@@ -501,7 +511,9 @@ class Camera:
         # print("Drawing point at", i, j, "with weight", weight)
         if self.psf is None:
             if 0 <= i < self.camera_width and 0 <= j < self.camera_height:
-                self.record_point_intensity(i, j, weight, t, None)
+                self.record_point_intensity(i, j, weight, t, None, 
+                                            decomp_type=decomp_type,
+                                            spike_mask=spike_mask)
             return (0 <= i < self.camera_width and 0 <= j < self.camera_height)
         else:
             # paste the PSF in the recording array centered at the point
@@ -584,24 +596,15 @@ class Camera:
                                     y_psf_lim[0]-y_psf_lim[0]:y_psf_lim[1]-y_psf_lim[0]]
 
             self.record_point_intensity(None, None, x_psf_weighted_bounded, 
-                                        t, i_bounds=i_bounds, j_bounds=j_bounds)
+                                        t, i_bounds=i_bounds, j_bounds=j_bounds,
+                                        decomp_type=decomp_type,
+                                        spike_mask=spike_mask)
             del xy_psf_weighted, x_psf_weighted_bounded, psf_slice
             gc.collect()
             return True            
         
     def record_point_intensity(self, i, j, weights, t, i_bounds=None, j_bounds=None,
-                               decomp_type=None):
+                               decomp_type=None, spike_mask=None):
         """ Record the intensity of a point on the camera view. """
-        recording = self.get_recording(decomp_type=decomp_type)
-
-        if i_bounds is None and j_bounds is None:
-            if t is None:
-                recording[:, i, j] += weights
-            else:
-                recording[t, i, j] += weights
-        else:
-            if t is None:
-                recording[:, i_bounds[0]:i_bounds[1], j_bounds[0]:j_bounds[1]] += weights
-            else:
-                recording[t, i_bounds[0]:i_bounds[1], j_bounds[0]:j_bounds[1]] += weights
-
+        self.cell_recording.record_activity(i, j, weights, t, i_bounds=i_bounds, j_bounds=j_bounds,
+                                            compart=decomp_type, spike_mask=spike_mask)

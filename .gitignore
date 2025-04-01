@@ -4,10 +4,13 @@
 */*.mod
 */*.hoc
 */*.pyc
+*.pyc
 */*.npy
 *.npy
 *.mp4
 *.gif
+tests/*.nml
+tests/*.dat
 src/hVOS/__pycache__/*
 src/hVOS/__pycache__/camera.cpython-38.pyc
 *.png

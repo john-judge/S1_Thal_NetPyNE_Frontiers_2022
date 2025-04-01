@@ -39,8 +39,9 @@ class OpticalReadout:
                             continue
 
                     voltage_trace = cell.get_voltage_trace(compart_id)
-                    intensity_trace = self._calculate_intensity_trace(voltage_trace)
+                    intensity_trace, spike_mask = self._calculate_intensity_trace(voltage_trace)
                     cell.set_optical_trace(compart_id, intensity_trace, target_dir)
+                    cell.set_spike_mask(compart_id, spike_mask, target_dir)
                     del voltage_trace, intensity_trace
                 print("\tFinished computing optical signal for", 
                         len(compart_ids), 

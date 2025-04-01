@@ -7,7 +7,7 @@ class hVOSReadout (OpticalReadout):
     def __init__(self, target_populations, cells, morphologies, force_overwrite=False):
         super().__init__(target_populations, cells, morphologies, force_overwrite=force_overwrite)
 
-    def _calculate_intensity_trace(self, voltage_trace):
+    def _calculate_intensity_trace(self, voltage_trace, flip=True):
         # Wang et al 2010: hVOS 2.0 in cultured PC12 cells
         #    
         #          for Vm in the range of -70 to +30 mV
@@ -19,6 +19,9 @@ class hVOSReadout (OpticalReadout):
         voltage_trace = np.array(voltage_trace)
         intensity_trace[voltage_trace < -70] =  0.04592  + 0.000716 * voltage_trace[voltage_trace < -70]
         intensity_trace[voltage_trace >= -70] = 0.196 + 0.00286 * voltage_trace[voltage_trace >= -70]
+
+        if flip:  # reflect around y=1
+            intensity_trace = 2 - intensity_trace
         '''for i, voltage in enumerate(voltage_trace):
             if voltage < -70:
                 intensity_trace[i] += 0.056  + 0.0008 * voltage

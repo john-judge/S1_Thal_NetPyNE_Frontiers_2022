@@ -848,6 +848,27 @@ if cfg.addIClamp:
             'sec': sec, 
             'loc': loc}
 
+# ------------------------------------------------------------------------------
+# Extracellular stimulation 
+# ------------------------------------------------------------------------------
+if cfg.addExtracellularStim:
+    netParams.stimSourceParams['XStim1'] = {'type': 'XStim', 
+                                                       'field': {'class': 'pointSource',
+                                                                 'location': [cfg.xStimLocation[0], cfg.xStimLocation[1], cfg.xStimLocation[2]],
+                                                                  'sigma': cfg.xStimSigma,  # conductivity in mS/mm
+                                                                 },
+                                                        'waveform': {'type': 'pulse',
+                                                                     'amp': cfg.xStimAmp,  # amplitude in mA
+                                                                        'dur': cfg.xStimDur,  # duration in ms
+                                                                        'del': cfg.xStimDel,  # delay in ms
+                                                        }
+    }
+    netParams.stimTargetParams['XStim1->all'] = {
+        'source': 'XStim1',
+        'conds': {'cellList': 'all'}}
+
+                                                       
+
 #------------------------------------------------------------------------------
 # NetStim inputs - FROM CFG.PY
 #------------------------------------------------------------------------------

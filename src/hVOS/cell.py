@@ -32,6 +32,9 @@ class Cell:
 
     def get_morphology(self):
         return self.morphology
+    
+    def get_cell_id(self):
+        return self.cell_id
 
     def __repr__(self):
         return f"Cell(id={self.cell_id}, me_type={self.me_type}, position={self.x}, {self.y}, {self.z})"

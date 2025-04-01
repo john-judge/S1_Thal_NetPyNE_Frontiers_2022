@@ -249,10 +249,10 @@ cfg.IEGain = 1.0
 
 #------------------------------------------------------------------------------
 ## Th->Th 
-cfg.connectTh = True
-cfg.connect_RTN_RTN     = True
-cfg.connect_TC_RTN      = True
-cfg.connect_RTN_TC      = True
+cfg.connectTh = False
+cfg.connect_RTN_RTN     = False
+cfg.connect_TC_RTN      = False
+cfg.connect_RTN_TC      = False
 
 cfg.yConnFactor             = 10 # y-tolerance form connection distance based on the x and z-plane radial tolerances (1=100%; 2=50%; 5=20%; 10=10%)
 
@@ -270,29 +270,29 @@ cfg.divergenceHO = 10
 
 #------------------------------------------------------------------------------
 ## Th->S1
-cfg.connect_Th_S1 = True
+cfg.connect_Th_S1 = False
 cfg.TC_S1 = {}
-cfg.TC_S1['VPL_sTC'] = True
-cfg.TC_S1['VPM_sTC'] = True
-cfg.TC_S1['POm_sTC_s1'] = True
+cfg.TC_S1['VPL_sTC'] = False
+cfg.TC_S1['VPM_sTC'] = False
+cfg.TC_S1['POm_sTC_s1'] = False
 
 cfg.frac_Th_S1 = 1.0
 #------------------------------------------------------------------------------
 ## S1->Th 
-cfg.connect_S1_Th = True
+cfg.connect_S1_Th = False
 
-cfg.connect_S1_RTN = True
+cfg.connect_S1_RTN = False
 cfg.convergence_S1_RTN         = 30.0  # dist_2D<R
 cfg.connWeight_S1_RTN       = 0.500
 
-cfg.connect_S1_TC = True
+cfg.connect_S1_TC = False
 cfg.convergence_S1_TC         = 30.0  # dist_2D<R
 cfg.connWeight_S1_TC       = 0.250
 
 #------------------------------------------------------------------------------
 # Current inputs 
 #------------------------------------------------------------------------------
-cfg.addIClamp = True  # decrease the transient
+cfg.addIClamp = False  # decrease the transient
  
 cfg.IClamp = []
 cfg.IClampnumber = 0
@@ -301,6 +301,17 @@ cfg.thalamocorticalconnections =  ['VPL_sTC', 'VPM_sTC', 'POm_sTC_s1']
 for popName in cfg.thalamocorticalconnections:
     cfg.IClamp.append({'pop': popName, 'sec': 'soma', 'loc': 0.5, 'start': 0, 'dur': 5, 'amp': 2.0+10.0*cfg.IClampnumber}) #pA
     cfg.IClampnumber=cfg.IClampnumber+1
+
+#------------------------------------------------------------------------------
+# Extracellular stim
+#------------------------------------------------------------------------------
+cfg.addExtracellularStim = True
+
+cfg.xStimLocation = [0,0,0]
+cfg.xStimSigma = 0.276  # conductivity in mS/mm
+cfg.xStimAmp = 0.2  # amplitude in mA
+cfg.xStimDur = 0.2  # duration in ms
+cfg.xStimDel = 20  # delay in ms
 
 #------------------------------------------------------------------------------
 # NetStim inputs 
