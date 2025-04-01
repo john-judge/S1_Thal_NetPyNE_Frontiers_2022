@@ -863,9 +863,10 @@ if cfg.addExtracellularStim:
                                                                         'del': cfg.xStimDel,  # delay in ms
                                                         }
     }
+    
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
-        'conds': {'cellList': 'all'}}
+        'conds': {'pop': cfg.allpops}}
 
                                                        
 
