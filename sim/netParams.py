@@ -871,7 +871,7 @@ if cfg.addExtracellularStim:
     
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
-        'conds': {'pop': cfg.allpops}}
+        'conds': {'cellList': 'all'}}
 
                                                        
 
