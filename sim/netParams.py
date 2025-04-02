@@ -865,8 +865,8 @@ if cfg.addExtracellularStim:
     }'''
     netParams.stimSourceParams['XStim1'] =  {
         'type': 'XStim',
-        'field': {'class': 'pointSource', 'location': [100,-100,0], 'sigma': 0.276},
-        'waveform': {'type': 'pulse', 'amp' : 0.020, 'del' : 20, 'dur' : 80, 'freq': 250}
+        'field': {'class': 'pointSource', 'location': [0,0,0], 'sigma': 0.276},
+        'waveform': {'type': 'pulse', 'amp' : 0.20, 'del' : 20, 'dur' : 0.2}
         }
     
     netParams.stimTargetParams['XStim1->all'] = {
