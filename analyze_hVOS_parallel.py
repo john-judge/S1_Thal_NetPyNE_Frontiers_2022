@@ -215,7 +215,7 @@ cam_height = 300
 t = loaded_compart_data['time']
 time_step_size = t[1] - t[0]
 soma_position = target_cell.get_soma_position()
-cam = Camera([cell], 
+cam = Camera([target_cell], 
              me_type_morphology_map, 
              loaded_compart_data['time'],
              fov_center=soma_position,
@@ -244,7 +244,7 @@ cam.close_memmaps()
 #########################################
 # Draw cell without PSF
 #########################################
-cam_no_psf = Camera(target_population_cells, 
+cam_no_psf = Camera([target_cell], 
              me_type_morphology_map, 
              loaded_compart_data['time'],
              fov_center=soma_position,
@@ -254,7 +254,7 @@ cam_no_psf = Camera(target_population_cells,
              psf=None,
              data_dir=model_rec_out_dir + 'tmp/',#, #
              use_2d_psf=True)
-cam_no_psf._draw_cell(cell)
+cam_no_psf._draw_cell(target_cell)
 for compart_id in ['soma', 'axon', 'apic', 'dend']:
     for activity_type in ['synaptic', 'spiking']:
         rec = cam_no_psf.get_cell_recording().get_raw_recording(compart_id=compart_id, 
