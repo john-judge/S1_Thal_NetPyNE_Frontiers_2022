@@ -80,11 +80,11 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 for cellName in cfg.S1cells:
 	layernumber = cellName[1:2]
 	if layernumber == '2':
-		netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 'ynormRange': layer['23'], 'label':[],
-                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName]))}
+		netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 'ynormRange': layer['23'], 
+                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 'diversity': True}
 	else:
-		netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 'ynormRange': layer[layernumber], 'label':[],
-                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName]))}
+		netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 'ynormRange': layer[layernumber], 
+                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 'diversity': True}
 
 ## THALAMIC POPULATIONS (from prev model)
 for popName in cfg.thalamicpops:
@@ -92,8 +92,8 @@ for popName in cfg.thalamicpops:
         ThcellType = 'sRE_cell'
     else: # excitatory
         ThcellType = 'sTC_cell'    
-    netParams.popParams[popName] = {'cellType': ThcellType, 'cellModel': 'HH_full', 'yRange': [ymin[popName], ymax[popName]],'label':[],
-                                        'numCells':  int(np.ceil(cfg.popNumber[popName]))}
+    netParams.popParams[popName] = {'cellType': ThcellType, 'cellModel': 'HH_full', 'yRange': [ymin[popName], ymax[popName]],
+                                        'numCells':  int(np.ceil(cfg.popNumber[popName])), 'diversity': False}
 
 #------------------------------------------------------------------------------
 # Cell parameters  # L1 70  L23 215  L4 230 L5 260  L6 260  = 1035
