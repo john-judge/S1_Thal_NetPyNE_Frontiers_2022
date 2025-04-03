@@ -40,7 +40,7 @@ cfg.cvode_atol = 1e-6
 cfg.cache_efficient = True
 cfg.printRunTime = 0.1
 
-cfg.includeParamsLabel = False
+cfg.includeParamsLabel = True
 cfg.printPopAvgRates = True
 cfg.checkErrors = False
 
