@@ -42,7 +42,7 @@ class Camera:
         self.spike_thresh = spike_thresh  # optical units
 
         # make memory-mapped numpy arrays.
-        self.cell_recordings = CellRecording(self.data_dir,
+        self.cell_recording = CellRecording(self.data_dir,
                                              target_cells[0].get_cell_id(),
                                              self.time,
                                              camera_width=camera_width,
@@ -94,15 +94,15 @@ class Camera:
 
     def get_cell_recording(self, decomp_type=None):
         """ Get the recording of the network activity. Returns a CellRecording object"""
-        return self.cell_recordings 
+        return self.cell_recording 
     
     def flush_memmaps(self):
         """ Flush the memory-mapped numpy arrays to disk. """
-        self.cell_recordings.flush_memmaps()
+        self.cell_recording.flush_memmaps()
 
     def close_memmaps(self):
         """ Close the memory-mapped numpy arrays. """
-        self.cell_recordings.close_memmaps()
+        self.cell_recording.close_memmaps()
 
     def draw_single_frame(self, time_step):
         """ Draw the camera view of the network at a single time step. 
@@ -122,7 +122,6 @@ class Camera:
         for cell in self.target_cells:
             self._draw_cell(cell, time_step=None)
             self.flush_memmaps()
-
 
     def add_time_annotations(self, frame_step_size, img_filenames):
         # add time annotations
@@ -146,7 +145,8 @@ class Camera:
         return final_images
 
     def animate_frames_to_video(self, recording, filename='camera_view.gif',
-                                frames=(0,999), time_step_size=0.1, frame_stride=10):
+                                frames=(0,999), time_step_size=0.1, frame_stride=10,
+                                vmin=0, vmax=0.01):
         """ Animate the frames to a video. """
         # each timestep to a frame in a list of images
         time_step_size *= frame_stride
@@ -158,7 +158,7 @@ class Camera:
         image_filenames = []
         for i, img in enumerate(images):
             plt.clf()
-            plt.imshow(img, vmin=0, vmax=0.1)
+            plt.imshow(img, vmin=vmin, vmax=vmax)
             image_filename = 'frame_' + str(i) + '.png'
             plt.savefig(image_filename)
             
@@ -177,7 +177,6 @@ class Camera:
     def classify_compartment(self, compartment):
         """ Classify the compartment of the cell. 
         This is used to determine which compartment to draw in the camera view. """
-        print("classifying compartment", compartment)
         if 'soma' in compartment:
             return 'soma'
         elif 'axon' in compartment:

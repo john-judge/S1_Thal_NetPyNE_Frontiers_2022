@@ -20,7 +20,7 @@ class CellRecording:
         self.camera_width = camera_width
         self.camera_height = camera_height
         self.compartments = ['soma', 'axon', 'dend', 'apic']
-        self.recordings = []
+        self.recordings = {}
         for compart in self.compartments:
             self.recordings[compart] = self.create_compartment_recording(compart)
 
@@ -30,7 +30,14 @@ class CellRecording:
         if compart not in self.compartments:
             raise ValueError("Compartment not found: " + compart)
         if spike_mask is None:
-            spike_mask = np.zeros()
+            spike_mask = np.zeros(weights.shape, dtype=bool)
+
+        # if shape of spike mask does not match weights, tile it in axis 1 and 2 to match
+        if spike_mask.shape[0] != weights.shape[0]:
+            raise ValueError("Spike mask shape not compatible with weights shape: " + \
+                             str(spike_mask.shape) + " vs " + str(weights.shape))
+        if len(spike_mask.shape) == 1 and len(weights.shape) > 1:
+            spike_mask = spike_mask.reshape((spike_mask.shape[0], 1, 1))
         
         if i_bounds is None and j_bounds is None:
             if t is None:
@@ -103,6 +110,6 @@ class CellRecording:
     def close_memmaps(self):
         """ Close the memory-mapped numpy arrays. """
         for compart in self.compartments:
-            self.recordings[compart]['spiking'].close()
-            self.recordings[compart]['synaptic'].close()
+            del self.recordings[compart]['spiking']
+            del self.recordings[compart]['synaptic']
         gc.collect()

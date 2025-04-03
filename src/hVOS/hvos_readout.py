@@ -21,7 +21,7 @@ class hVOSReadout (OpticalReadout):
         intensity_trace[voltage_trace >= -70] = 0.196 + 0.00286 * voltage_trace[voltage_trace >= -70]
 
         if flip:  # reflect around y=1
-            intensity_trace = 2 - intensity_trace
+            intensity_trace *= -1
         '''for i, voltage in enumerate(voltage_trace):
             if voltage < -70:
                 intensity_trace[i] += 0.056  + 0.0008 * voltage
