@@ -41,15 +41,15 @@ target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
 
-# 'S1_results/' contains a subdirectory 'cell_dat' 
+# 'run1/' contains a subdirectory 'cell_dat' 
 #   which contains a memmap numpy file for each cell in the network
 #   each memmap file contains the voltage trace for each compartment of the cell
 #   in the format 'v7_batch_1_0_0_V<compartment_id>_<cell_id>.dat'
-data_dir = 'S1_results/'
+data_dir = 'run1/'
 morphology_data_dir = 'NMC_model/NMC.NeuronML2/'
-model_rec_out_dir = 'S1_results/model_rec/'
+model_rec_out_dir = 'run1/model_rec/'
 
-# list subdirectories of S1_results/ 
+# list subdirectories of run1/ 
 #   each subdirectory is a range of compart_ids
 #   e.g. 'apic_0_10', 'dend_10_20', etc.
 # compart_data dict maps compart_id range to subdirectory name
