@@ -53,7 +53,7 @@ optical_type = "hVOS"
 run_id = 2
 data_dir = '../run' + str(run_id) + '/'
 morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
-model_rec_out_dir = data_dir + '/model_rec/'
+model_rec_out_dir = data_dir + 'model_rec/'
 
 # list subdirectories of run1/ 
 #   each subdirectory is a range of compart_ids
@@ -195,7 +195,7 @@ for ax in axs:
     ax.set_xlim(0, 200)
 
 axs[0].set_title('ME-type:' + target_cell.get_me_type())
-plt.savefig(model_rec_out_dir + f'{target_cell.get_me_type()}_cell_{target_cell.get_cell_id()}_voltage_optical.png')
+plt.savefig(model_rec_out_dir + str(target_cell.get_cell_id()) + '_voltage_optical.png')
 
 ######################################
 # determine which morphology to use for each cell
