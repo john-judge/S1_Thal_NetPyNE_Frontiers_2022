@@ -852,7 +852,7 @@ if cfg.addIClamp:
 # Extracellular stimulation 
 # ------------------------------------------------------------------------------
 if cfg.addExtracellularStim:
-    '''netParams.stimSourceParams['XStim1'] = {'type': 'XStim', 
+    netParams.stimSourceParams['XStim1'] = {'type': 'XStim', 
                                                        'field': {'class': 'pointSource',
                                                                  'location': [cfg.xStimLocation[0], cfg.xStimLocation[1], cfg.xStimLocation[2]],
                                                                   'sigma': cfg.xStimSigma,  # conductivity in mS/mm
@@ -862,16 +862,14 @@ if cfg.addExtracellularStim:
                                                                         'dur': cfg.xStimDur,  # duration in ms
                                                                         'del': cfg.xStimDel,  # delay in ms
                                                         }
-    }'''
-    netParams.stimSourceParams['XStim1'] =  {
-        'type': 'XStim',
-        'field': {'class': 'pointSource', 'location': [0,0,0], 'sigma': 0.276},
-        'waveform': {'type': 'pulse', 'amp' : 0.20, 'del' : 20, 'dur' : 0.2}
-        }
-    
+    }
+    stim_radius = 50
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
-        'conds': {'cellList': 'all'}}
+        'conds': {'cellList': 'all', 
+                  'x': [cfg.xStimLocation[0]-stim_radius,cfg.xStimLocation[0]+stim_radius], 
+                  'y': [cfg.xStimLocation[1]-stim_radius,cfg.xStimLocation[1]+stim_radius], 
+                  'z': [cfg.xStimLocation[2]-stim_radius,cfg.xStimLocation[2]+stim_radius]},}
 
                                                        
 
