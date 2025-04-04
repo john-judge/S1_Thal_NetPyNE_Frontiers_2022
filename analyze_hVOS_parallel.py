@@ -216,6 +216,7 @@ print("Any target cells missing structure data?:",
 #######################################
 # Draw cell with PSF
 #######################################
+os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
 cam_width = 300
 cam_height = 300
 t = loaded_compart_data['time']
@@ -229,7 +230,7 @@ cam = Camera([target_cell],
              camera_width=cam_width,
              camera_height=cam_height,
              psf=psf,
-             data_dir=model_rec_out_dir, 
+             data_dir=model_rec_out_dir + 'psf/', 
              use_2d_psf=False)
 cam._draw_cell(target_cell)
 
@@ -250,6 +251,7 @@ cam.close_memmaps()
 #########################################
 # Draw cell without PSF
 #########################################
+os.makedirs(model_rec_out_dir + 'no_psf/', exist_ok=True)
 cam_no_psf = Camera([target_cell], 
              me_type_morphology_map, 
              loaded_compart_data['time'],
@@ -258,7 +260,7 @@ cam_no_psf = Camera([target_cell],
              camera_width=cam_width,
              camera_height=cam_height,
              psf=None,
-             data_dir=model_rec_out_dir + 'tmp/',#, #
+             data_dir=model_rec_out_dir + 'no_psf/',#, #
              use_2d_psf=True)
 cam_no_psf._draw_cell(target_cell)
 for compart_id in ['soma', 'axon', 'apic', 'dend']:

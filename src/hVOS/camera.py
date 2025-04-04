@@ -13,8 +13,6 @@ class Camera:
      showing the cell's morphology and the intensity of the hVOS signal,
      Then renders frames at every time step to create a video of the 
      network activity seen through the optical traces. """
-
-     # TO DO: CHTC parallelize the render of each cell by writing to disk
     
     def __init__(self, target_cells, morphologies, time, 
                  fov_center=(0, 0, 0),  # um, including axial focus
@@ -183,7 +181,7 @@ class Camera:
         image_filenames = self.add_time_annotations(time_step_size, image_filenames)
 
         try:
-            imageio.mimsave(filename, image_filenames)
+            imageio.mimsave(self.data_dir + filename, image_filenames)
             print("CREATED MOVIE:", filename)
 
         except Exception as e:
