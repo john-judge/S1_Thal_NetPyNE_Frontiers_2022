@@ -21,8 +21,8 @@ job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 # dend: <220 segments, 11 jobs (IDs 0-10)
 
 job_id_to_task_map = {
-    n_jobs: {'compartment': 'soma', 'cell_num_start': None, 'cell_num_end': None},
-    n_jobs-1: {'compartment': 'axon', 'cell_num_start': 0, 'cell_num_end': 10},
+    n_jobs-1: {'compartment': 'soma', 'cell_num_start': None, 'cell_num_end': None}, # job 20
+    n_jobs-2: {'compartment': 'axon', 'cell_num_start': 0, 'cell_num_end': 10}, # job 19
 }
 
 # for apic_0 to apic_40, increments of n_compartment_ids_per_job=10
