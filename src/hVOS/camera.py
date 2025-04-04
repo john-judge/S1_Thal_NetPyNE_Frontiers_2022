@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import gc
-import cv2
+from PIL import Image, ImageDraw, ImageFont
 import imageio
 from skimage.measure import block_reduce
 
@@ -127,17 +127,34 @@ class Camera:
         final_images = []
         t_frame = 0
 
+
         for filename in img_filenames:
-            img = cv2.imread(filename)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            cv2.putText(img, str(round(t_frame,1)) + " ms",
-                (5, 25),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.0,
-                (0, 0, 0)
-            )
+            # Open the image
+            img = Image.open(filename).convert("RGB")
+            draw = ImageDraw.Draw(img)
+
+            # Define font and text
+            try:
+                font = ImageFont.truetype("arial.ttf", 20)  # Use a system font
+            except IOError:
+                font = ImageFont.load_default()  # Fallback to default font if arial.ttf is unavailable
+
+            text = f"{round(t_frame, 1)} ms"
+            text_position = (5, 5)  # Position for the text
+            text_color = (0, 0, 0)  # Black color
+
+            # Add text to the image
+            draw.text(text_position, text, fill=text_color, font=font)
+
+            # Save the annotated image
+            annotated_filename = filename + "annotate.png"
+            img.save(annotated_filename)
+
+            # Append the annotated image to the final images list
+            final_images.append(imageio.imread(annotated_filename))
+
+            # Increment the frame time
             t_frame += frame_step_size
-            cv2.imwrite(filename +"annotate.png", cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
 
             final_images.append(imageio.imread(filename +"annotate.png"))
 
