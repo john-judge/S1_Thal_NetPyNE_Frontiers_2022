@@ -29,10 +29,14 @@ from src.hVOS.mcPSF import mcPSF
 # read command line args
 #####################################
 if len(sys.argv) != 2:
-    raise ValueError("Please provide the job_id as a command line argument.")
-job_id = int(sys.argv[1])
-if job_id < 0:
-    raise ValueError("Job ID must be a positive integer.")
+    job_id = 0  # testing mode has no job_id
+else:
+    job_id = int(sys.argv[1])
+
+if not np.isnumeric(job_id):
+    job_id = 0  # testing mode has no job_id
+print('job_id:', job_id)
+
 
 #####################################
 # Find data in CHTC staging and extract data just for this job's cell
@@ -57,6 +61,7 @@ compart_data = {subdir: filepath for filepath, subdir in
                 zip(os.listdir(data_dir), os.listdir(data_dir)) 
                 if os.path.isdir(os.path.join(data_dir, subdir) 
                                  and 'model_rec' not in subdir)}
+print('compart_data:', compart_data)
 
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
@@ -65,10 +70,10 @@ compart_data = {subdir: filepath for filepath, subdir in
 loaded_compart_data = {}  
 for compart in compart_data.keys(): 
     target_dir =  compart_data[compart]
+    target_dir += '/S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/'
     if not os.path.exists(target_dir):
         print('Directory ' + target_dir + ' does not exist')
         continue
-    target_dir += '/S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/'
     for file in os.listdir(target_dir):
         if file.endswith('.dat') and 'v7_batch1_0_0' in file and 'cell' in file:
             file_name = file.replace(".dat", "").replace("v7_batch1_0_0_", "").split('_')
