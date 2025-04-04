@@ -45,9 +45,9 @@ optical_type = "hVOS"
 #   which contains a memmap numpy file for each cell in the network
 #   each memmap file contains the voltage trace for each compartment of the cell
 #   in the format 'v7_batch_1_0_0_V<compartment_id>_<cell_id>.dat'
-data_dir = 'run1/'
-morphology_data_dir = 'NMC_model/NMC.NeuronML2/'
-model_rec_out_dir = 'run1/model_rec/'
+data_dir = '../run1/'
+morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
+model_rec_out_dir = '../run1/model_rec/'
 
 # list subdirectories of run1/ 
 #   each subdirectory is a range of compart_ids
