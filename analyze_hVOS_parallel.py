@@ -58,10 +58,10 @@ model_rec_out_dir = '../run1/model_rec/'
 #   each subdirectory is a range of compart_ids
 #   e.g. 'apic_0_10', 'dend_10_20', etc.
 # compart_data dict maps compart_id range to subdirectory name
-compart_data = {subdir: filepath for filepath, subdir in 
-                zip(os.listdir(data_dir), os.listdir(data_dir)) 
-                if os.path.isdir(os.path.join(data_dir, subdir) 
-                                 and 'model_rec' not in subdir)}
+compart_data = {subdir: os.path.join(data_dir, subdir) for subdir in 
+                os.listdir(data_dir) 
+                if os.path.isdir(os.path.join(data_dir, subdir)) 
+                                 and 'model_rec' not in subdir}
 print('compart_data:', compart_data)
 
 # create a dict that maps compart_id 'Vcomp_#' to
