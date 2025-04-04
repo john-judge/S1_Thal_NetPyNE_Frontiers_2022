@@ -28,14 +28,15 @@ from src.hVOS.mcPSF import mcPSF
 ####################################
 # read command line args
 #####################################
+job_id = 0
 if len(sys.argv) != 2:
     job_id = 0  # testing mode has no job_id
 else:
-    job_id = int(sys.argv[1])
 
-if not np.isnumeric(job_id):
-    job_id = 0  # testing mode has no job_id
-print('job_id:', job_id)
+    try:
+        job_id = int(sys.argv[1])
+    except ValueError:
+        job_id = 0
 
 
 #####################################
