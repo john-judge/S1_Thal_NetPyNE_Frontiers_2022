@@ -96,7 +96,6 @@ loaded_compart_data['time'] = np.memmap(mm_time_fp, dtype='float32', mode='r')
 
 # load cell_id to me_type map
 me_type_map_file = data_dir + 'cell_id_to_me_type_map.pkl'
-loaded_compart_data = {}
 if os.path.exists(me_type_map_file):
     with open(me_type_map_file, 'rb') as f:
         cell_id_to_me_type_map = pickle.load(f)
