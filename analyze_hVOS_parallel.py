@@ -50,9 +50,10 @@ optical_type = "hVOS"
 #   which contains a memmap numpy file for each cell in the network
 #   each memmap file contains the voltage trace for each compartment of the cell
 #   in the format 'v7_batch_1_0_0_V<compartment_id>_<cell_id>.dat'
-data_dir = '../run1/'
+run_id = 2
+data_dir = '../run' + str(run_id) + '/'
 morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
-model_rec_out_dir = '../run1/model_rec/'
+model_rec_out_dir = data_dir + '/model_rec/'
 
 # list subdirectories of run1/ 
 #   each subdirectory is a range of compart_ids
@@ -81,7 +82,6 @@ for compart in compart_data.keys():
             compart = "_".join(file_name[:2])
             cell_id = "_".join(file_name[2:])
             if 'soma' in file:
-                print("Loading soma data:", file)
                 compart = 'Vsoma'
                 cell_id = 'cell_' + cell_id
                 
@@ -217,11 +217,13 @@ print("Any target cells missing structure data?:",
 # Draw cell with PSF
 #######################################
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
-cam_width = 300
-cam_height = 300
+cam_width = 500
+cam_height = 500
 t = loaded_compart_data['time']
 time_step_size = t[1] - t[0]
-soma_position = target_cell.get_soma_position()
+view_center_cell = 0  # view center cell is the cell to center on.
+# other cells may or may not be in view.
+soma_position = target_population_cells[view_center_cell].get_soma_position()
 cam = Camera([target_cell], 
              me_type_morphology_map, 
              loaded_compart_data['time'],
