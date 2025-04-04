@@ -81,6 +81,7 @@ for compart in compart_data.keys():
             compart = "_".join(file_name[:2])
             cell_id = "_".join(file_name[2:])
             if 'soma' in file:
+                print("Loading soma data:", file)
                 compart = 'Vsoma'
                 cell_id = 'cell_' + cell_id
                 
