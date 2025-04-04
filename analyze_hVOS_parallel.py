@@ -176,30 +176,12 @@ psf.convolve_radial_psf(mc_psf)
 # build 3D PSF 
 psf = psf.build_3D_PSF()
 
-######################################
-# Plot voltage and optical signal and savefig
-######################################
-target_cell = target_population_cells[i_target_cell]
-compart_ids = target_cell.get_list_compartment_ids()
-# make two subplots
-fig, axs = plt.subplots(2, 1, figsize=(10, 10))
-for compart_id in compart_ids:
-    voltage_trace = target_cell.get_voltage_trace(compart_id)
-    intensity_trace = target_cell.get_optical_trace(compart_id)
-    axs[0].plot(loaded_compart_data['time'],voltage_trace, label='Voltage')
-    axs[1].plot(loaded_compart_data['time'],intensity_trace, label='Intensity')
-axs[1].set_xlabel('Time (ms)')
-axs[0].set_ylabel('Membrane Potential (mV)')
-axs[1].set_ylabel('df/f')
-for ax in axs:
-    ax.set_xlim(0, 200)
-
-axs[0].set_title('ME-type:' + target_cell.get_me_type())
-plt.savefig(model_rec_out_dir + str(target_cell.get_cell_id()) + '_voltage_optical.png')
 
 ######################################
 # determine which morphology to use for each cell
 ######################################
+target_cell = target_population_cells[i_target_cell]
+compart_ids = target_cell.get_list_compartment_ids()
 for morph_key in me_type_morphology_map:
     for morph in me_type_morphology_map[morph_key]:
         for cell in target_population_cells:
@@ -237,7 +219,7 @@ cam = Camera([target_cell],
 cam._draw_cell(target_cell)
 
 
-for compart_id in ['soma', 'axon', 'apic', 'dend']:
+'''for compart_id in ['soma', 'axon', 'apic', 'dend']:
     for activity_type in ['synaptic', 'spiking']:
         rec = cam.get_cell_recording().get_raw_recording(compart_id=compart_id, 
                                                          activity_type=activity_type)
@@ -246,7 +228,7 @@ for compart_id in ['soma', 'axon', 'apic', 'dend']:
                         filename='w_psf_' + compart_id + "_" + activity_type + '.gif',
                         time_step_size=time_step_size,
                         vmin=0,
-                        vmax=0.01)
+                        vmax=0.01)'''
 cam.close_memmaps()
 
 
@@ -265,12 +247,12 @@ cam_no_psf = Camera([target_cell],
              data_dir=model_rec_out_dir + 'no_psf/',#, #
              use_2d_psf=True)
 cam_no_psf._draw_cell(target_cell)
-for compart_id in ['soma', 'axon', 'apic', 'dend']:
+'''for compart_id in ['soma', 'axon', 'apic', 'dend']:
     for activity_type in ['synaptic', 'spiking']:
         rec = cam_no_psf.get_cell_recording().get_raw_recording(compart_id=compart_id, 
                                                          activity_type=activity_type)
         cam_no_psf.animate_frames_to_video(rec, 
                         frames=(0,500),
                         filename='no_psf_' + compart_id + "_" + activity_type + '.gif',
-                        time_step_size=time_step_size)
+                        time_step_size=time_step_size)'''
 cam_no_psf.close_memmaps()
