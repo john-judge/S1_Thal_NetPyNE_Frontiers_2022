@@ -28,7 +28,7 @@ cfg.coreneuron = False
 #------------------------------------------------------------------------------
 # Run parameters
 #------------------------------------------------------------------------------
-cfg.duration = 200 ## Duration of the sim, in ms  
+cfg.duration = 50 ## Duration of the sim, in ms  
 cfg.dt = 0.025
 cfg.seeds = {'cell': 4322, 'conn': 4322, 'stim': 4322, 'loc': 4322} 
 cfg.hParams = {'celsius': 22, 'v_init': -65} # room temperature (slice)
