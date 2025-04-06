@@ -45,7 +45,7 @@ else:
 target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
-t_max = 500 # number of points to write to disk
+t_max = 501 # number of points to write to disk
 
 # 'run1/' contains a subdirectory 'cell_dat' 
 #   which contains a memmap numpy file for each cell in the network
