@@ -55,6 +55,7 @@ run_id = 2
 data_dir = '../run' + str(run_id) + '/'
 morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
 model_rec_out_dir = data_dir + 'model_rec/'
+model_rec_final_out_dir = data_dir + 'model_rec_final/'
 
 # list subdirectories of run1/ 
 #   each subdirectory is a range of compart_ids
@@ -233,6 +234,8 @@ cam._draw_cell(target_cell)
                         time_step_size=time_step_size,
                         vmin=0,
                         vmax=0.01)'''
+psf_nonzero_files = cam.get_cell_recording().get_non_zero_file_list()
+print("PSF non-zero files:", psf_nonzero_files)
 cam.close_memmaps()
 
 
@@ -259,4 +262,21 @@ cam_no_psf._draw_cell(target_cell)
                         frames=(0,500),
                         filename='no_psf_' + compart_id + "_" + activity_type + '.gif',
                         time_step_size=time_step_size)'''
+no_psf_nonzero_files = cam_no_psf.get_cell_recording().get_non_zero_file_list()
+print("No PSF non-zero files:", no_psf_nonzero_files)
 cam_no_psf.close_memmaps()
+
+###########################################
+# Copy non-zero files to model_rec_final_out_dir
+###########################################
+os.makedirs(model_rec_final_out_dir, exist_ok=True)
+for file in psf_nonzero_files:
+    file_name = file.split('/')[-1]
+    target_file = model_rec_final_out_dir + file_name
+    if not os.path.exists(target_file):
+        os.system('cp ' + file + ' ' + target_file)
+for file in no_psf_nonzero_files:
+    file_name = file.split('/')[-1]
+    target_file = model_rec_final_out_dir + file_name
+    if not os.path.exists(target_file):
+        os.system('cp ' + file + ' ' + target_file)

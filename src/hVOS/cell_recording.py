@@ -1,5 +1,6 @@
 import numpy as np
 import gc
+import os
 
 
 class CellRecording:
@@ -23,6 +24,22 @@ class CellRecording:
         self.recordings = {}
         for compart in self.compartments:
             self.recordings[compart] = self.create_compartment_recording(compart)
+
+    def get_non_zero_file_list(self):
+        """ Check self.recordings for non-zero numpy arrays and return a list of the filenames. """
+        non_zero_files = []
+        for compart in self.compartments:
+            spk_mm_fp = self.get_mmap_filename(compart, file_keyword='spk_rec')
+            syn_mm_fp = self.get_mmap_filename(compart, file_keyword='syn_rec')
+            if os.path.exists(spk_mm_fp) and np.count_nonzero(np.memmap(spk_mm_fp, 
+                                                                        dtype='float32', 
+                                                                        mode='r')) > 0:
+                non_zero_files.append(spk_mm_fp)
+            if os.path.exists(syn_mm_fp) and np.count_nonzero(np.memmap(syn_mm_fp, 
+                                                                        dtype='float32', 
+                                                                        mode='r')) > 0:
+                non_zero_files.append(syn_mm_fp)
+        return non_zero_files
 
     def record_activity(self, i, j, weights, t, i_bounds=None, j_bounds=None,
                                compart=None, spike_mask=None):
