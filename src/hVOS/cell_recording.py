@@ -38,6 +38,16 @@ class CellRecording:
                              str(spike_mask.shape) + " vs " + str(weights.shape))
         if len(spike_mask.shape) == 1 and len(weights.shape) > 1:
             spike_mask = spike_mask.reshape((spike_mask.shape[0], 1, 1))
+
+        # check if spike mask is wrong time length
+        if spike_mask.shape[0] != len(self.time):
+            print("Spike mask shape not compatible with time length: " + \
+                  str(spike_mask.shape) + " vs " + str(len(self.time)) + \
+                    'weights shape: ' + str(weights.shape) + \
+                        "Trimming. Cell id: " + str(self.cell_id) + \
+                            " compartment: " + compart + " i: " + str(i) + " j: " + str(j))
+            spike_mask = spike_mask[:len(self.time), :, :]
+            weights = weights[:len(self.time), :, :]
         
         if i_bounds is None and j_bounds is None:
             if t is None:
