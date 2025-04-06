@@ -45,6 +45,7 @@ else:
 target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
+t_max = 500 # number of points to write to disk
 
 # 'run1/' contains a subdirectory 'cell_dat' 
 #   which contains a memmap numpy file for each cell in the network
@@ -93,6 +94,9 @@ for compart in compart_data.keys():
 # load time
 mm_time_fp = data_dir + 'v7_batch1_0_0_time.dat'
 loaded_compart_data['time'] = np.memmap(mm_time_fp, dtype='float32', mode='r')
+assert len(loaded_compart_data['time']) == t_max, \
+        "Time length mismatch: " + str(len(loaded_compart_data['time'])) + \
+            " != " + str(t_max)
 
 # load cell_id to me_type map
 me_type_map_file = data_dir + 'cell_id_to_me_type_map.pkl'
@@ -199,8 +203,8 @@ print("Any target cells missing structure data?:",
 # Draw cell with PSF
 #######################################
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
-cam_width = 500
-cam_height = 500
+cam_width = 300
+cam_height = 300
 t = loaded_compart_data['time']
 time_step_size = t[1] - t[0]
 view_center_cell = 0  # view center cell is the cell to center on.
@@ -210,7 +214,7 @@ cam = Camera([target_cell],
              me_type_morphology_map, 
              loaded_compart_data['time'],
              fov_center=soma_position,
-             camera_resolution=1.0,
+             camera_resolution=3.0,
              camera_width=cam_width,
              camera_height=cam_height,
              psf=psf,
