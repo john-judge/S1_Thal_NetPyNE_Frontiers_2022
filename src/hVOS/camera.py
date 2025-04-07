@@ -573,28 +573,26 @@ class Camera:
                 return False
             if -z_overlap > self.psf[:, :, :].shape[2] // 2 - 1:
                 return False'''
-            # the center of the PSF is the amount of scattering through half of a slice (typically 100 um)
-            # i.e. the scattering for the focal z-plane.
-            # any higher and we have less scattering, any lower and we have more scattering
-            
 
             z_overlap = 0
             if not self.use_2d_psf:
                 z_overlap = int(round(z - z_fov))
 
+            # the center of the PSF is the amount of scattering through half of a slice (typically 100 um)
+            # i.e. the scattering for the focal z-plane.
+            # any higher and we have less scattering, any lower and we have more scattering
+            
+            z_psf = self.psf.shape[2] // 4  - z_overlap
+
             # if z > z_fov, it is closer to the camera, so we need to 
             #       shift the PSF slice down
             # if z < z_fov, it is further from the camera, so we need to 
             #          shift the PSF slice up
-
-            z_psf = self.psf.shape[2] // 2  
-            
-            if z_psf < 0: 
+            if z_overlap < 0: 
                 z_psf = 0  # use the most scattering possible
-            if z_psf > self.psf.shape[2] - 1:
-                z_psf = self.psf.shape[2] - 1  # use the least scattering possible
+            if z_overlap > self.psf.shape[2] // 2 - 1:
+                z_psf = self.psf.shape[2] // 2 - 1  # use the least scattering possible
             
-
             if t is None:
                 psf_slice = self.psf[:, :, z_psf].copy()
                 
