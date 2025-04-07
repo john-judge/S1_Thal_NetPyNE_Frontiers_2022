@@ -7,8 +7,7 @@ This project computes the hVOS readout from a biological circuit infused with VS
 ```
 vsd-readout-project
 ├── src
-│   ├── main.py               # Entry point of the application
-│   ├── vsd
+│   ├── hVOS
 │   │   ├── __init__.py       # Marks the vsd directory as a package
 │   │   ├── cell.py           # Defines the Cell class
 │   │   ├── morphology.py      # Defines the Morphology class
