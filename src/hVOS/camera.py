@@ -25,6 +25,7 @@ class Camera:
                  data_dir='',  # for storing memory-mapped numpy arrays
                  use_2d_psf=False,  # flatten entire image to z=0
                  spike_thresh=0.1674, # optial a.u., found in data['net']['params']['defaultThreshold'], then 0.196 + 0.00286 * -10 = 0.1674
+                 init_dummy=False,
                  ):  
         self.target_cells = target_cells
         self.morphologies = morphologies
@@ -39,15 +40,18 @@ class Camera:
         self.spike_thresh = spike_thresh  # optical units
 
         # make memory-mapped numpy arrays.
-        self.cell_recording = CellRecording(self.data_dir,
-                                             target_cells[0].get_cell_id(),
-                                             self.time,
-                                             camera_width=camera_width,
-                                             camera_height=camera_height)
+        self.cell_recording = None
+        if not init_dummy:
+            self.cell_recording = CellRecording(self.data_dir,
+                                                target_cells[0].get_cell_id(),
+                                                self.time,
+                                                camera_width=camera_width,
+                                                camera_height=camera_height)
         self.psf = psf
         self.psf_resolution = psf_resolution  # treat this as the axial resolution as well, which is realistically ~1 um
-        self.rescale_psf()
-        #self.orient_psf_to_camera()
+        if not init_dummy:
+            self.rescale_psf()
+            #self.orient_psf_to_camera()
 
     def rescale_psf(self):
         ''' 
@@ -179,7 +183,6 @@ class Camera:
             image_filenames.append(image_filename)
 
         image_filenames = self.add_time_annotations(time_step_size, image_filenames)
-
         try:
             imageio.mimsave(self.data_dir + filename, image_filenames)
             print("CREATED MOVIE:", filename)
@@ -559,7 +562,7 @@ class Camera:
 
             # if the point z is outside the PSF's z range, return False
             xy_psf_weighted = None
-            if not self.use_2d_psf:
+            '''if not self.use_2d_psf:
                 if z < z_fov + z_psf_lim[0] or z > z_fov + z_psf_lim[1]:
                     return False
             z_overlap = 0
@@ -569,12 +572,31 @@ class Camera:
             if z_overlap > self.psf[:, :, :].shape[2] // 2 - 1:
                 return False
             if -z_overlap > self.psf[:, :, :].shape[2] // 2 - 1:
-                return False
+                return False'''
+            # the center of the PSF is the amount of scattering through half of a slice (typically 100 um)
+            # i.e. the scattering for the focal z-plane.
+            # any higher and we have less scattering, any lower and we have more scattering
             
+
+            z_overlap = 0
+            if not self.use_2d_psf:
+                z_overlap = int(round(z - z_fov))
+
+            # if z > z_fov, it is closer to the camera, so we need to 
+            #       shift the PSF slice down
+            # if z < z_fov, it is further from the camera, so we need to 
+            #          shift the PSF slice up
+
+            z_psf = self.psf.shape[2] // 2  
+            
+            if z_psf < 0: 
+                z_psf = 0  # use the most scattering possible
+            if z_psf > self.psf.shape[2] - 1:
+                z_psf = self.psf.shape[2] - 1  # use the least scattering possible
+            
+
             if t is None:
-                z_center_psf = self.psf.shape[2] // 2
-                z_overlap = z_center_psf + z_overlap
-                psf_slice = self.psf[:, :, z_overlap].copy()
+                psf_slice = self.psf[:, :, z_psf].copy()
                 
                 # If psf_slice shape is 18x18, and weight is 2000x1x1,
                 #   tile psf_slice to match the weights shape (2000 x 18 x 18)
@@ -582,7 +604,7 @@ class Camera:
                 # element-wise multiplication of the PSF slice with the weight
                 xy_psf_weighted = psf_slice * weight.reshape(-1, 1, 1)
             else:
-                xy_psf_weighted = self.psf[:, :, z_overlap] * weight
+                xy_psf_weighted = self.psf[:, :, z_psf] * weight
 
             # actual bounds
             i_bounds = [max(0, i + x_psf_lim[0]), min(self.camera_width, i + x_psf_lim[1])]

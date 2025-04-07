@@ -29,8 +29,9 @@ class mcPSF:
         # convert to a 200x200 array
         psf = df.reshape((200, 200))
 
+        # Not needed: scattering only in the x-y plane towards the camera
         # add the negative z values
-        psf = np.vstack((np.flipud(psf), psf))
+        #psf = np.vstack((np.flipud(psf), psf))
 
         # normalize the PSF to sum to 1
         psf = psf / np.sum(psf)
