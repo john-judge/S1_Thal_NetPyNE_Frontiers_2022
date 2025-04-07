@@ -271,12 +271,12 @@ cam_no_psf.close_memmaps()
 ###########################################
 os.makedirs(model_rec_final_out_dir, exist_ok=True)
 for file in psf_nonzero_files:
-    file_name = file.split('/')[-1]
+    file_name = "psf_" + file.split('/')[-1]
     target_file = model_rec_final_out_dir + file_name
     if not os.path.exists(target_file):
         os.system('cp ' + file + ' ' + target_file)
 for file in no_psf_nonzero_files:
-    file_name = file.split('/')[-1]
+    file_name = "no_psf_" + file.split('/')[-1]
     target_file = model_rec_final_out_dir + file_name
     if not os.path.exists(target_file):
         os.system('cp ' + file + ' ' + target_file)
