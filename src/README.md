@@ -1,6 +1,6 @@
-# VSD Readout Project
+# hVOS Readout Project
 
-This project computes the voltage sensitive dye (VSD) readout from a biological circuit infused with VSD. It takes into account the morphologies of cells and their corresponding voltage traces to generate a readout that can be visualized.
+This project computes the hVOS readout from a biological circuit infused with VSD. It takes into account the morphologies of cells and their corresponding voltage traces to generate a readout that can be visualized.
 
 ## Project Structure
 
@@ -13,35 +13,11 @@ vsd-readout-project
 │   │   ├── cell.py           # Defines the Cell class
 │   │   ├── morphology.py      # Defines the Morphology class
 │   │   ├── voltage_trace.py   # Defines the VoltageTrace class
-│   │   └── vsd_readout.py     # Defines the VSDReadout class
+|   |   ├── camera.py          # Define the Camera class
+│   │   └── hvos_readout.py     # Defines the hVOSReadout class
 ├── requirements.txt           # Lists project dependencies
 └── README.md                  # Project documentation
 ```
-
-## Installation
-
-To set up the project, clone the repository and install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-To run the application, execute the following command:
-
-```bash
-python src/main.py
-```
-
-Make sure to have your cell data, morphologies, and voltage traces prepared and accessible to the application.
-
-## Classes Overview
-
-- **Cell**: Represents a biological cell and includes methods to retrieve its morphology and voltage traces.
-- **Morphology**: Represents the structure of a cell and includes methods to load and manipulate morphology data.
-- **VoltageTrace**: Represents the voltage traces for each compartment of a cell and includes methods to load and process voltage data.
-- **VSDReadout**: Computes the VSD readout based on the provided cell morphologies and voltage traces, generating output for visualization.
 
 ## Contributing
 
