@@ -562,7 +562,7 @@ class Camera:
 
             # if the point z is outside the PSF's z range, return False
             xy_psf_weighted = None
-            '''if not self.use_2d_psf:
+            if not self.use_2d_psf:
                 if z < z_fov + z_psf_lim[0] or z > z_fov + z_psf_lim[1]:
                     return False
             z_overlap = 0
@@ -572,29 +572,12 @@ class Camera:
             if z_overlap > self.psf[:, :, :].shape[2] // 2 - 1:
                 return False
             if -z_overlap > self.psf[:, :, :].shape[2] // 2 - 1:
-                return False'''
-
-            z_overlap = 0
-            if not self.use_2d_psf:
-                z_overlap = int(round(z - z_fov))
-
-            # the center of the PSF is the amount of scattering through half of a slice (typically 100 um)
-            # i.e. the scattering for the focal z-plane.
-            # any higher and we have less scattering, any lower and we have more scattering
-            
-            z_psf = self.psf.shape[2] // 4  - z_overlap
-
-            # if z > z_fov, it is closer to the camera, so we need to 
-            #       shift the PSF slice down
-            # if z < z_fov, it is further from the camera, so we need to 
-            #          shift the PSF slice up
-            if z_overlap < 0: 
-                z_psf = 0  # use the most scattering possible
-            if z_overlap > self.psf.shape[2] // 2 - 1:
-                z_psf = self.psf.shape[2] // 2 - 1  # use the least scattering possible
+                return False
             
             if t is None:
-                psf_slice = self.psf[:, :, z_psf].copy()
+                z_center_psf = self.psf.shape[2] // 2
+                z_overlap = z_center_psf + z_overlap
+                psf_slice = self.psf[:, :, z_overlap].copy()
                 
                 # If psf_slice shape is 18x18, and weight is 2000x1x1,
                 #   tile psf_slice to match the weights shape (2000 x 18 x 18)
@@ -602,7 +585,7 @@ class Camera:
                 # element-wise multiplication of the PSF slice with the weight
                 xy_psf_weighted = psf_slice * weight.reshape(-1, 1, 1)
             else:
-                xy_psf_weighted = self.psf[:, :, z_psf] * weight
+                xy_psf_weighted = self.psf[:, :, z_overlap] * weight
 
             # actual bounds
             i_bounds = [max(0, i + x_psf_lim[0]), min(self.camera_width, i + x_psf_lim[1])]

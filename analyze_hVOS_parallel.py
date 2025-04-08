@@ -45,6 +45,9 @@ if 'psf_only' in sys.argv:
 if 'no_psf_only' in sys.argv:
     no_psf_only = True
 
+# whether to use Monte Carlo scattering
+use_mc_scattering_psf = False
+
 #####################################
 # Find data in CHTC staging and extract data just for this job's cell
 #####################################
@@ -179,10 +182,12 @@ psf = PSF(
     axial_lim=(-100.0, 100.0),  # axial limits
 )
 rad_psf = psf.get_radial_psf()  # returns a 3D PSF, but shows the radial-axial profile
-mc_psf = mcPSF().get_mc_psf()
 
-# compose PSFs via convolution
-psf.convolve_radial_psf(mc_psf)
+if use_mc_scattering_psf:
+    mc_psf = mcPSF().get_mc_psf()
+
+    # compose PSFs via convolution
+    psf.convolve_radial_psf(mc_psf)
 
 # build 3D PSF 
 psf = psf.build_3D_PSF()
