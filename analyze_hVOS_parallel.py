@@ -162,6 +162,7 @@ target_population_cells = [
                     t_pop in target_hVOS_populations ]) 
 ]
 i_target_cell = job_id % len(target_population_cells)  # index of cell to process for this job
+
  # sparsity sampling implemented here
 target_population_cells = [cell for cell in target_population_cells
                                 if random.random() < target_sparsity]
@@ -196,7 +197,13 @@ psf = psf.build_3D_PSF()
 ######################################
 # determine which morphology to use for each cell
 ######################################
-target_cell = target_population_cells[i_target_cell]
+try:
+    target_cell = target_population_cells[i_target_cell]
+except IndexError as e:
+    print("Tried to get ", i_target_cell, 
+          "th cell from target_population_cells of length", len(target_population_cells))
+    print("Error:", e)
+
 compart_ids = target_cell.get_list_compartment_ids()
 for morph_key in me_type_morphology_map:
     for morph in me_type_morphology_map[morph_key]:
