@@ -226,7 +226,7 @@ cam_width = 300
 cam_height = 300
 t = loaded_compart_data['time']
 time_step_size = t[1] - t[0]
-view_center_cell = 0  # view center cell is the cell to center on.
+view_center_cell = 1  # view center cell is the cell to center on.
 # other cells may or may not be in view.
 soma_position = target_population_cells[view_center_cell].get_soma_position()
 if not no_psf_only:

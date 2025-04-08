@@ -22,6 +22,9 @@ cfg = specs.SimConfig()
 #
 #------------------------------------------------------------------------------
 
+# (224.04323588068343, 752.2745354245205, 94.19539296396553)
+xStimLocation =[224,752,94]
+# z_recording_radius = 1000 # microns (box shape)
 cfg.simType='S1_TH_coreneuron'
 cfg.coreneuron = False
 
@@ -175,10 +178,18 @@ elif cfg.cellsrec == 3:  # record all cells of target ME types
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
 if record_trace_setting['compartment'] == 'soma' and ((record_trace_setting['cell_num_start'] is None) or (record_trace_setting['cell_num_end'] is None)):
-    cfg.recordTraces['V' + record_trace_setting['compartment']] = {'sec': record_trace_setting['compartment'],'loc':0.5,'var':'v'}
+    cfg.recordTraces['V' + record_trace_setting['compartment']] = {'sec': record_trace_setting['compartment'],'loc':0.5,
+                                                                   'var':'v'
+                                                                   #'conds': {'z': [xStimLocation[2]-z_recording_radius, 
+                                                                    #               xStimLocation[2]+z_recording_radius]}
+                                                                    }
 else:
     for i in range(record_trace_setting['cell_num_start'], record_trace_setting['cell_num_end']):
-        cfg.recordTraces['V' + record_trace_setting['compartment'] + '_'+str(i)] = {'sec':record_trace_setting['compartment'] + '_'+str(i),'loc':0.5,'var':'v'}
+        cfg.recordTraces['V' + record_trace_setting['compartment'] + '_'+str(i)] = {'sec':record_trace_setting['compartment'] + '_'+str(i),'loc':0.5,
+                                                                                    'var':'v',
+                                                                                    #'conds': {'z': [xStimLocation[2]-z_recording_radius, 
+                                                                                    #                xStimLocation[2]+z_recording_radius]}
+                                                                                                    }
         #cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
         #cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
 
@@ -305,7 +316,7 @@ for popName in cfg.thalamocorticalconnections:
 #------------------------------------------------------------------------------
 cfg.addExtracellularStim = True
 
-cfg.xStimLocation = [0,0,0]
+cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
 cfg.xStimAmp = 0.2  # amplitude in mA
 cfg.xStimDur = 0.2  # duration in ms
