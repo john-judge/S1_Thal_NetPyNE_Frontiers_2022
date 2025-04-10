@@ -63,7 +63,7 @@ if os.path.exists(me_type_map_file):
 else:
 
     compart = list(compart_data.keys())[0]
-    target_dir_net = compart_data[compart] + '/S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/v7_batch1_0_0_data.pkl'
+    target_dir_net = compart_data[compart] + 'S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/v7_batch1_0_0_data.pkl'
 
     with open(target_dir_net, 'rb') as f:
         data = pickle.load(f)
