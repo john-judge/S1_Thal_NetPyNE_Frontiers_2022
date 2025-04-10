@@ -54,7 +54,7 @@ len(t)
 #########################################
 cell_id_to_me_type_map = {}
 
-me_type_map_file = 'C:/Users/jjudge3/Desktop/neuron docker/' + 'archive/run' + str(run_id) + "/" + 'cell_id_to_me_type_map.pkl'
+me_type_map_file = target_dir + 'cell_id_to_me_type_map.pkl'
 
 if os.path.exists(me_type_map_file):
     with open(me_type_map_file, 'rb') as f:
