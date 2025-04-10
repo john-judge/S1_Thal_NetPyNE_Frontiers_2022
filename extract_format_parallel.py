@@ -144,6 +144,9 @@ if should_create_mem_map:
                         if cell_id not in loaded_compart_data[compart]:
                             loaded_compart_data[compart][cell_id] = {}
                         loaded_compart_data[compart][cell_id] = mm_data_fp  # store just pointer
+                        del mm_data_fp  # delete the pointer to free up memory
+                        gc.collect()  # force garbage collection
+
             # to avoid memory issues, delete data after it's been stored
             del data
             gc.collect()
