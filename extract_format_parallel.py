@@ -16,19 +16,20 @@ from src.hVOS.cell import Cell
 # extract all the .tar.gz files
 # #####################################
 run_id = 2
-data_dir = ''
+data_dir = '../'
 compart_data = {}
 should_create_mem_map = True  # if True, create mem mapped files. If False, load mem mapped files
 target_dir = data_dir + 'run' + str(run_id) + '/'
 
-for file in os.listdir(data_dir):
+for file in os.listdir(target_dir):
     compart = file.replace('.tar.gz', "").replace('S1-Thal-output-',"")
     output_dir = target_dir + compart + '/'
     
     if file.endswith('.tar.gz'):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-            result = subprocess.run(['tar', '-xzvf', data_dir + file, "-C", output_dir], capture_output=True, text=True, check=True)
+            result = subprocess.run(['tar', '-xzvf', target_dir + file, "-C", output_dir],
+                                     capture_output=True, text=True, check=True)
             
             print('Extracted ' + file)
         # else it already exists and was extracted
