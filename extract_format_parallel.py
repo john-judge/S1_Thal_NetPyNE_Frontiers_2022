@@ -86,8 +86,6 @@ time = None
 if should_create_mem_map:
     for compart in compart_data.keys():
         print(compart)
-        if compart in loaded_compart_data:
-            continue
         target_dir = compart_data[compart]
         if not os.path.exists(target_dir):
             print('Directory ' + target_dir + ' does not exist')
