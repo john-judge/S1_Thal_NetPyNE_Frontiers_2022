@@ -24,6 +24,8 @@ from src.hVOS.vsd_readout import VSDReadout
 from src.hVOS.camera import Camera
 from src.hVOS.psf import PSF
 from src.hVOS.mcPSF import mcPSF
+from src.hVOS.compartment_file import MemoryMappedCompartmentVoltages
+
 
 ####################################
 # read command line args
@@ -70,46 +72,25 @@ model_rec_final_out_dir = data_dir + 'model_rec_final/'
 #   each subdirectory is a range of compart_ids
 #   e.g. 'apic_0_10', 'dend_10_20', etc.
 # compart_data dict maps compart_id range to subdirectory name
-compart_data = {subdir: os.path.join(data_dir, subdir) for subdir in 
-                os.listdir(data_dir) 
-                if os.path.isdir(os.path.join(data_dir, subdir)) 
-                                 and 'model_rec' not in subdir}
-print('compart_data:', compart_data)
+analyze_dir = '../analyze_output/'
+loaded_compart_data = MemoryMappedCompartmentVoltages(analyze_dir)
+loaded_compart_data.load_existing_mmap(analyze_dir + 'cell_id_to_me_type_map.pkl', 
+                        analyze_dir + 'S1_results.npy')
 
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
 # cell's compartment data (the memmap file name) for that compart_id
 # also, loaded_compart_data['time'] points to a loaded mmap pointer
-loaded_compart_data = {}  
-for compart in compart_data.keys(): 
-    target_dir =  compart_data[compart]
-    target_dir += '/S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/'
-    if not os.path.exists(target_dir):
-        print('Directory ' + target_dir + ' does not exist')
-        continue
-    for file in os.listdir(target_dir):
-        if file.endswith('.dat') and 'v7_batch1_0_0' in file and 'cell' in file:
-            file_name = file.replace(".dat", "").replace("v7_batch1_0_0_", "").split('_')
-            compart = "_".join(file_name[:2])
-            cell_id = "_".join(file_name[2:])
-            if 'soma' in file:
-                compart = 'Vsoma'
-                cell_id = 'cell_' + cell_id
-                
-            if compart not in loaded_compart_data:
-                loaded_compart_data[compart] = {}
-            if cell_id not in loaded_compart_data[compart]:
-                loaded_compart_data[compart][cell_id] = {}
-            loaded_compart_data[compart][cell_id] = target_dir + file
+
 # load time
 mm_time_fp = data_dir + 'v7_batch1_0_0_time.dat'
-loaded_compart_data['time'] = np.memmap(mm_time_fp, dtype='float32', mode='r')
-assert len(loaded_compart_data['time']) == t_max, \
-        "Time length mismatch: " + str(len(loaded_compart_data['time'])) + \
+time = np.memmap(mm_time_fp, dtype='float32', mode='r')
+assert len(time) == t_max, \
+        "Time length mismatch: " + str(len(time)) + \
             " != " + str(t_max)
 
 # load cell_id to me_type map
-me_type_map_file = data_dir + 'cell_id_to_me_type_map.pkl'
+me_type_map_file = analyze_dir + 'cell_id_to_me_type_map.pkl'
 if os.path.exists(me_type_map_file):
     with open(me_type_map_file, 'rb') as f:
         cell_id_to_me_type_map = pickle.load(f)
@@ -119,21 +100,7 @@ if os.path.exists(me_type_map_file):
 #######################################
 cells = {}
 me_type_morphology_map = {}
-for cell_id in loaded_compart_data['Vsoma']:
-    soma = loaded_compart_data['Vsoma'][cell_id]
-    axons = {}
-    apics = {}
-    dends = {}
-    for compart in loaded_compart_data.keys():
-        if compart == 'time':
-            continue
-        if cell_id in loaded_compart_data[compart]:
-            if 'axon' in compart:
-                axons[compart] = loaded_compart_data[compart][cell_id]
-            elif 'apic' in compart:
-                apics[compart] = loaded_compart_data[compart][cell_id]
-            elif 'dend' in compart:
-                dends[compart] = loaded_compart_data[compart][cell_id]
+for (cell_id, compart) in loaded_compart_data.hash_map.keys():
 
     short_cell_id = int(cell_id.replace('cell_', ''))
     me_type = cell_id_to_me_type_map[short_cell_id]['me_type']
