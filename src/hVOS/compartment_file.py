@@ -53,5 +53,6 @@ class MemoryMappedCompartmentVoltages:
             return None
         i_data = self.hash_map[cell_id][compart_id]
         if type(i_data) != int:
-            raise KeyError(f"Compartment ID {compart_id} not found for Cell ID {cell_id}: {i_data}")
+            print(f"Compartment ID {compart_id} not found for Cell ID {cell_id}: {i_data}")
+            return None
         return self.mmap_fp[i_data]
