@@ -57,6 +57,8 @@ target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
 t_max = 501 # number of points to write to disk
+cam_width = 300
+cam_height = 300
 
 # 'run1/' contains a subdirectory 'cell_dat' 
 #   which contains a memmap numpy file for each cell in the network
@@ -78,7 +80,8 @@ if not os.path.exists(model_rec_final_out_dir):
 analyze_dir = '../analyze_output/'
 loaded_compart_data = MemoryMappedCompartmentVoltages(analyze_dir)
 loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl', 
-                        analyze_dir + 'S1_results.npy')
+                        analyze_dir + 'S1_results.npy',
+                        shape=(-1, t_max, cam_width, cam_height))
 
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
@@ -215,8 +218,7 @@ print("Any target cells missing structure data?:",
 # Draw cell with PSF
 #######################################
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
-cam_width = 300
-cam_height = 300
+
 t = loaded_compart_data['time']
 time_step_size = t[1] - t[0]
 view_center_cell = 1  # view center cell is the cell to center on.
