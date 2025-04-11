@@ -86,7 +86,6 @@ loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
 # cell's compartment data (the memmap file name) for that compart_id
-# also, loaded_compart_data['time'] points to a loaded mmap pointer
 
 # load time
 mm_time_fp = data_dir + 'v7_batch1_0_0_time.dat'
@@ -219,7 +218,6 @@ print("Any target cells missing structure data?:",
 #######################################
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
 
-t = loaded_compart_data['time']
 time_step_size = t[1] - t[0]
 view_center_cell = 1  # view center cell is the cell to center on.
 # other cells may or may not be in view.
@@ -227,7 +225,7 @@ soma_position = target_population_cells[view_center_cell].get_soma_position()
 if not no_psf_only:
     cam = Camera([target_cell], 
                 me_type_morphology_map, 
-                loaded_compart_data['time'],
+                time,
                 fov_center=soma_position,
                 camera_resolution=3.0,
                 camera_width=cam_width,
@@ -260,7 +258,7 @@ os.makedirs(model_rec_out_dir + 'no_psf/', exist_ok=True)
 if not psf_only:
     cam_no_psf = Camera([target_cell], 
                 me_type_morphology_map, 
-                loaded_compart_data['time'],
+                time,
                 fov_center=soma_position,
                 camera_resolution=1.0,
                 camera_width=cam_width,
