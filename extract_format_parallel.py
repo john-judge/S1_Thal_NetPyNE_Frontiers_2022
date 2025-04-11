@@ -37,7 +37,7 @@ for file in os.listdir(target_dir):
         # else it already exists and was extracted
         #os.rename(data_dir + file, data_dir + 'archive/' + file)
         compart_data[compart] = output_dir
-
+print("compart_data", compart_data)
 #######################################
 # load time 
 #######################################
