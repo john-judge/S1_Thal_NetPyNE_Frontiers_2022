@@ -5,13 +5,10 @@ import os
 import subprocess
 import sys
 import gc
-
-# pickle
 import pickle
 
 from src.hVOS.cell import Cell
 from src.hVOS.compartment_file import MemoryMappedCompartmentVoltages
-
 
 
 #####################################
