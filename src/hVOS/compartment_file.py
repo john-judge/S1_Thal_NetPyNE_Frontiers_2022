@@ -7,9 +7,9 @@ class MemoryMappedCompartmentVoltages:
     row of a 4-D memory mapped array
     """
 
-    def __init__(self):
+    def __init__(self, data_dir):
         self.hash_map = {}
-        self.mmap_filename = 'S1_results.npy'
+        self.mmap_filename = data_dir + 'S1_results.npy'
         self.mmap_fp = None
         self.shape = None
         self.fp_size_init = 10000

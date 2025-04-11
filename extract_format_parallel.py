@@ -19,6 +19,7 @@ data_dir = '../'
 compart_data = {}
 should_create_mem_map = True  # if True, create mem mapped files. If False, load mem mapped files
 target_dir = data_dir + 'run' + str(run_id) + '/'
+output_dir_final = target_dir + 'run' + str(run_id) + '/'
 
 for file in os.listdir(target_dir):
     compart = file.replace('.tar.gz', "").replace('S1-Thal-output-',"")
@@ -54,7 +55,7 @@ len(t)
 #########################################
 cell_id_to_me_type_map = {}
 
-me_type_map_file = target_dir + 'cell_id_to_me_type_map.pkl'
+me_type_map_file = output_dir_final + 'cell_id_to_me_type_map.pkl'
 
 if os.path.exists(me_type_map_file):
     with open(me_type_map_file, 'rb') as f:
@@ -81,7 +82,7 @@ else:
 ##########################################
 # memory map all the files needed (prepped for optical model)
 ##########################################
-loaded_compart_data = MemoryMappedCompartmentVoltages()
+loaded_compart_data = MemoryMappedCompartmentVoltages(output_dir_final)
 time = None
 if should_create_mem_map:
     for compart in compart_data.keys():
@@ -121,7 +122,7 @@ if should_create_mem_map:
 
     # also store time to memory mapped file
     if time is not None:
-        mm_time_fp = target_dir + 'v7_batch1_0_0_time.dat'
+        mm_time_fp = output_dir_final + 'v7_batch1_0_0_time.dat'
         if not os.path.exists(mm_time_fp):
             with open(mm_time_fp, 'wb') as f:
                 f.write(b'\0' * time.nbytes)
@@ -129,6 +130,6 @@ if should_create_mem_map:
         mm_time_fp[:] = time[:]
         mm_time_fp.flush()
 
-loaded_compart_data.dump_hash_map(target_dir + 'v7_batch1_0_0_hash_map.pkl')
+loaded_compart_data.dump_hash_map(output_dir_final + 'v7_batch1_0_0_hash_map.pkl')
 loaded_compart_data.mmap_fp.flush()
 
