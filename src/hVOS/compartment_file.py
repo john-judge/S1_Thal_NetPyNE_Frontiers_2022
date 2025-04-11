@@ -55,4 +55,4 @@ class MemoryMappedCompartmentVoltages:
         if type(i_data) != int:
             print(f"Compartment ID {compart_id} not found for Cell ID {cell_id}: {i_data}")
             return None
-        return self.mmap_fp[i_data]
+        return (i_data, self.mmap_fp)

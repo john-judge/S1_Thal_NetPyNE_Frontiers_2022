@@ -111,7 +111,7 @@ for cell_id in loaded_compart_data.hash_map.keys():
             print("Data not found for cell:", cell_id, "compartment:", compart)
             continue
         print("Adding compartment:", compart, "cell id:", cell_id,
-               "Data shape:", data.shape)
+               "Data pointer:", data)
         if 'soma' in compart:
             soma = data
         elif 'axon' in compart:
