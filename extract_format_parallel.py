@@ -121,7 +121,6 @@ if should_create_mem_map:
 
     # also store time to memory mapped file
     if time is not None:
-        target_dir = data_dir + 'archive/run' + str(run_id) + '/'
         mm_time_fp = target_dir + 'v7_batch1_0_0_time.dat'
         if not os.path.exists(mm_time_fp):
             with open(mm_time_fp, 'wb') as f:
