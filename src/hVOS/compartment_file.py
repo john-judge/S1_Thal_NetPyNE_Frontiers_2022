@@ -36,7 +36,10 @@ class MemoryMappedCompartmentVoltages:
         if self.mmap_fp is None:
             self.init_mmap(data.shape)
         i_data = len(self.hash_map.keys())
-        self.hash_map[(cell_id, compart_id)] = i_data
+        if cell_id not in self.hash_map:
+            self.hash_map[cell_id] = {}
+        self.hash_map[cell_id][compart_id] = i_data
+        
         if i_data >= self.shape[0]:
             # resize the memory mapped file
             self.shape = (self.shape[0] * 2,) + data.shape
@@ -45,5 +48,5 @@ class MemoryMappedCompartmentVoltages:
         self.mmap_fp.flush()
 
     def get_item(self, cell_id, compart_id):
-        i_data = self.hash_map[(cell_id, compart_id)]
+        i_data = self.hash_map[cell_id][compart_id]
         return self.mmap_fp[i_data]
