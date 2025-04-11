@@ -218,7 +218,7 @@ print("Any target cells missing structure data?:",
 #######################################
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
 
-time_step_size = t[1] - t[0]
+time_step_size = time[1] - time[0]
 view_center_cell = 1  # view center cell is the cell to center on.
 # other cells may or may not be in view.
 soma_position = target_population_cells[view_center_cell].get_soma_position()
