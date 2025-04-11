@@ -77,7 +77,7 @@ if not os.path.exists(model_rec_final_out_dir):
 # compart_data dict maps compart_id range to subdirectory name
 analyze_dir = '../analyze_output/'
 loaded_compart_data = MemoryMappedCompartmentVoltages(analyze_dir)
-loaded_compart_data.load_existing_mmap(analyze_dir + 'cell_id_to_me_type_map.pkl', 
+loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl', 
                         analyze_dir + 'S1_results.npy')
 
 # create a dict that maps compart_id 'Vcomp_#' to
