@@ -41,12 +41,11 @@ class Cell:
 
     def load_data(self, data_pointer):
         i_data, mmap_fp = data_pointer
-        return mmap_fp[i_data]
+        return mmap_fp[i_data, :]
     
-    def write_data(self, data_pointer, data):
-        i_data, mmap_fp = data_pointer
-        mmap_fp[i_data] = data
-        mmap_fp.flush()
+    def write_data(self, mm_file, data):
+        fp = np.memmap(mm_file, dtype='float32', mode='w+', shape=data.shape)
+        fp[:] = data[:]
     
     def get_list_compartment_ids(self):
         return list(self.axons.keys()) + \
