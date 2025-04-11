@@ -45,7 +45,7 @@ class MemoryMappedCompartmentVoltages:
             # resize the memory mapped file
             self.shape = (self.shape[0] * 2,) + data.shape
             self.mmap_fp.resize(self.shape)
-        self.mmap_fp[i_data] = data
+        self.mmap_fp[i_data, :] = data[:]
         self.mmap_fp.flush()
 
     def get_item(self, cell_id, compart_id):

@@ -81,7 +81,7 @@ analyze_dir = '../analyze_output/'
 loaded_compart_data = MemoryMappedCompartmentVoltages(analyze_dir)
 loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl', 
                         analyze_dir + 'S1_results.npy',
-                        shape=(-1, t_max, cam_width, cam_height))
+                        shape=(-1, t_max))
 
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
