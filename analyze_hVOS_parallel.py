@@ -63,11 +63,14 @@ t_max = 501 # number of points to write to disk
 #   each memmap file contains the voltage trace for each compartment of the cell
 #   in the format 'v7_batch_1_0_0_V<compartment_id>_<cell_id>.dat'
 run_id = 2
-data_dir = '../run' + str(run_id) + '/'
+data_dir = '../analyze_output/'
 morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
 model_rec_out_dir = data_dir + 'model_rec/'
 model_rec_final_out_dir = data_dir + 'model_rec_final/'
-
+if not os.path.exists(model_rec_out_dir):
+    os.makedirs(model_rec_out_dir)
+if not os.path.exists(model_rec_final_out_dir):
+    os.makedirs(model_rec_final_out_dir)
 # list subdirectories of run1/ 
 #   each subdirectory is a range of compart_ids
 #   e.g. 'apic_0_10', 'dend_10_20', etc.
