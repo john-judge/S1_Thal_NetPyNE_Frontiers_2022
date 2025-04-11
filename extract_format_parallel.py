@@ -10,6 +10,8 @@ import gc
 import pickle
 
 from src.hVOS.cell import Cell
+from src.hVOS.compartment_file import MemoryMappedCompartmentVoltages
+
 
 
 #####################################
@@ -82,7 +84,7 @@ else:
 ##########################################
 # memory map all the files needed (prepped for optical model)
 ##########################################
-loaded_compart_data = {}
+loaded_compart_data = MemoryMappedCompartmentVoltages()
 time = None
 if should_create_mem_map:
     for compart in compart_data.keys():
@@ -98,16 +100,6 @@ if should_create_mem_map:
 
         if not os.path.exists(data_file):
             print("Data file not found:", data_file)
-            continue
-        # also skip if the .dat files already exist
-        mmaps_exist = False
-        for file in os.listdir(target_dir):
-            if file.endswith('.dat') and 'v7_batch1_0_0' in file and 'cell' in file:
-                print("\t", target_dir + file)
-                mmaps_exist = True
-                break
-        if mmaps_exist:
-            print("Memory mapped files already exist for compartment", compart)
             continue
 
         # Load data
@@ -126,26 +118,7 @@ if should_create_mem_map:
                     for cell_id in data['simData'][k]:
                         print(k, cell_id)
 
-                        # create memory mapped file for this cell's segment data
-                        mm_data_fp = target_dir + 'v7_batch1_0_0_' + k + '_' + cell_id + '.dat'
-                        cell_data = np.array(data['simData'][k][cell_id])
-
-                        # create empty file if it doesn't exist
-                        if not os.path.exists(mm_data_fp):
-                            with open(mm_data_fp, 'wb') as f:
-                                f.write(b'\0' * cell_data.nbytes)
-
-                        # store as a memory mapped array for faster access / less memory usage
-                        mm_data_fp = np.memmap(mm_data_fp, dtype='float32', mode='w+', shape=cell_data.shape)
-                        mm_data_fp[:] = cell_data[:]
-                        mm_data_fp.flush()
-                        if compart not in loaded_compart_data:
-                            loaded_compart_data[compart] = {}
-                        if cell_id not in loaded_compart_data[compart]:
-                            loaded_compart_data[compart][cell_id] = {}
-                        loaded_compart_data[compart][cell_id] = mm_data_fp  # store just pointer
-                        del mm_data_fp  # delete the pointer to free up memory
-                        gc.collect()  # force garbage collection
+                        loaded_compart_data.add_item(cell_id, compart, np.array(data['simData'][k][cell_id]))
 
             # to avoid memory issues, delete data after it's been stored
             del data
@@ -161,29 +134,7 @@ if should_create_mem_map:
         mm_time_fp = np.memmap(mm_time_fp, dtype='float32', mode='w+', shape=time.shape)
         mm_time_fp[:] = time[:]
         mm_time_fp.flush()
-        loaded_compart_data['time'] = mm_time_fp  # store just pointer
-else: # load mem mapped files. Get file pointers from looking through data_dir dat files and load them into loaded_compart_data
-    for compart in compart_data.keys(): 
-        target_dir = data_dir + 'archive/run' + str(run_id) + '/' + compart
-        if not os.path.exists(target_dir):
-            print('Directory ' + target_dir + ' does not exist')
-            continue
-        target_dir += '/S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/'
-        for file in os.listdir(target_dir):
-            if file.endswith('.dat') and 'v7_batch1_0_0' in file and 'cell' in file:
-                file_name = file.replace(".dat", "").replace("v7_batch1_0_0_", "").split('_')
-                compart = "_".join(file_name[:2])
-                cell_id = "_".join(file_name[2:])
-                if 'soma' in file:
-                    compart = 'Vsoma'
-                    cell_id = 'cell_' + cell_id
-                    
-                if compart not in loaded_compart_data:
-                    loaded_compart_data[compart] = {}
-                if cell_id not in loaded_compart_data[compart]:
-                    loaded_compart_data[compart][cell_id] = {}
-                loaded_compart_data[compart][cell_id] = target_dir + file
-    # load time
-    target_dir = data_dir + 'archive/run' + str(run_id) + '/'
-    mm_time_fp = target_dir + 'v7_batch1_0_0_time.dat'
-    loaded_compart_data['time'] = np.memmap(mm_time_fp, dtype='float32', mode='r')
+
+loaded_compart_data.dump_hash_map(target_dir + 'v7_batch1_0_0_hash_map.pkl')
+loaded_compart_data.mmap_fp.flush()
+
