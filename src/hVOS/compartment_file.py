@@ -21,7 +21,7 @@ class MemoryMappedCompartmentVoltages:
         self.mmap_filename = mmap_filename
 
     def init_mmap(self, arr_shape):
-        self.shape = (self.fp_size_init) + arr_shape
+        self.shape = (self.fp_size_init,) + arr_shape
         self.mmap_fp = np.memmap(self.mmap_filename, dtype='float32', mode='w+', shape=self.shape)
 
     def dump_hash_map(self, hash_map_filename):
@@ -29,7 +29,7 @@ class MemoryMappedCompartmentVoltages:
             pickle.dump(self.hash_map, f)
 
     def resize_mmap(self, arr_shape):
-        self.shape = (self.shape[0] * 2) + arr_shape
+        self.shape = (self.shape[0] * 2,) + arr_shape
         self.mmap_fp.resize(self.shape)
 
     def add_item(self, cell_id, compart_id, data):
@@ -39,7 +39,7 @@ class MemoryMappedCompartmentVoltages:
         self.hash_map[(cell_id, compart_id)] = i_data
         if i_data >= self.shape[0]:
             # resize the memory mapped file
-            self.shape = (self.shape[0] * 2) + data.shape
+            self.shape = (self.shape[0] * 2,) + data.shape
             self.mmap_fp.resize(self.shape)
         self.mmap_fp[i_data] = data
         self.mmap_fp.flush()
