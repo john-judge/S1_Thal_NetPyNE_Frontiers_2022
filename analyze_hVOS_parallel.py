@@ -104,7 +104,7 @@ if os.path.exists(me_type_map_file):
 cells = {}
 me_type_morphology_map = {}
 for cell_id in loaded_compart_data.hash_map.keys():
-    axons, apics, dends, soma = [], [], [], None
+    axons, apics, dends, soma = {}, {}, {}, None
     for compart in loaded_compart_data.hash_map[cell_id].keys():
         data = loaded_compart_data.get_item(cell_id, compart)
         if data is None:
@@ -115,11 +115,11 @@ for cell_id in loaded_compart_data.hash_map.keys():
         if 'soma' in compart:
             soma = data
         elif 'axon' in compart:
-            axons.append(data)
+            axons[compart] = data
         elif 'apic' in compart:
-            apics.append(data)
+            apics[compart] = data
         elif 'dend' in compart:
-            dends.append(data)
+            dends[compart] = data
         else:
             print("Unknown compart:", compart)
             continue
