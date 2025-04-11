@@ -19,7 +19,7 @@ data_dir = '../'
 compart_data = {}
 should_create_mem_map = True  # if True, create mem mapped files. If False, load mem mapped files
 target_dir = data_dir + 'run' + str(run_id) + '/'
-output_dir_final = target_dir + 'run' + str(run_id) + '/'
+output_dir_final = data_dir + 'analyze_output/'
 if not os.path.exists(output_dir_final):
     os.makedirs(output_dir_final)
 
