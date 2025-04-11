@@ -80,6 +80,7 @@ else:
 
     with open(me_type_map_file, 'wb') as f:
         pickle.dump(cell_id_to_me_type_map, f)
+    print("wrote", me_type_map_file)
 
 ##########################################
 # memory map all the files needed (prepped for optical model)
@@ -87,6 +88,7 @@ else:
 loaded_compart_data = MemoryMappedCompartmentVoltages(output_dir_final)
 time = None
 if should_create_mem_map:
+    print("Creating mem map at", loaded_compart_data.mmap_filename)
     for compart in compart_data.keys():
         print(compart)
         target_dir = compart_data[compart]
