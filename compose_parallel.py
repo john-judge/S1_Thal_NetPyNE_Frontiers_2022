@@ -20,7 +20,7 @@ delta_t = 0.1
 time = np.arange(0, t_steps * delta_t, delta_t)
 
 # input: expects a directory 'analyze_output' with the output_dir_#.tar.gz files
-data_dir = '../analyze_output/'
+data_dir = '../analyze_output/model_rec_final'
 output_dir = '../composed_output/'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)

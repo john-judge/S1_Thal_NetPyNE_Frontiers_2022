@@ -39,7 +39,11 @@ class Cell:
     def __repr__(self):
         return f"Cell(id={self.cell_id}, me_type={self.me_type}, position={self.x}, {self.y}, {self.z})"
 
-    def load_data(self, mm_file):
+    def load_data(self, data_pointer):
+        i_data, mmap_fp = data_pointer
+        return mmap_fp[i_data, :]
+    
+    def load_optical_data(self, mm_file):
         return np.memmap(mm_file, dtype='float32', mode='r')
     
     def write_data(self, mm_file, data):
@@ -64,14 +68,14 @@ class Cell:
         
     def get_optical_trace(self, compart_id):
         if 'soma' in compart_id:
-            return self.load_data(self.soma_optical['Vsoma'])
+            return self.load_optical_data(self.soma_optical['Vsoma'])
         compart_dict = {'axon': self.axon_optical, 
                         'apic': self.apic_optical, 
                         'dend': self.dend_optical}
         for key in compart_dict.keys():
             if key in compart_id:
                 try:
-                    return self.load_data(compart_dict[key][compart_id])
+                    return self.load_optical_data(compart_dict[key][compart_id])
                 except KeyError:
                     print(f"Optical trace not found for {compart_id}")
                     print(f"Available optical traces:", compart_dict[key].keys())

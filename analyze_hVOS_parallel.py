@@ -57,30 +57,35 @@ target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
 t_max = 501 # number of points to write to disk
+cam_width = 300
+cam_height = 300
 
 # 'run1/' contains a subdirectory 'cell_dat' 
 #   which contains a memmap numpy file for each cell in the network
 #   each memmap file contains the voltage trace for each compartment of the cell
 #   in the format 'v7_batch_1_0_0_V<compartment_id>_<cell_id>.dat'
 run_id = 2
-data_dir = '../run' + str(run_id) + '/'
+data_dir = '../analyze_output/'
 morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
 model_rec_out_dir = data_dir + 'model_rec/'
 model_rec_final_out_dir = data_dir + 'model_rec_final/'
-
+if not os.path.exists(model_rec_out_dir):
+    os.makedirs(model_rec_out_dir)
+if not os.path.exists(model_rec_final_out_dir):
+    os.makedirs(model_rec_final_out_dir)
 # list subdirectories of run1/ 
 #   each subdirectory is a range of compart_ids
 #   e.g. 'apic_0_10', 'dend_10_20', etc.
 # compart_data dict maps compart_id range to subdirectory name
 analyze_dir = '../analyze_output/'
 loaded_compart_data = MemoryMappedCompartmentVoltages(analyze_dir)
-loaded_compart_data.load_existing_mmap(analyze_dir + 'cell_id_to_me_type_map.pkl', 
-                        analyze_dir + 'S1_results.npy')
+loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl', 
+                        analyze_dir + 'S1_results.npy',
+                        shape=(-1, t_max))
 
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
 # cell's compartment data (the memmap file name) for that compart_id
-# also, loaded_compart_data['time'] points to a loaded mmap pointer
 
 # load time
 mm_time_fp = data_dir + 'v7_batch1_0_0_time.dat'
@@ -100,7 +105,29 @@ if os.path.exists(me_type_map_file):
 #######################################
 cells = {}
 me_type_morphology_map = {}
-for (cell_id, compart) in loaded_compart_data.hash_map.keys():
+for cell_id in loaded_compart_data.hash_map.keys():
+    axons, apics, dends, soma = {}, {}, {}, None
+    for compart in loaded_compart_data.hash_map[cell_id].keys():
+        data = loaded_compart_data.get_item(cell_id, compart)
+        if data is None:
+            print("Data not found for cell:", cell_id, "compartment:", compart)
+            continue
+
+        if 'soma' in compart:
+            soma = data
+        elif 'axon' in compart:
+            axons[compart] = data
+        elif 'apic' in compart:
+            apics[compart] = data
+        elif 'dend' in compart:
+            dends[compart] = data
+        else:
+            print("Unknown compart:", compart)
+            continue
+
+    if soma is None:
+        print("No soma found for cell:", cell_id)
+        continue
 
     short_cell_id = int(cell_id.replace('cell_', ''))
     me_type = cell_id_to_me_type_map[short_cell_id]['me_type']
@@ -189,17 +216,15 @@ print("Any target cells missing structure data?:",
 # Draw cell with PSF
 #######################################
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
-cam_width = 300
-cam_height = 300
-t = loaded_compart_data['time']
-time_step_size = t[1] - t[0]
+
+time_step_size = time[1] - time[0]
 view_center_cell = 1  # view center cell is the cell to center on.
 # other cells may or may not be in view.
 soma_position = target_population_cells[view_center_cell].get_soma_position()
 if not no_psf_only:
     cam = Camera([target_cell], 
                 me_type_morphology_map, 
-                loaded_compart_data['time'],
+                time,
                 fov_center=soma_position,
                 camera_resolution=3.0,
                 camera_width=cam_width,
@@ -232,7 +257,7 @@ os.makedirs(model_rec_out_dir + 'no_psf/', exist_ok=True)
 if not psf_only:
     cam_no_psf = Camera([target_cell], 
                 me_type_morphology_map, 
-                loaded_compart_data['time'],
+                time,
                 fov_center=soma_position,
                 camera_resolution=1.0,
                 camera_width=cam_width,

@@ -37,7 +37,7 @@ for file in os.listdir(target_dir):
         # else it already exists and was extracted
         #os.rename(data_dir + file, data_dir + 'archive/' + file)
         compart_data[compart] = output_dir
-
+print("compart_data", compart_data)
 #######################################
 # load time 
 #######################################
@@ -118,7 +118,7 @@ if should_create_mem_map:
                     for cell_id in data['simData'][k]:
                         print(k, cell_id)
 
-                        loaded_compart_data.add_item(cell_id, compart, np.array(data['simData'][k][cell_id]))
+                        loaded_compart_data.add_item(cell_id, k, np.array(data['simData'][k][cell_id]))
 
             # to avoid memory issues, delete data after it's been stored
             del data
