@@ -143,6 +143,8 @@ for psf_type in all_cells_rec.keys():
 
                 # save the blurred image
 
+    if composed_arr is None:
+        continue
     # show composed_arr
     plt.clf()
     plt.imshow(-composed_arr[0, :, :], cmap='hot', interpolation='nearest')
