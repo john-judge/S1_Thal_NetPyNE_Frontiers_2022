@@ -71,8 +71,9 @@ all_cells_rec = {
 }
 
 for i_output in output_dir_dict.keys():
-    output_dir = output_dir_dict[i_output] + "analyze_output/model_rec_final/"
+    output_dir = output_dir_dict[i_output] + "run2/model_rec_final/"
     if not os.path.exists(output_dir):
+        print(f"output_dir {output_dir} does not exist. Skipping.")
         continue
     for file in os.listdir(output_dir):
         if file.endswith('.npy'):
