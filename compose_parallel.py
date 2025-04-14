@@ -45,7 +45,10 @@ psf_2d /= np.sum(psf_2d)
 output_dir_dict = {}
 for file in os.listdir(data_dir):
     if file.endswith('.tar.gz'):
-        
+        i_output = file.replace(".tar.gz", "").split("_")[-1]
+        if i_output == '':
+            continue
+        i_output = int(i_output)
         output_dir = data_dir + file[:-7] + '/'
         print(data_dir + file)
         if not os.path.exists(output_dir) or should_re_extract:
@@ -54,7 +57,7 @@ for file in os.listdir(data_dir):
                 os.makedirs(output_dir)
             result = subprocess.run(['tar', '-xzvf', data_dir + file, "-C", output_dir], 
                                     capture_output=True, text=True, check=True)
-        i_output = int(file.replace(".tar.gz", "").split("_")[-1])
+        
         output_dir_dict[i_output] = output_dir
 
 ################################################
