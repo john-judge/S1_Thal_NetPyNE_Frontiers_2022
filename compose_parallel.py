@@ -46,16 +46,16 @@ output_dir_dict = {}
 for file in os.listdir(data_dir):
     if file.endswith('.tar.gz'):
         
-        output_dir = data_dir + file[:-7] + '/'
+        output_dir_extract = data_dir + file[:-7] + '/'
         print(data_dir + file)
-        if not os.path.exists(output_dir) or should_re_extract:
-            if not os.path.exists(output_dir):
-                print("\tCreating directory:", output_dir)
-                os.makedirs(output_dir)
-            result = subprocess.run(['tar', '-xzvf', data_dir + file, "-C", output_dir], 
+        if not os.path.exists(output_dir_extract) or should_re_extract:
+            if not os.path.exists(output_dir_extract):
+                print("\tCreating directory:", output_dir_extract)
+                os.makedirs(output_dir_extract)
+            result = subprocess.run(['tar', '-xzvf', data_dir + file, "-C", output_dir_extract], 
                                     capture_output=True, text=True, check=True)
         i_output = int(file.replace(".tar.gz", "").split("_")[-1])
-        output_dir_dict[i_output] = output_dir
+        output_dir_dict[i_output] = output_dir_extract
 
 ################################################
 # map files and collect data into composed arrays of all cells
