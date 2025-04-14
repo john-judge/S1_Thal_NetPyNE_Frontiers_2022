@@ -71,14 +71,14 @@ all_cells_rec = {
 }
 
 for i_output in output_dir_dict.keys():
-    output_dir = output_dir_dict[i_output] + "run2/model_rec_final/"
-    if not os.path.exists(output_dir):
-        print(f"output_dir {output_dir} does not exist. Skipping.")
+    input_dir = output_dir_dict[i_output] + "run2/model_rec_final/"
+    if not os.path.exists(input_dir):
+        print(f"input_dir {input_dir} does not exist. Skipping.")
         continue
-    for file in os.listdir(output_dir):
+    for file in os.listdir(input_dir):
         if file.endswith('.npy'):
             # open numpy memmap file 
-            file_path = output_dir + file
+            file_path = input_dir + file
             print(file_path)
             arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, 300, 300)
 
