@@ -75,7 +75,7 @@ all_cells_rec = {
 }
 
 for i_output in output_dir_dict.keys():
-    input_dir = output_dir_dict[i_output] + "run2/model_rec_final/"
+    input_dir = output_dir_dict[i_output] + "analyze_output/model_rec_final/"
     if not os.path.exists(input_dir):
         print(f"input_dir {input_dir} does not exist. Skipping.")
         continue
