@@ -20,7 +20,7 @@ delta_t = 0.1
 time = np.arange(0, t_steps * delta_t, delta_t)
 
 # input: expects a directory 'analyze_output' with the output_dir_#.tar.gz files
-data_dir = '../analyze_output/model_rec_final'
+data_dir = '../analyze_output/'
 output_dir = '../composed_output/'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
@@ -49,16 +49,17 @@ for file in os.listdir(data_dir):
         if i_output == '':
             continue
         i_output = int(i_output)
-        output_dir = data_dir + file[:-7] + '/'
+        
+        output_dir_extract = data_dir + file[:-7] + '/'
         print(data_dir + file)
-        if not os.path.exists(output_dir) or should_re_extract:
-            if not os.path.exists(output_dir):
-                print("\tCreating directory:", output_dir)
-                os.makedirs(output_dir)
-            result = subprocess.run(['tar', '-xzvf', data_dir + file, "-C", output_dir], 
+        if not os.path.exists(output_dir_extract) or should_re_extract:
+            if not os.path.exists(output_dir_extract):
+                print("\tCreating directory:", output_dir_extract)
+                os.makedirs(output_dir_extract)
+            result = subprocess.run(['tar', '-xzvf', data_dir + file, "-C", output_dir_extract], 
                                     capture_output=True, text=True, check=True)
         
-        output_dir_dict[i_output] = output_dir
+        output_dir_dict[i_output] = output_dir_extract
 
 ################################################
 # map files and collect data into composed arrays of all cells
@@ -74,13 +75,14 @@ all_cells_rec = {
 }
 
 for i_output in output_dir_dict.keys():
-    output_dir = output_dir_dict[i_output] + "run" + str(run_id) + "/model_rec_final/"
-    if not os.path.exists(output_dir):
+    input_dir = output_dir_dict[i_output] + "run2/model_rec_final/"
+    if not os.path.exists(input_dir):
+        print(f"input_dir {input_dir} does not exist. Skipping.")
         continue
-    for file in os.listdir(output_dir):
+    for file in os.listdir(input_dir):
         if file.endswith('.npy'):
             # open numpy memmap file 
-            file_path = output_dir + file
+            file_path = input_dir + file
             print(file_path)
             arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, 300, 300)
 
@@ -146,6 +148,8 @@ for psf_type in all_cells_rec.keys():
 
                 # save the blurred image
 
+    if composed_arr is None:
+        continue
     # show composed_arr
     plt.clf()
     plt.imshow(-composed_arr[0, :, :], cmap='hot', interpolation='nearest')
@@ -264,7 +268,7 @@ for psf_type in final_arr.keys():
         plt.savefig(output_dir + filename)
         plt.close()
 
-        images.append(imageio.imread(filename))
+        images.append(imageio.imread(output_dir + filename))
     imageio.mimsave(output_dir + f"{psf_type}_{compart_type}_percent_contribution.gif", images)
     
         

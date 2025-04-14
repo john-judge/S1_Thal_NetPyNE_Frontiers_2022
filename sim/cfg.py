@@ -247,7 +247,7 @@ cfg.rateStimI = 9.0
 ## S1->S1
 cfg.addConn = True
 
-NBQX_global_experiment = True
+NBQX_global_experiment = False
 
 cfg.synWeightFractionEE = [1.0, 1.0] # E -> E AMPA to NMDA ratio
 cfg.synWeightFractionEI = [1.0, 1.0] # E -> I AMPA to NMDA ratio
