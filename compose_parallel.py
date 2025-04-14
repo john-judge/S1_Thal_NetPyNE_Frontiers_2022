@@ -15,9 +15,9 @@ import imageio
 from src.hVOS.camera import Camera
 
 # load time
-t_steps = 501
+t_max = 999
 delta_t = 0.1
-time = np.arange(0, t_steps * delta_t, delta_t)
+time = np.arange(0, t_max * delta_t, delta_t)
 
 # input: expects a directory 'analyze_output' with the output_dir_#.tar.gz files
 data_dir = '../analyze_output/'
@@ -178,14 +178,14 @@ for psf_type in all_cells_rec.keys():
             gif_filename = output_dir + f"{psf_type}_{compart_type}_{activity_type}.gif"
             if arr is None:
                 continue
-            cam.animate_frames_to_video(arr, gif_filename, frames=(0, 501))
+            cam.animate_frames_to_video(arr, gif_filename, frames=(0, t_max))
 
             if psf_type == 'no_psf':
                 # blur the image with the PSF
                 blurred_arr = np.zeros(arr.shape, dtype='float32')
                 for i in range(arr.shape[0]):
                     blurred_arr[i, :, :] = signal.convolve2d(arr[i, :, :], psf_2d, mode='same')
-                cam.animate_frames_to_video(blurred_arr, gif_filename.replace('.gif', '_blurred.gif'), frames=(0, 501))
+                cam.animate_frames_to_video(blurred_arr, gif_filename.replace('.gif', '_blurred.gif'), frames=(0, t_max))
 
             # store the arr
             if psf_type not in final_arr:

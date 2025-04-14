@@ -22,7 +22,7 @@ cfg = specs.SimConfig()
 #
 #------------------------------------------------------------------------------
 
-# (224.04323588068343, 752.2745354245205, 94.19539296396553)
+# (224.04323588068343, 752.2745354245205, 94.19539296396553) is the location of cell index1 soma
 xStimLocation =[224,752,94]
 # z_recording_radius = 1000 # microns (box shape)
 cfg.simType='S1_TH_coreneuron'
@@ -31,7 +31,7 @@ cfg.coreneuron = False
 #------------------------------------------------------------------------------
 # Run parameters
 #------------------------------------------------------------------------------
-cfg.duration = 50 ## Duration of the sim, in ms  
+cfg.duration = 99.8 ## Duration of the sim, in ms  
 cfg.dt = 0.025
 cfg.seeds = {'cell': 4322, 'conn': 4322, 'stim': 4322, 'loc': 4322} 
 cfg.hParams = {'celsius': 22, 'v_init': -65} # room temperature (slice)

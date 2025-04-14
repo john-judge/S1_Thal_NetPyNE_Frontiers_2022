@@ -56,9 +56,10 @@ use_mc_scattering_psf = False
 target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
-t_max = 501 # number of points to write to disk
-cam_width = 300
-cam_height = 300
+t_max = 999 # number of points to write to disk
+cam_width = 600
+cam_height = 600
+camera_resolution = 6.0
 
 # 'run1/' contains a subdirectory 'cell_dat' 
 #   which contains a memmap numpy file for each cell in the network
@@ -226,7 +227,7 @@ if not no_psf_only:
                 me_type_morphology_map, 
                 time,
                 fov_center=soma_position,
-                camera_resolution=3.0,
+                camera_resolution=camera_resolution,
                 camera_width=cam_width,
                 camera_height=cam_height,
                 psf=psf,
@@ -259,7 +260,7 @@ if not psf_only:
                 me_type_morphology_map, 
                 time,
                 fov_center=soma_position,
-                camera_resolution=1.0,
+                camera_resolution=camera_resolution,
                 camera_width=cam_width,
                 camera_height=cam_height,
                 psf=None,
