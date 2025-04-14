@@ -264,7 +264,7 @@ for psf_type in final_arr.keys():
         plt.savefig(output_dir + filename)
         plt.close()
 
-        images.append(imageio.imread(filename))
+        images.append(imageio.imread(output_dir + filename))
     imageio.mimsave(output_dir + f"{psf_type}_{compart_type}_percent_contribution.gif", images)
     
         
