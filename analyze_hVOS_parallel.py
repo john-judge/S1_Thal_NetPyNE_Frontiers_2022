@@ -57,8 +57,8 @@ target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
 t_max = 999 # number of points to write to disk
-cam_width = 300
-cam_height = 300
+cam_width = 100
+cam_height = 100
 camera_resolution = 6.0
 
 # 'run1/' contains a subdirectory 'cell_dat' 
