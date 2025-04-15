@@ -252,13 +252,13 @@ rois = []
 colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k',
             'orange', 'purple', 'pink']
 for i_roi in range(n_rois):
-    roi_diameter = np.random.randint(roi_size_range[0], roi_size_range[1])
+    roi_diameter = np.random.randint(roi_diameter_range[0], roi_diameter_range[1])
 
     # random location
-    roi_x = np.random.randint(0, 
-                final_composed_arr['blurred_arr'].shape[1] - roi_size)
-    roi_y = np.random.randint(0,
-                final_composed_arr['blurred_arr'].shape[2] - roi_size)
+    roi_x = np.random.randint(roi_diameter//2, 
+                final_composed_arr['blurred_arr'].shape[1] - roi_diameter//2)
+    roi_y = np.random.randint(roi_diameter//2,
+                final_composed_arr['blurred_arr'].shape[2] - roi_diameter//2)
 
     roi = [[roi_x, roi_y]]
     # add the roi_size nearest pixels to the roi by spiraling outward until limit reached
