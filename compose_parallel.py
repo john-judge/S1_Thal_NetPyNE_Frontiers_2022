@@ -25,7 +25,6 @@ output_dir = '../composed_output/'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 run_id = 2
-sparsity = 1.0
 should_re_extract = True  # set to True if you want to re-extract the data into existing folders
 
 ############################################
@@ -73,7 +72,7 @@ all_cells_rec = {
         } for c in comparts
     } for p in ['no_psf', 'psf']
 }
-
+five_soma_masks = []  # for later analysis
 for i_output in output_dir_dict.keys():
     input_dir = output_dir_dict[i_output] + "analyze_output/model_rec_final/"
     if not os.path.exists(input_dir):
@@ -105,6 +104,9 @@ for i_output in output_dir_dict.keys():
             
             all_cells_rec[psf_type][compart_type][activity_type] += arr
 
+            if len(five_soma_masks) < 5:
+                if compart_type == 'soma' and activity_type == 'syn' and psf_type == 'no_psf':
+                    five_soma_masks.append(arr > 0)
             del arr
             gc.collect()
 
@@ -222,6 +224,75 @@ for psf_type in final_arr.keys():
                 final_composed_arr[psf_type] = np.zeros(arr.shape, dtype='float32')
             final_composed_arr[psf_type] += arr
 
+##################################################
+# make a gif of the final composed arr (blurred)
+###############################################
+cam.animate_frames_to_video(final_composed_arr['blurred_arr'], 
+output_dir + "final_composed_blurred.gif", frames=(0, t_max))
+
+###################################################
+# choose random ROIs in the final_composed_arr blurred_arr image 
+# and plot their optical traces over time (png)
+# Also show location of the ROIs overlaid in the image
+###################################################
+n_rois = 10
+roi_diameter_range = [1, 5]  # size of the ROIs, they are distributed uniformly in size
+# matplotlib figure
+plt.clf()
+plt.figure(figsize=(10, 6))
+# show image in left subplot
+plt.subplot(1, 2, 1)
+plt.imshow(-final_composed_arr['blurred_arr'][0, :, :], 
+                cmap='gray', interpolation='nearest')
+rois = []
+colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k',
+            'orange', 'purple', 'pink']
+for i_roi in range(n_rois):
+    roi_diameter = np.random.randint(roi_size_range[0], roi_size_range[1])
+
+    # random location
+    roi_x = np.random.randint(0, 
+                final_composed_arr['blurred_arr'].shape[1] - roi_size)
+    roi_y = np.random.randint(0,
+                final_composed_arr['blurred_arr'].shape[2] - roi_size)
+
+    roi = [[roi_x, roi_y]]
+    # add the roi_size nearest pixels to the roi by spiraling outward until limit reached
+    if roi_diameter > 1:
+        for i in range(max(0, i-roi_diameter//2), 
+                        min(final_composed_arr['blurred_arr'].shape[1], i+roi_diameter//2)):
+            for j in range(max(0, j-roi_diameter//2),
+                            min(final_composed_arr['blurred_arr'].shape[2], j+roi_diameter//2)):
+                if abs(i - roi_x) + abs(j - roi_y) <= roi_diameter // 2:
+                    if not (i == roi_x and j == roi_y):
+                        roi.append([i, j])
+    
+    # for each pixel in roi, shade the pixel in the image
+    for pixel in roi:
+        plt.scatter(pixel[0], pixel[1], color=colors[i_roi % len(colors)], s=5,
+                    alpha=0.25)
+
+# now plot the optical trace for each roi
+last_headspace = 0
+plt.subplot(1, 2, 2)
+for i_roi in range(n_rois):
+    roi = rois[i_roi]
+    roi_trace = None
+    for px in roi:
+        if roi_trace is None:
+            roi_trace = final_composed_arr['blurred_arr'][:, px[0], px[1]]
+        else:
+            roi_trace += final_composed_arr['blurred_arr'][:, px[0], px[1]]
+
+    roi_trace /= len(roi)
+    plt.plot(time, roi_trace + last_headspace, 
+                color=colors[i_roi % len(colors)])
+
+    last_headspace += roi_trace.max() * 1.1
+
+plt.xlabel("Time (ms)")
+plt.ylabel("Optical Trace")
+plt.savefig(output_dir + "roi_traces.png")
 
 ###############################################
 # build 4 hisograms: # pixels for % compartment contribution for each compartment
@@ -271,4 +342,116 @@ for psf_type in final_arr.keys():
         images.append(imageio.imread(output_dir + filename))
     imageio.mimsave(output_dir + f"{psf_type}_{compart_type}_percent_contribution.gif", images)
     
-        
+###################################################
+# Soma location optical traces versus non-soma
+################################################
+# use five_soma_masks for non-soma rois
+# use all-soma no-psf composition for a mask of all non-soma areas
+# and then plot the optical traces for each cell including only pixels inside the mask
+# and save the image
+
+all_non_soma = (final_arr['no_psf']['soma']['syn'] == 0)  # True if not soma
+avg_soma_size = np.mean([mask.sum() for mask in five_soma_masks])
+avg_soma_diameter = np.sqrt(avg_soma_size) / np.pi
+
+five_non_soma_masks = []
+for i_non_soma in range(5):
+    five_non_soma_masks.append(np.zeros(all_non_soma.shape, dtype=bool))
+    # sample a random point from all_non_soma
+    non_soma_x = np.random.randint(0, all_non_soma.shape[1])
+    non_soma_y = np.random.randint(0, all_non_soma.shape[2])
+
+    for i in range(max(0, non_soma_x - avg_soma_diameter // 2), 
+                        min(all_non_soma.shape[1], non_soma_x + avg_soma_diameter // 2)):
+        for j in range(max(0, non_soma_y - avg_soma_diameter // 2),
+                        min(all_non_soma.shape[2], non_soma_y + avg_soma_diameter // 2)):
+            if abs(i - non_soma_x) + abs(j - non_soma_y) <= avg_soma_diameter // 2:
+                if not (i == non_soma_x and j == non_soma_y):
+                    if all_non_soma[i, j]:
+                        five_non_soma_masks[i_non_soma][i, j] = True
+                        all_non_soma[i, j] = True
+
+plt.clf()
+plt.figure(figsize=(10, 6))
+# show image in left subplot
+plt.subplot(1, 2, 1)
+plt.imshow(-final_composed_arr['blurred_arr'][0, :, :], 
+                cmap='gray', interpolation='nearest')
+
+# plot the rois in the image
+for i_roi in range(len(five_non_soma_masks)):
+    roi = five_non_soma_masks[i_roi]
+    # for each pixel in roi, shade the pixel in the image
+    for pixel in roi:
+        plt.scatter(pixel[0], pixel[1], color=colors[i_roi % len(colors)], s=5,
+                    alpha=0.25)
+
+# now plot the optical trace for each roi
+last_headspace = 0
+plt.subplot(1, 2, 2)
+leg_handles = []
+# plot non-soma traces
+for i_soma, five_masks in enumerate([five_non_soma_masks, five_soma_masks]):
+    label = "Non-soma"
+    color = 'tab:orange'
+    if i_soma == 0:
+        label = "Soma"
+        color = 'tab:green'
+    for i_roi in range(len(five_non_soma_masks)):
+        roi_mask = five_non_soma_masks[i_roi]
+        roi_trace = None
+        for i in range(roi_mask.shape[0]):
+            for j in range(roi_mask.shape[1]):
+                if roi_mask[i, j]:
+                    if roi_trace is None:
+                        roi_trace = final_composed_arr['blurred_arr'][:, i, j]
+                    else:
+                        roi_trace += final_composed_arr['blurred_arr'][:, i, j]
+
+        roi_trace /= len(roi)
+        l1 = plt.plot(time, roi_trace + last_headspace, 
+                    color=color,
+                    label=label)
+
+        last_headspace += roi_trace.max() * 1.1
+    leg_handles.append(l1[0])
+
+plt.legend(handles=leg_handles, loc='upper right')
+plt.xlabel("Time (ms)")
+plt.ylabel("Optical Trace")
+plt.savefig(output_dir + "dend_v_soma_roi_traces.png")
+
+
+
+##################################################
+# Sparsity analysis: single-cell crosstalk
+###############################################
+biological_sparsity = 0.6  # when sparsity == 1.0, the biological sparsity is 0.6
+sparsity_range = [0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
+crosstalk_fractions = [0 for _ in range(len(sparsity_range))]
+for i_sp, sparsity in enumerate(sparsity_range):
+    # reconduct the same compose analysis but only sampling SPARSITY % of the cells
+
+    # use the five_soma_masks to analyze the crosstalk
+    # at each soma roi, get the fraction of the signal that is from the cell
+    # whose soma resides there divided by the total signal from all cells.
+    for soma_mask in five_soma_masks:
+        # get the signal from all cells in the soma mask
+        all_signal = final_composed_arr['blurred_arr'][:, soma_mask]
+        # get the signal from the cell whose soma resides there
+        cell_soma_signal = final_arr['blurred_arr']['soma']['syn'][:, soma_mask]
+        # get the crosstalk fraction
+        crosstalk_fraction = np.sum(cell_soma_signal) / np.sum(all_signal)
+        crosstalk_fractions[i_sp] += crosstalk_fraction
+    crosstalk_fractions[i_sp] /= len(five_soma_masks)
+    crosstalk_fractions[i_sp] = 1 - crosstalk_fractions[i_sp]
+
+bio_sparsity = [biological_sparsity * sp for sp in sparsity_range]
+
+# plot average crosstalk fraction verssus sparsity
+plt.clf()
+plt.figure(figsize=(10, 6))
+plt.plot(bio_sparsity, crosstalk_fractions, 'o-')
+plt.xlabel("Sparsity")
+plt.ylabel("Average Crosstalk Fraction at Soma location")
+plt.savefig(output_dir + "crosstalk_sparsity.png")
