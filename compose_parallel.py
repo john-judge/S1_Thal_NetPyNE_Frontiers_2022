@@ -191,7 +191,8 @@ for psf_type in all_cells_rec.keys():
                 blurred_arr = np.zeros(arr.shape, dtype='float32')
                 for i in range(arr.shape[0]):
                     blurred_arr[i, :, :] = signal.convolve2d(arr[i, :, :], psf_2d, mode='same')
-                cam.animate_frames_to_video(blurred_arr, gif_filename.replace('.gif', '_blurred.gif'), frames=(0, t_max))
+                cam.animate_frames_to_video(blurred_arr, gif_filename.replace('.gif', '_blurred.gif'), 
+                                            frames=(0, t_max))
 
             # store the arr
             if psf_type not in final_arr:
@@ -211,8 +212,6 @@ for psf_type in all_cells_rec.keys():
                     final_arr['blurred_arr'][compart_type][activity_type] = {}
 
                 final_arr['blurred_arr'][compart_type][activity_type] = blurred_arr
-
-            
 
 ###############################################
 # build final composed as well
@@ -275,6 +274,7 @@ for i_roi in range(n_rois):
     for pixel in roi:
         plt.scatter(pixel[0], pixel[1], color=colors[i_roi % len(colors)], s=5,
                     alpha=0.25)
+    rois.append(roi)
 
 # now plot the optical trace for each roi
 last_headspace = 0
@@ -424,8 +424,6 @@ plt.legend(handles=leg_handles, loc='upper right')
 plt.xlabel("Time (ms)")
 plt.ylabel("Optical Trace")
 plt.savefig(output_dir + "dend_v_soma_roi_traces.png")
-
-
 
 ##################################################
 # Sparsity analysis: single-cell crosstalk
