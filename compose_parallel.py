@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
 import imageio
+import shutil
 
 from src.hVOS.camera import Camera
 
@@ -40,7 +41,19 @@ psf_2d /= np.sum(psf_2d)
 
 ################################################
 # Extract the tar.gz file (result from optical model)
+# map files and collect data into composed arrays of all cells
+# Delete files as possible to free up disk space
 ################################################
+comparts = ['axon', 'dend', 'soma', 'apic']
+all_cells_rec = {
+    p: { 
+        c: {
+            'syn': None,
+            'spk': None,
+        } for c in comparts
+    } for p in ['no_psf', 'psf']
+}
+five_soma_masks = []  # for later analysis
 output_dir_dict = {}
 for file in os.listdir(data_dir):
     if file.endswith('.tar.gz'):
@@ -60,57 +73,48 @@ for file in os.listdir(data_dir):
         
         output_dir_dict[i_output] = output_dir_extract
 
-################################################
-# map files and collect data into composed arrays of all cells
-################################################
-comparts = ['axon', 'dend', 'soma', 'apic']
-all_cells_rec = {
-    p: { 
-        c: {
-            'syn': None,
-            'spk': None,
-        } for c in comparts
-    } for p in ['no_psf', 'psf']
-}
-five_soma_masks = []  # for later analysis
-for i_output in output_dir_dict.keys():
-    input_dir = output_dir_dict[i_output] + "analyze_output/model_rec_final/"
-    if not os.path.exists(input_dir):
-        print(f"input_dir {input_dir} does not exist. Skipping.")
-        continue
-    for file in os.listdir(input_dir):
-        if file.endswith('.npy'):
-            # open numpy memmap file 
-            file_path = input_dir + file
-            print(file_path)
-            arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, 300, 300)
+        ################################################
+        input_dir = output_dir_dict[i_output] + "analyze_output/model_rec_final/"
+        if not os.path.exists(input_dir):
+            print(f"input_dir {input_dir} does not exist. Skipping.")
+            continue
+        for file in os.listdir(input_dir):
+            if file.endswith('.npy'):
+                # open numpy memmap file 
+                file_path = input_dir + file
+                print(file_path)
+                arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, 300, 300)
 
-            # use the file name to determine the compartment and type of data
-            # e.g. no_psf_cell_8406-syn_rec_dend.npy
-            # e.g. psf_cell_8406-spk_rec_soma.npy
-            # e.g. psf_cell_8406-syn_rec_apic.npy
-            compart_type = file.split("_")[-1].replace(".npy", "")
-            psf_type = file.split("_")[0]
-            psf_type = 'no_psf' if psf_type == 'no' else 'psf'
-            activity_type = file.split("_")[-3]
-            activity_type = activity_type.split("-")[1]
-            cell_id = file.split("_")[1].split("-")[0]
+                # use the file name to determine the compartment and type of data
+                # e.g. no_psf_cell_8406-syn_rec_dend.npy
+                # e.g. psf_cell_8406-spk_rec_soma.npy
+                # e.g. psf_cell_8406-syn_rec_apic.npy
+                compart_type = file.split("_")[-1].replace(".npy", "")
+                psf_type = file.split("_")[0]
+                psf_type = 'no_psf' if psf_type == 'no' else 'psf'
+                activity_type = file.split("_")[-3]
+                activity_type = activity_type.split("-")[1]
+                cell_id = file.split("_")[1].split("-")[0]
 
-            print(compart_type, psf_type, activity_type, cell_id)
+                print(compart_type, psf_type, activity_type, cell_id)
 
-            if all_cells_rec[psf_type][compart_type][activity_type] is None:
-                all_cells_rec[psf_type][compart_type][activity_type] = \
-                    np.zeros(arr.shape, dtype='float32')
-            
-            all_cells_rec[psf_type][compart_type][activity_type] += arr
+                if all_cells_rec[psf_type][compart_type][activity_type] is None:
+                    all_cells_rec[psf_type][compart_type][activity_type] = \
+                        np.zeros(arr.shape, dtype='float32')
+                
+                all_cells_rec[psf_type][compart_type][activity_type] += arr
 
-            if len(five_soma_masks) < 5:
-                if compart_type == 'soma' and activity_type == 'syn' and psf_type == 'no_psf':
-                    five_soma_masks.append(arr > 0)
-            del arr
-            gc.collect()
-
-
+                if len(five_soma_masks) < 5:
+                    if compart_type == 'soma' and activity_type == 'syn' and psf_type == 'no_psf':
+                        five_soma_masks.append(arr > 0)
+                del arr
+                gc.collect()
+        
+        # delete the input_dir to free up space
+        try:
+            shutil.rmtree(input_dir)
+        except Exception as e:
+            print(f"Error deleting {input_dir}: {e}")
 
 ###########################################
 # Show each result in all_cells_rec and save in output_dir
