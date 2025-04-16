@@ -62,7 +62,7 @@ use_mc_scattering_psf = False
 # Find data in CHTC staging and extract data just for this job's cell
 #####################################
 target_hVOS_populations = ["L4_SS", "L4_PC"]
-target_sparsity = 0.6
+target_sparsity = 1.0
 optical_type = "hVOS"
 t_max = 999 # number of points to write to disk
 cam_width = cam_params['cam_width']
@@ -169,16 +169,27 @@ target_population_cells = [
 i_target_cells = []
 i_t = job_id
 while i_t < len(target_population_cells):
-    i_target_cells.append(i_t)
+    if i_t < len(target_population_cells):
+        i_target_cells.append(i_t)
     i_t += total_jobs
 print("Job id:", job_id, "of", total_jobs, "processing cells:", i_target_cells)
 
  # sparsity sampling implemented here
 target_population_cells = [cell for cell in target_population_cells
                                 if random.random() < target_sparsity]
+
+# choose cells for this job to draw
+cells_to_draw = None
+try:
+    cells_to_draw = [target_population_cells[i_target_cell] for i_target_cell in i_target_cells]
+except IndexError as e:
+    print("Tried to get ", i_target_cells, 
+          "th cell from target_population_cells of length", len(target_population_cells))
+    print("Error:", e)
+
 optical_readout = {'hVOS': hVOSReadout, 'VSD': VSDReadout}[optical_type]
 hvos_readout = optical_readout(target_hVOS_populations, 
-                               cells, 
+                               cells_to_draw, 
                                me_type_morphology_map,
                                force_overwrite=False)
 hvos_readout.compute_optical_signal(data_dir)
@@ -207,12 +218,6 @@ psf = psf.build_3D_PSF()
 ######################################
 # determine which morphology to use for each cell
 ######################################
-try:
-    cells_to_draw = [target_population_cells[i_target_cell] for i_target_cell in i_target_cells]
-except IndexError as e:
-    print("Tried to get ", i_target_cells, 
-          "th cell from target_population_cells of length", len(target_population_cells))
-    print("Error:", e)
 
 target_cell_0 = cells_to_draw[0]
 compart_ids = target_cell_0.get_list_compartment_ids()
