@@ -25,7 +25,7 @@ from src.hVOS.camera import Camera
 from src.hVOS.psf import PSF
 from src.hVOS.mcPSF import mcPSF
 from src.hVOS.compartment_file import MemoryMappedCompartmentVoltages
-
+from cam_params import cam_params
 
 ####################################
 # read command line args
@@ -57,9 +57,9 @@ target_hVOS_populations = ["L4_SS", "L4_PC"]
 target_sparsity = 0.6
 optical_type = "hVOS"
 t_max = 999 # number of points to write to disk
-cam_width = 100
-cam_height = 100
-camera_resolution = 6.0
+cam_width = cam_params['cam_width']
+cam_height = cam_params['cam_height']
+camera_resolution = cam_params['cam_resolution']
 
 # 'run1/' contains a subdirectory 'cell_dat' 
 #   which contains a memmap numpy file for each cell in the network

@@ -12,13 +12,17 @@ import numpy as np
 from scipy import signal
 import imageio
 import shutil
+import random
 
 from src.hVOS.camera import Camera
+from cam_params import cam_params
 
 # load time
 t_max = 999
 delta_t = 0.1
 time = np.arange(0, t_max * delta_t, delta_t)
+cam_width = cam_params['cam_width']
+cam_height = cam_params['cam_height']
 
 # input: expects a directory 'analyze_output' with the output_dir_#.tar.gz files
 data_dir = '../analyze_output/'
@@ -53,6 +57,10 @@ all_cells_rec = {
         } for c in comparts
     } for p in ['no_psf', 'psf']
 }
+biological_sparsity = 0.6  # when sparsity == 1.0, the biological sparsity is 0.6
+sparsity_range = [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.0]
+sparsity_arr = [np.zeros((cam_width, cam_height), dtype='float32') 
+                    for _ in range(len(sparsity_range))]
 five_soma_masks = []  # for later analysis
 output_dir_dict = {}
 for file in os.listdir(data_dir):
@@ -78,12 +86,17 @@ for file in os.listdir(data_dir):
         if not os.path.exists(input_dir):
             print(f"input_dir {input_dir} does not exist. Skipping.")
             continue
+
+        # roll the sparsity dice for this cell. rand float between 0 and 1
+        sparsity_dice_rolls = [
+            random.random() < sparse for sparse in sparsity_range
+        ]
         for file in os.listdir(input_dir):
             if file.endswith('.npy'):
                 # open numpy memmap file 
                 file_path = input_dir + file
                 print(file_path)
-                arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, 300, 300)
+                arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, cam_width, cam_height)
 
                 # use the file name to determine the compartment and type of data
                 # e.g. no_psf_cell_8406-syn_rec_dend.npy
@@ -96,6 +109,11 @@ for file in os.listdir(data_dir):
                 activity_type = activity_type.split("-")[1]
                 cell_id = file.split("_")[1].split("-")[0]
 
+                # sparsity data collection
+                for i_sp in range(len(sparsity_range)):
+                    if sparsity_dice_rolls[i_sp]:
+                        sparsity_arr[i_sp] += np.max(arr, axis=0)
+
                 print(compart_type, psf_type, activity_type, cell_id)
 
                 if all_cells_rec[psf_type][compart_type][activity_type] is None:
@@ -106,7 +124,9 @@ for file in os.listdir(data_dir):
 
                 if len(five_soma_masks) < 5:
                     if compart_type == 'soma' and activity_type == 'syn' and psf_type == 'no_psf':
-                        five_soma_masks.append(arr > 0)
+                        if np.sum(-arr) > 0:
+                            # take the first 5 masks
+                            five_soma_masks.append(np.max(arr, axis=0))
                 del arr
                 gc.collect()
         
@@ -184,7 +204,8 @@ for psf_type in all_cells_rec.keys():
             gif_filename = output_dir + f"{psf_type}_{compart_type}_{activity_type}.gif"
             if arr is None:
                 continue
-            cam.animate_frames_to_video(arr, gif_filename, frames=(0, t_max))
+            cam.animate_frames_to_video(arr, gif_filename, frames=(0, t_max),
+                                        flip=True)
 
             if psf_type == 'no_psf':
                 # blur the image with the PSF
@@ -192,7 +213,7 @@ for psf_type in all_cells_rec.keys():
                 for i in range(arr.shape[0]):
                     blurred_arr[i, :, :] = signal.convolve2d(arr[i, :, :], psf_2d, mode='same')
                 cam.animate_frames_to_video(blurred_arr, gif_filename.replace('.gif', '_blurred.gif'), 
-                                            frames=(0, t_max))
+                                            frames=(0, t_max), flip=True)
 
             # store the arr
             if psf_type not in final_arr:
@@ -231,7 +252,8 @@ for psf_type in final_arr.keys():
 # make a gif of the final composed arr (blurred)
 ###############################################
 cam.animate_frames_to_video(final_composed_arr['blurred_arr'], 
-output_dir + "final_composed_blurred.gif", frames=(0, t_max))
+    output_dir + "final_composed_blurred.gif", frames=(0, t_max),
+    flip=True)
 
 ###################################################
 # choose random ROIs in the final_composed_arr blurred_arr image 
@@ -239,7 +261,7 @@ output_dir + "final_composed_blurred.gif", frames=(0, t_max))
 # Also show location of the ROIs overlaid in the image
 ###################################################
 n_rois = 10
-roi_diameter_range = [1, 5]  # size of the ROIs, they are distributed uniformly in size
+roi_diameter_range = [1, 15]  # size of the ROIs, they are distributed uniformly in size
 # matplotlib figure
 plt.clf()
 plt.figure(figsize=(10, 6))
@@ -266,7 +288,7 @@ for i_roi in range(n_rois):
                         min(final_composed_arr['blurred_arr'].shape[1], i+roi_diameter//2)):
             for j in range(max(0, j-roi_diameter//2),
                             min(final_composed_arr['blurred_arr'].shape[2], j+roi_diameter//2)):
-                if abs(i - roi_x) + abs(j - roi_y) <= roi_diameter // 2:
+                if np.sqrt((i - roi_x)**2 + (j - roi_y)^2) <= roi_diameter // 2:
                     if not (i == roi_x and j == roi_y):
                         roi.append([i, j])
     
@@ -322,8 +344,10 @@ for psf_type in final_arr.keys():
                 arr = final_arr[psf_type][compart_type][activity_type]
                 if arr is None:
                     continue
+
                 as_fraction_arr = arr / final_composed_arr[psf_type]
-            
+                as_fraction_arr[final_composed_arr[psf_type] == 0] = 0
+
                 # discard elements that are not in the range (0, 1]
                 as_fraction_arr_t = as_fraction_arr[t, :, :]
                 as_fraction_arr_t = as_fraction_arr_t[as_fraction_arr_t > 0]
@@ -354,21 +378,21 @@ for psf_type in final_arr.keys():
 # and then plot the optical traces for each cell including only pixels inside the mask
 # and save the image
 
-all_non_soma = (final_arr['no_psf']['soma']['syn'] == 0)  # True if not soma
+all_non_soma = (final_arr['no_psf']['soma']['syn'] == 0)[0, :, :]  # True if not soma
 avg_soma_size = np.mean([mask.sum() for mask in five_soma_masks])
 avg_soma_diameter = np.sqrt(avg_soma_size) / np.pi
 
 five_non_soma_masks = []
-for i_non_soma in range(5):
+for i_non_soma in range(50):
     five_non_soma_masks.append(np.zeros(all_non_soma.shape, dtype=bool))
     # sample a random point from all_non_soma
-    non_soma_x = np.random.randint(0, all_non_soma.shape[1])
-    non_soma_y = np.random.randint(0, all_non_soma.shape[2])
+    non_soma_x = np.random.randint(0, all_non_soma.shape[0])
+    non_soma_y = np.random.randint(0, all_non_soma.shape[1])
 
-    for i in range(max(0, non_soma_x - avg_soma_diameter // 2), 
-                        min(all_non_soma.shape[1], non_soma_x + avg_soma_diameter // 2)):
-        for j in range(max(0, non_soma_y - avg_soma_diameter // 2),
-                        min(all_non_soma.shape[2], non_soma_y + avg_soma_diameter // 2)):
+    for i in range(max(0, int(non_soma_x - avg_soma_diameter // 2)), 
+                        min(all_non_soma.shape[1], int(non_soma_x + avg_soma_diameter // 2))):
+        for j in range(max(0, int(non_soma_y - avg_soma_diameter // 2)),
+                        min(all_non_soma.shape[2], int(non_soma_y + avg_soma_diameter // 2))):
             if abs(i - non_soma_x) + abs(j - non_soma_y) <= avg_soma_diameter // 2:
                 if not (i == non_soma_x and j == non_soma_y):
                     if all_non_soma[i, j]:
@@ -383,7 +407,7 @@ plt.imshow(-final_composed_arr['blurred_arr'][0, :, :],
                 cmap='gray', interpolation='nearest')
 
 # plot the rois in the image
-for i_roi in range(len(five_non_soma_masks)):
+for i_roi in range(min(5, len(five_non_soma_masks))):
     roi = five_non_soma_masks[i_roi]
     # for each pixel in roi, shade the pixel in the image
     for pixel in roi:
@@ -398,6 +422,7 @@ leg_handles = []
 for i_soma, five_masks in enumerate([five_non_soma_masks, five_soma_masks]):
     label = "Non-soma"
     color = 'tab:orange'
+    l1 = None
     if i_soma == 0:
         label = "Soma"
         color = 'tab:green'
@@ -411,14 +436,17 @@ for i_soma, five_masks in enumerate([five_non_soma_masks, five_soma_masks]):
                         roi_trace = final_composed_arr['blurred_arr'][:, i, j]
                     else:
                         roi_trace += final_composed_arr['blurred_arr'][:, i, j]
-
+        if roi_trace is None:
+            continue
         roi_trace /= len(roi)
         l1 = plt.plot(time, roi_trace + last_headspace, 
                     color=color,
                     label=label)
 
         last_headspace += roi_trace.max() * 1.1
-    leg_handles.append(l1[0])
+    if l1 is not None:
+        leg_handles.append(l1[0])
+
 
 plt.legend(handles=leg_handles, loc='upper right')
 plt.xlabel("Time (ms)")
@@ -428,32 +456,41 @@ plt.savefig(output_dir + "dend_v_soma_roi_traces.png")
 ##################################################
 # Sparsity analysis: single-cell crosstalk
 ###############################################
-biological_sparsity = 0.6  # when sparsity == 1.0, the biological sparsity is 0.6
-sparsity_range = [0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
-crosstalk_fractions = [0 for _ in range(len(sparsity_range))]
+# convolve each of the sparse images
+for i_sp in range(len(sparsity_range)):
+    sparsity_arr[i_sp][:, :] = signal.convolve2d(sparsity_arr[i_sp][:, :], psf_2d, mode='same')
+crosstalk_fractions = [[] for _ in range(len(sparsity_range))]
 for i_sp, sparsity in enumerate(sparsity_range):
     # reconduct the same compose analysis but only sampling SPARSITY % of the cells
 
     # use the five_soma_masks to analyze the crosstalk
     # at each soma roi, get the fraction of the signal that is from the cell
     # whose soma resides there divided by the total signal from all cells.
-    for soma_mask in five_soma_masks:
+    for soma_max in five_soma_masks:
         # get the signal from all cells in the soma mask
-        all_signal = final_composed_arr['blurred_arr'][:, soma_mask]
+        soma_mask = (soma_max != 0)
+        all_signal = sparsity_arr[i_sp] * soma_mask
         # get the signal from the cell whose soma resides there
-        cell_soma_signal = final_arr['blurred_arr']['soma']['syn'][:, soma_mask]
+        cell_soma_signal = -signal.convolve2d(
+                    soma_max, 
+                    psf_2d, mode='same')
         # get the crosstalk fraction
         crosstalk_fraction = np.sum(cell_soma_signal) / np.sum(all_signal)
-        crosstalk_fractions[i_sp] += crosstalk_fraction
-    crosstalk_fractions[i_sp] /= len(five_soma_masks)
-    crosstalk_fractions[i_sp] = 1 - crosstalk_fractions[i_sp]
+        crosstalk_fractions[i_sp].append(1-crosstalk_fraction)
 
 bio_sparsity = [biological_sparsity * sp for sp in sparsity_range]
-
+print(crosstalk_fractions)
 # plot average crosstalk fraction verssus sparsity
 plt.clf()
 plt.figure(figsize=(10, 6))
-plt.plot(bio_sparsity, crosstalk_fractions, 'o-')
+# scatter plot with error bars
+crosstalk_fractions_std = [np.std(crosstalk) for crosstalk in crosstalk_fractions]
+crosstalk_fractions = [np.mean(crosstalk) for crosstalk in crosstalk_fractions]
+
+plt.errorbar(bio_sparsity, crosstalk_fractions, yerr=crosstalk_fractions_std, fmt='o')
+
 plt.xlabel("Sparsity")
 plt.ylabel("Average Crosstalk Fraction at Soma location")
 plt.savefig(output_dir + "crosstalk_sparsity.png")
+print(crosstalk_fractions)
+print(crosstalk_fractions_std)

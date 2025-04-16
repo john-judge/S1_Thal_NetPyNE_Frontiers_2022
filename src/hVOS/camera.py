@@ -164,17 +164,18 @@ class Camera:
 
     def animate_frames_to_video(self, recording, filename='camera_view.gif',
                                 frames=(0,999), time_step_size=0.1, frame_stride=10,
-                                vmin=0, vmax=0.01, autoscale_minmax=True):
+                                vmin=0, vmax=0.01, autoscale_minmax=True, flip=True):
         """ Animate the frames to a video. """
         # each timestep to a frame in a list of images
+        sign = -1 if flip else 1
         time_step_size *= frame_stride
         frames = [frames[0], min(frames[1], len(self.time))]
-        images = [recording[i, :, :].copy() for i in range(frames[0], frames[1], frame_stride)]
+        images = [sign * recording[i, :, :].copy() for i in range(frames[0], frames[1], frame_stride)]
 
         # if autoscale_minmax is True, set vmin and vmax to the min and max of the images
         if autoscale_minmax:
-            vmin = np.min(images)
-            vmax = np.max(images)
+            vmin = sign * np.min(recording)
+            vmax = sign * np.max(recording)
 
         # write each image to a file and keep the filenames in a list
         # then use imageio to create a video from the images
