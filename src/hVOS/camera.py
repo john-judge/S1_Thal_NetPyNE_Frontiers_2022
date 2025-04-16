@@ -176,6 +176,7 @@ class Camera:
         if autoscale_minmax:
             vmin = sign * np.min(recording)
             vmax = sign * np.max(recording)
+            vmin, vmax = (vmin, vmax) if vmin < vmax else (vmax, vmin)
 
         # write each image to a file and keep the filenames in a list
         # then use imageio to create a video from the images

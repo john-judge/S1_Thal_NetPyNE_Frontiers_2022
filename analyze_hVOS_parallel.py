@@ -30,6 +30,7 @@ from cam_params import cam_params
 ####################################
 # read command line args
 #####################################
+
 job_id = 0
 if len(sys.argv) < 2:
     job_id = 0  # testing mode has no job_id
@@ -39,6 +40,13 @@ else:
         job_id = int(sys.argv[1])
     except ValueError:
         job_id = 0
+
+total_jobs = 50
+if len(sys.argv) > 2:
+    try:
+        total_jobs = int(sys.argv[2])
+    except ValueError:
+        total_jobs = 50
 
 no_psf_only = False
 psf_only = False
@@ -156,7 +164,14 @@ target_population_cells = [
         if any([t_pop in cells[cell_id].get_me_type() for 
                     t_pop in target_hVOS_populations ]) 
 ]
-i_target_cell = job_id % len(target_population_cells)  # index of cell to process for this job
+
+# indexes of cells to process for this job
+i_target_cells = []
+i_t = job_id
+while i_t < len(target_population_cells):
+    i_target_cells.append(i_t)
+    i_t += total_jobs
+print("Job id:", job_id, "of", total_jobs, "processing cells:", i_target_cells)
 
  # sparsity sampling implemented here
 target_population_cells = [cell for cell in target_population_cells
@@ -193,13 +208,14 @@ psf = psf.build_3D_PSF()
 # determine which morphology to use for each cell
 ######################################
 try:
-    target_cell = target_population_cells[i_target_cell]
+    cells_to_draw = [target_population_cells[i_target_cell] for i_target_cell in i_target_cells]
 except IndexError as e:
-    print("Tried to get ", i_target_cell, 
+    print("Tried to get ", i_target_cells, 
           "th cell from target_population_cells of length", len(target_population_cells))
     print("Error:", e)
 
-compart_ids = target_cell.get_list_compartment_ids()
+target_cell_0 = cells_to_draw[0]
+compart_ids = target_cell_0.get_list_compartment_ids()
 for morph_key in me_type_morphology_map:
     for morph in me_type_morphology_map[morph_key]:
         for cell in target_population_cells:
@@ -223,32 +239,24 @@ view_center_cell = 1  # view center cell is the cell to center on.
 # other cells may or may not be in view.
 soma_position = target_population_cells[view_center_cell].get_soma_position()
 if not no_psf_only:
-    cam = Camera([target_cell], 
-                me_type_morphology_map, 
-                time,
-                fov_center=soma_position,
-                camera_resolution=camera_resolution,
-                camera_width=cam_width,
-                camera_height=cam_height,
-                psf=psf,
-                data_dir=model_rec_out_dir + 'psf/', 
-                use_2d_psf=False)
-    cam._draw_cell(target_cell)
+    for target_cell in cells_to_draw:
+        cell_model_rec_out_dir = model_rec_out_dir + target_cell.get_cell_id() + '/'
+        os.makedirs(cell_model_rec_out_dir, exist_ok=True)
+        cam = Camera([target_cell], 
+                    me_type_morphology_map, 
+                    time,
+                    fov_center=soma_position,
+                    camera_resolution=camera_resolution,
+                    camera_width=cam_width,
+                    camera_height=cam_height,
+                    psf=psf,
+                    data_dir=cell_model_rec_out_dir + 'psf/', 
+                    use_2d_psf=False)
+        cam._draw_cell(target_cell)
 
-
-    '''for compart_id in ['soma', 'axon', 'apic', 'dend']:
-        for activity_type in ['synaptic', 'spiking']:
-            rec = cam.get_cell_recording().get_raw_recording(compart_id=compart_id, 
-                                                            activity_type=activity_type)
-            cam.animate_frames_to_video(rec, 
-                            frames=(0,500),
-                            filename='w_psf_' + compart_id + "_" + activity_type + '.gif',
-                            time_step_size=time_step_size,
-                            vmin=0,
-                            vmax=0.01)'''
-    psf_nonzero_files = cam.get_cell_recording().get_non_zero_file_list()
-    print("PSF non-zero files:", psf_nonzero_files)
-    cam.close_memmaps()
+        psf_nonzero_files = cam.get_cell_recording().get_non_zero_file_list()
+        print("PSF non-zero files:", psf_nonzero_files)
+        cam.close_memmaps()
 
 
 #########################################
@@ -256,28 +264,31 @@ if not no_psf_only:
 #########################################
 os.makedirs(model_rec_out_dir + 'no_psf/', exist_ok=True)
 if not psf_only:
-    cam_no_psf = Camera([target_cell], 
-                me_type_morphology_map, 
-                time,
-                fov_center=soma_position,
-                camera_resolution=camera_resolution,
-                camera_width=cam_width,
-                camera_height=cam_height,
-                psf=None,
-                data_dir=model_rec_out_dir + 'no_psf/',#, #
-                use_2d_psf=True)
-    cam_no_psf._draw_cell(target_cell)
-    '''for compart_id in ['soma', 'axon', 'apic', 'dend']:
-        for activity_type in ['synaptic', 'spiking']:
-            rec = cam_no_psf.get_cell_recording().get_raw_recording(compart_id=compart_id, 
-                                                            activity_type=activity_type)
-            cam_no_psf.animate_frames_to_video(rec, 
-                            frames=(0,500),
-                            filename='no_psf_' + compart_id + "_" + activity_type + '.gif',
-                            time_step_size=time_step_size)'''
-    no_psf_nonzero_files = cam_no_psf.get_cell_recording().get_non_zero_file_list()
-    print("No PSF non-zero files:", no_psf_nonzero_files)
-    cam_no_psf.close_memmaps()
+    for target_cell in cells_to_draw:
+        cell_model_rec_out_dir = model_rec_out_dir + target_cell.get_cell_id() + '/'
+        os.makedirs(cell_model_rec_out_dir, exist_ok=True)
+        cam_no_psf = Camera([target_cell], 
+                    me_type_morphology_map, 
+                    time,
+                    fov_center=soma_position,
+                    camera_resolution=camera_resolution,
+                    camera_width=cam_width,
+                    camera_height=cam_height,
+                    psf=None,
+                    data_dir=cell_model_rec_out_dir + 'no_psf/',#, #
+                    use_2d_psf=True)
+        cam_no_psf._draw_cell(target_cell)
+        '''for compart_id in ['soma', 'axon', 'apic', 'dend']:
+            for activity_type in ['synaptic', 'spiking']:
+                rec = cam_no_psf.get_cell_recording().get_raw_recording(compart_id=compart_id, 
+                                                                activity_type=activity_type)
+                cam_no_psf.animate_frames_to_video(rec, 
+                                frames=(0,500),
+                                filename='no_psf_' + compart_id + "_" + activity_type + '.gif',
+                                time_step_size=time_step_size)'''
+        no_psf_nonzero_files = cam_no_psf.get_cell_recording().get_non_zero_file_list()
+        print("No-PSF non-zero files:", no_psf_nonzero_files)
+        cam_no_psf.close_memmaps()
 
 ###########################################
 # Copy non-zero files to model_rec_final_out_dir
@@ -286,12 +297,14 @@ os.makedirs(model_rec_final_out_dir, exist_ok=True)
 if not no_psf_only:
     for file in psf_nonzero_files:
         file_name = "psf_" + file.split('/')[-1]
-        target_file = model_rec_final_out_dir + file_name
+        cell_subdir = file.split('/')[-2] + '/'
+        target_file = model_rec_final_out_dir + cell_subdir + file_name
         if not os.path.exists(target_file):
             os.system('cp ' + file + ' ' + target_file)
 if not psf_only:
     for file in no_psf_nonzero_files:
         file_name = "no_psf_" + file.split('/')[-1]
-        target_file = model_rec_final_out_dir + file_name
+        cell_subdir = file.split('/')[-2] + '/'
+        target_file = model_rec_final_out_dir + cell_subdir + file_name
         if not os.path.exists(target_file):
             os.system('cp ' + file + ' ' + target_file)
