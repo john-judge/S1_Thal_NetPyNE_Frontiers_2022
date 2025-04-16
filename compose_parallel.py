@@ -57,7 +57,7 @@ all_cells_rec = {
         } for c in comparts
     } for p in ['no_psf', 'psf']
 }
-biological_sparsity = 0.6  # when sparsity == 1.0, the biological sparsity is 0.6
+biological_sparsity = 1.0  # when sparsity == 1.0, the biological sparsity is 0.6
 sparsity_range = [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.0]
 sparsity_arr = [np.zeros((cam_width, cam_height), dtype='float32') 
                     for _ in range(len(sparsity_range))]

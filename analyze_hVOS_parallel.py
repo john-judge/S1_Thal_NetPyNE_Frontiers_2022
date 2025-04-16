@@ -303,6 +303,9 @@ if not no_psf_only:
     for file in psf_nonzero_files:
         file_name = "psf_" + file.split('/')[-1]
         cell_subdir = file.split('/')[-2] + '/'
+        target_subdir = model_rec_final_out_dir + cell_subdir
+        if not os.path.exists(target_subdir):
+            os.makedirs(target_subdir)
         target_file = model_rec_final_out_dir + cell_subdir + file_name
         if not os.path.exists(target_file):
             os.system('cp ' + file + ' ' + target_file)
@@ -310,6 +313,9 @@ if not psf_only:
     for file in no_psf_nonzero_files:
         file_name = "no_psf_" + file.split('/')[-1]
         cell_subdir = file.split('/')[-2] + '/'
+        target_subdir = model_rec_final_out_dir + cell_subdir
+        if not os.path.exists(target_subdir):
+            os.makedirs(target_subdir)
         target_file = model_rec_final_out_dir + cell_subdir + file_name
         if not os.path.exists(target_file):
             os.system('cp ' + file + ' ' + target_file)
