@@ -245,7 +245,7 @@ view_center_cell = 1  # view center cell is the cell to center on.
 soma_position = target_population_cells[view_center_cell].get_soma_position()
 if not no_psf_only:
     for target_cell in cells_to_draw:
-        cell_model_rec_out_dir = model_rec_out_dir + target_cell.get_cell_id() + '/'
+        cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
         cam = Camera([target_cell], 
                     me_type_morphology_map, 
@@ -255,7 +255,7 @@ if not no_psf_only:
                     camera_width=cam_width,
                     camera_height=cam_height,
                     psf=psf,
-                    data_dir=cell_model_rec_out_dir + 'psf/', 
+                    data_dir=cell_model_rec_out_dir, 
                     use_2d_psf=False)
         cam._draw_cell(target_cell)
 
@@ -270,7 +270,7 @@ if not no_psf_only:
 os.makedirs(model_rec_out_dir + 'no_psf/', exist_ok=True)
 if not psf_only:
     for target_cell in cells_to_draw:
-        cell_model_rec_out_dir = model_rec_out_dir + target_cell.get_cell_id() + '/'
+        cell_model_rec_out_dir = model_rec_out_dir + 'no_psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
         cam_no_psf = Camera([target_cell], 
                     me_type_morphology_map, 
@@ -280,7 +280,7 @@ if not psf_only:
                     camera_width=cam_width,
                     camera_height=cam_height,
                     psf=None,
-                    data_dir=cell_model_rec_out_dir + 'no_psf/',#, #
+                    data_dir=cell_model_rec_out_dir,#, #
                     use_2d_psf=True)
         cam_no_psf._draw_cell(target_cell)
         '''for compart_id in ['soma', 'axon', 'apic', 'dend']:
