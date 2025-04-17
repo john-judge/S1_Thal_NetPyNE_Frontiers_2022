@@ -26,7 +26,7 @@ class MemoryMappedCompartmentVoltages:
         print("Initializing memory mapped file with shape", (self.fp_size_init,) + arr_shape)
         self.shape = (self.fp_size_init,) + arr_shape
         self.mmap_fp = np.memmap(self.mmap_filename, dtype='float32', mode='w+', shape=self.shape)
-        if not self.disable_resize
+        if not self.disable_resize:
             self.mmap_fp = np.require(self.mmap_fp, requirements=['O'])
 
     def dump_hash_map(self, hash_map_filename):
