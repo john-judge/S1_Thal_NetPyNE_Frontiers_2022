@@ -47,6 +47,12 @@ netParams.shape = 'cylinder' # cylindrical (column-like) volume
 # All	2082	    1.000	
 
 
+# When experiment_dendritic_somatic_inhibition = True, omits 
+# the 'sec' parameter in connParams for inhibitory -> excitatory connections,
+# which forces the connection synapses to be uniformly distributed on soma or first sec of the target cell,
+# rather than uniformly distributing synapses along the specified section.
+experiment_dendritic_somatic_inhibition = cfg.experiment_dendritic_somatic_inhibition
+
 cellModels = ['HH_full']
 Epops = ['L23_PC', 'L4_PC', 'L4_SS', 'L4_SP', 
              'L5_TTPC1', 'L5_TTPC2', 'L5_STPC', 'L5_UTPC',
@@ -368,6 +374,8 @@ if cfg.addConn:
                                         'delay': 'defaultDelay+dist_3D/propVelocity',
                                         'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                         'sec': 'spiny'}        
+                        if experiment_dendritic_somatic_inhibition:
+                            del netParams.connParams['II_' + pre + '_' + post]['sec']
                 # ------------------------------------------------------------------------------
                 #  I -> E  # with ME conn diversity
                 # ------------------------------------------------------------------------------
@@ -411,6 +419,8 @@ if cfg.addConn:
                                     'delay': 'defaultDelay+dist_3D/propVelocity',
                                     'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                     'sec': 'spiny'}  
+                        if experiment_dendritic_somatic_inhibition:
+                            del netParams.connParams['IE_'+pre+'_'+post]['sec']
                 
 
                         if connID_B >= 0:          
@@ -425,7 +435,9 @@ if cfg.addConn:
                                         'synMechWeightFactor': cfg.synWeightFractionIE,
                                         'delay': 'defaultDelay+dist_3D/propVelocity',
                                         'synsPerConn': int(synperconnNumber[pre][post]+0.5),
-                                        'sec': 'spiny'}                       
+                                        'sec': 'spiny'}            
+                            if experiment_dendritic_somatic_inhibition:
+                                del netParams.connParams['IE_'+pre+'_'+post+'_B']['sec']           
                 
                                 
                             if connID_C >= 0:          
@@ -440,7 +452,9 @@ if cfg.addConn:
                                             'synMechWeightFactor': cfg.synWeightFractionIE,
                                             'delay': 'defaultDelay+dist_3D/propVelocity',
                                             'synsPerConn': int(synperconnNumber[pre][post]+0.5),
-                                            'sec': 'spiny'}                       
+                                            'sec': 'spiny'}                
+                                if experiment_dendritic_somatic_inhibition:
+                                    del netParams.connParams['IE_'+pre+'_'+post+'_C']['sec']       
                                 
                 #------------------------------------------------------------------------------   
                 # E -> E

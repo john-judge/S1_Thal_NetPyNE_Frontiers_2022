@@ -247,11 +247,13 @@ cfg.rateStimI = 9.0
 ## S1->S1
 cfg.addConn = True
 
-NBQX_global_experiment = False
+cfg.experiment_NBQX_global = True  # For run9
+cfg.experiment_dendritic_somatic_inhibition = False  # for run10
+cfg.experiment_amp_stim = False  # for run11
 
 cfg.synWeightFractionEE = [1.0, 1.0] # E -> E AMPA to NMDA ratio
 cfg.synWeightFractionEI = [1.0, 1.0] # E -> I AMPA to NMDA ratio
-if NBQX_global_experiment:
+if cfg.experiment_NBQX_global:
     cfg.synWeightFractionEE = [0.0, 1.0] # E -> E AMPA to NMDA ratio
     cfg.synWeightFractionEI = [0.0, 1.0] # E -> I AMPA to NMDA ratio
 cfg.synWeightFractionII = [1.0, 1.0]  # I -> I GABAA to GABAB ratio
