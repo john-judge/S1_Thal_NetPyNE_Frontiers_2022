@@ -137,4 +137,11 @@ if should_create_mem_map:
 
 loaded_compart_data.dump_hash_map(output_dir_final + 'v7_batch1_0_0_hash_map.pkl')
 loaded_compart_data.mmap_fp.flush()
+del loaded_compart_data.mmap_fp
+
+# try re-opening the memory mapped file to test
+print('time shape', time.shape)
+loaded_compart_data.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
+                                        loaded_compart_data.mmap_filename, (-1, time.shape[0]))
+                                    
 
