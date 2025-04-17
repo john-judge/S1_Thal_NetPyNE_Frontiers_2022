@@ -208,6 +208,7 @@ for compart_id in compart_ids:
     voltage_trace = cell.get_voltage_trace(compart_id)
     intensity_trace = cell.get_optical_trace(compart_id)
     axs[0].plot(time,voltage_trace, label='Voltage')
+    print(intensity_trace)
     axs[1].plot(time,intensity_trace, label='Intensity')
 axs[1].set_xlabel('Time (ms)')
 axs[0].set_ylabel('Membrane Potential (mV)')
