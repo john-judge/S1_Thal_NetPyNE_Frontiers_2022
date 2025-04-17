@@ -109,17 +109,13 @@ if should_create_mem_map:
             except MemoryError:
                 print("MemoryError with file:", data_file)
                 raise MemoryError
-            print(data.keys())
             if time is None:  # store t only once
                 time = np.array(data['simData']['t'])
 
             for k in data['simData']:
                 if compart[:4] in k:
                     for cell_id in data['simData'][k]:
-                        print(k, cell_id)
-
                         loaded_compart_data.add_item(cell_id, k, np.array(data['simData'][k][cell_id]))
-                        print("Voltage of", k, loaded_compart_data.get_item(cell_id, k))
 
             # to avoid memory issues, delete data after it's been stored
             del data
@@ -141,7 +137,7 @@ del loaded_compart_data.mmap_fp
 
 # try re-opening the memory mapped file to test
 print('time shape', time.shape)
-loaded_compart_data.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
-                                        loaded_compart_data.mmap_filename, (-1, time.shape[0]))
+print(loaded_compart_data.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
+                                        loaded_compart_data.mmap_filename, (-1, time.shape[0])))
                                     
 
