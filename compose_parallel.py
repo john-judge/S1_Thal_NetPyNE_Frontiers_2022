@@ -90,7 +90,6 @@ for file in os.listdir(data_dir):
 
         ################################################
         for input_dir in input_dirs:
-            input_dir += "analyze_output/model_rec_final/"
             if not os.path.exists(input_dir):
                 print(f"input_dir {input_dir} does not exist. Skipping.")
                 continue
