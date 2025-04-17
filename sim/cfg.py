@@ -23,7 +23,8 @@ cfg = specs.SimConfig()
 #------------------------------------------------------------------------------
 
 # (224.04323588068343, 752.2745354245205, 94.19539296396553) is the location of cell index1 soma
-xStimLocation =[224,752,94]
+# (145.39086029354118), np.float64(843.5036716987845), np.float64(33.646623368081585)) soma index0
+xStimLocation =[145,844,34]
 # z_recording_radius = 1000 # microns (box shape)
 cfg.simType='S1_TH_coreneuron'
 cfg.coreneuron = False
