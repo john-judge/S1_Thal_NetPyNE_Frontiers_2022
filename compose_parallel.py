@@ -79,62 +79,70 @@ for file in os.listdir(data_dir):
             result = subprocess.run(['tar', '-xzvf', data_dir + file, "-C", output_dir_extract], 
                                     capture_output=True, text=True, check=True)
         
-        output_dir_dict[i_output] = output_dir_extract
+        input_dirs = []
+        for subdir in os.listdir(output_dir_extract):
+            print(subdir)
+            if 'cell' in subdir:
+                cell_id = 'cell_' + subdir.split('cell_')[1]
+
+                output_dir_dict[cell_id] = output_dir_extract + subdir + '/'
+                input_dirs.append(output_dir_dict[cell_id])
 
         ################################################
-        input_dir = output_dir_dict[i_output] + "analyze_output/model_rec_final/"
-        if not os.path.exists(input_dir):
-            print(f"input_dir {input_dir} does not exist. Skipping.")
-            continue
+        for input_dir in input_dirs:
+            input_dir += "analyze_output/model_rec_final/"
+            if not os.path.exists(input_dir):
+                print(f"input_dir {input_dir} does not exist. Skipping.")
+                continue
 
-        # roll the sparsity dice for this cell. rand float between 0 and 1
-        sparsity_dice_rolls = [
-            random.random() < sparse for sparse in sparsity_range
-        ]
-        for file in os.listdir(input_dir):
-            if file.endswith('.npy'):
-                # open numpy memmap file 
-                file_path = input_dir + file
-                print(file_path)
-                arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, cam_width, cam_height)
+            # roll the sparsity dice for this cell. rand float between 0 and 1
+            sparsity_dice_rolls = [
+                random.random() < sparse for sparse in sparsity_range
+            ]
+            for file in os.listdir(input_dir):
+                if file.endswith('.npy'):
+                    # open numpy memmap file 
+                    file_path = input_dir + file
+                    print(file_path)
+                    arr = np.memmap(file_path, dtype='float32', mode='r').reshape(-1, cam_width, cam_height)
 
-                # use the file name to determine the compartment and type of data
-                # e.g. no_psf_cell_8406-syn_rec_dend.npy
-                # e.g. psf_cell_8406-spk_rec_soma.npy
-                # e.g. psf_cell_8406-syn_rec_apic.npy
-                compart_type = file.split("_")[-1].replace(".npy", "")
-                psf_type = file.split("_")[0]
-                psf_type = 'no_psf' if psf_type == 'no' else 'psf'
-                activity_type = file.split("_")[-3]
-                activity_type = activity_type.split("-")[1]
-                cell_id = file.split("_")[1].split("-")[0]
+                    # use the file name to determine the compartment and type of data
+                    # e.g. no_psf_cell_8406-syn_rec_dend.npy
+                    # e.g. psf_cell_8406-spk_rec_soma.npy
+                    # e.g. psf_cell_8406-syn_rec_apic.npy
+                    compart_type = file.split("_")[-1].replace(".npy", "")
+                    psf_type = file.split("_")[0]
+                    psf_type = 'no_psf' if psf_type == 'no' else 'psf'
+                    activity_type = file.split("_")[-3]
+                    activity_type = activity_type.split("-")[1]
+                    cell_id = file.split("_")[1].split("-")[0]
 
-                # sparsity data collection
-                for i_sp in range(len(sparsity_range)):
-                    if sparsity_dice_rolls[i_sp]:
-                        sparsity_arr[i_sp] += np.max(arr, axis=0)
+                    # sparsity data collection
+                    for i_sp in range(len(sparsity_range)):
+                        if sparsity_dice_rolls[i_sp]:
+                            sparsity_arr[i_sp] += np.max(arr, axis=0)
 
-                print(compart_type, psf_type, activity_type, cell_id)
+                    print(compart_type, psf_type, activity_type, cell_id)
 
-                if all_cells_rec[psf_type][compart_type][activity_type] is None:
-                    all_cells_rec[psf_type][compart_type][activity_type] = \
-                        np.zeros(arr.shape, dtype='float32')
-                
-                all_cells_rec[psf_type][compart_type][activity_type] += arr
+                    if all_cells_rec[psf_type][compart_type][activity_type] is None:
+                        all_cells_rec[psf_type][compart_type][activity_type] = \
+                            np.zeros(arr.shape, dtype='float32')
+                    
+                    all_cells_rec[psf_type][compart_type][activity_type] += arr
 
-                if len(five_soma_masks) < 5:
-                    if compart_type == 'soma' and activity_type == 'syn' and psf_type == 'no_psf':
-                        if np.sum(-arr) > 0:
-                            # take the first 5 masks
-                            five_soma_masks.append(np.max(arr, axis=0))
-                del arr
-                gc.collect()
-        
-        # delete the input_dir to free up space
-        try:
-            shutil.rmtree(input_dir)
-        except Exception as e:
-            print(f"Error deleting {input_dir}: {e}")
+                    if len(five_soma_masks) < 5:
+                        if compart_type == 'soma' and activity_type == 'syn' and psf_type == 'no_psf':
+                            if np.sum(-arr) > 0:
+                                # take the first 5 masks
+                                five_soma_masks.append(np.max(arr, axis=0))
+                    del arr
+                    gc.collect()
+            
+            # delete the input_dir to free up space
+            try:
+                shutil.rmtree(input_dir)
+            except Exception as e:
+                print(f"Error deleting {input_dir}: {e}")
 
 ###########################################
 # Show each result in all_cells_rec and save in output_dir
