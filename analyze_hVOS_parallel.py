@@ -195,6 +195,30 @@ hvos_readout = optical_readout(target_hVOS_populations,
 hvos_readout.compute_optical_signal(data_dir)
 #hvos_readout.show_voltage_to_intensity_curve()
 
+
+##########################################
+# plot signal, choose random cell
+##########################################
+
+cell = random.choice(target_population_cells)
+compart_ids = cell.get_list_compartment_ids()
+plt.clf()
+fig, axs = plt.subplots(2, 1, figsize=(10, 10))
+for compart_id in compart_ids:
+    voltage_trace = cell.get_voltage_trace(compart_id)
+    intensity_trace = cell.get_optical_trace(compart_id)
+    axs[0].plot(loaded_compart_data['time'],voltage_trace, label='Voltage')
+    axs[1].plot(loaded_compart_data['time'],intensity_trace, label='Intensity')
+axs[1].set_xlabel('Time (ms)')
+axs[0].set_ylabel('Membrane Potential (mV)')
+axs[1].set_ylabel('df/f')
+for ax in axs:
+    ax.set_xlim(0, 200)
+
+axs[0].set_title('ME-type:' + cell.get_me_type())
+plt.savefig(model_rec_final_out_dir + 'signal.png')
+
+
 ####################################
 # Create PSF 
 ####################################
