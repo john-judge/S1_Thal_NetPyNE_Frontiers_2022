@@ -23,11 +23,17 @@ class MemoryMappedCompartmentVoltages:
 
     def init_mmap(self, arr_shape):
         self.shape = (self.fp_size_init,) + arr_shape
-        self.mmap_fp = np.require(np.memmap(self.mmap_filename, dtype='float32', mode='w+', shape=self.shape), requirements=['O'])
+        self.mmap_fp = np.memmap(self.mmap_filename, dtype='float32', mode='w+', shape=self.shape)
 
     def dump_hash_map(self, hash_map_filename):
         with open(hash_map_filename, 'wb') as f:
             pickle.dump(self.hash_map, f)
+
+    def save(self): 
+        """ Due to requirements 'OWNDATA' flag set to true, saving must be done manually. 
+            Defeats the purpose of memmaps on the writing portion, but this will not break
+            if numpy ever fixes that issue. """
+        np.save(self.mmap_filename, self.mmap_fp, allow_pickle=False)
 
     def resize_mmap(self, arr_shape):
         self.shape = (self.shape[0] * 2,) + arr_shape

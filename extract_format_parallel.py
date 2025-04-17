@@ -132,7 +132,7 @@ if should_create_mem_map:
         mm_time_fp.flush()
 
 loaded_compart_data.dump_hash_map(output_dir_final + 'v7_batch1_0_0_hash_map.pkl')
-
+loaded_compart_data.save()
 for cell_id in loaded_compart_data.hash_map:
     for comp in loaded_compart_data.hash_map[cell_id]:
         i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
@@ -142,6 +142,7 @@ for cell_id in loaded_compart_data.hash_map:
 print("Total nonzero:", np.sum(loaded_compart_data.mmap_fp != 0))
 
 loaded_compart_data.mmap_fp.flush()
+
 del loaded_compart_data.mmap_fp
 
 
