@@ -92,6 +92,14 @@ loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl
                         analyze_dir + 'S1_results.npy',
                         shape=(-1, t_max))
 
+# check get in loaded_compart_data
+for cell_id in loaded_compart_data.hash_map:
+    for comp in loaded_compart_data.hash_map[cell_id]:
+        i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
+        print(' check get in loaded_compart_data', mmfp[i_data])
+        break
+    break
+
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
 # cell's compartment data (the memmap file name) for that compart_id
@@ -117,8 +125,7 @@ me_type_morphology_map = {}
 for cell_id in loaded_compart_data.hash_map.keys():
     axons, apics, dends, soma = {}, {}, {}, None
     for compart in loaded_compart_data.hash_map[cell_id].keys():
-        i_data, mm_fp = loaded_compart_data.get_item(cell_id, compart)
-        data = mm_fp[i_data]
+        data = loaded_compart_data.get_item(cell_id, compart)
         if data is None:
             print("Data not found for cell:", cell_id, "compartment:", compart)
             continue
