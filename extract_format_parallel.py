@@ -144,12 +144,12 @@ test_compfile.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl'
                                         loaded_compart_data.mmap_filename, (-1, time.shape[0]))
 
 # check get in loaded_compart_data
-for cell_id in loaded_compart_data.hash_map:
-    for comp in loaded_compart_data.hash_map[cell_id]:
-        i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
-        print(' check get in loaded_compart_data', mmfp[i_data])
+for cell_id in test_compfile.hash_map:
+    for comp in test_compfile.hash_map[cell_id]:
+        i_data, mmfp = test_compfile.get_item(cell_id, comp)
+        print(' check get in test_compfile', mmfp[i_data])
         break
     break
-print("Total nonzero:", np.sum(loaded_compart_data.mmap_fp != 0))
+print("Total nonzero:", np.sum(test_compfile.mmap_fp != 0))
                                     
 
