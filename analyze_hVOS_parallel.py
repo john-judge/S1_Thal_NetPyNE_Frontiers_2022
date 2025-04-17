@@ -200,7 +200,7 @@ hvos_readout.compute_optical_signal(data_dir)
 # plot signal, choose random cell
 ##########################################
 
-cell = random.choice(target_population_cells)
+cell = random.choice(cells_to_draw)
 compart_ids = cell.get_list_compartment_ids()
 plt.clf()
 fig, axs = plt.subplots(2, 1, figsize=(10, 10))
