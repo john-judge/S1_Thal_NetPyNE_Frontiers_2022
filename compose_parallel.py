@@ -447,7 +447,7 @@ for i_soma, five_masks in enumerate([five_non_soma_masks, five_soma_masks]):
                         roi_trace += final_composed_arr['blurred_arr'][:, i, j]
         if roi_trace is None:
             continue
-        roi_trace /= len(roi)
+        roi_trace /= -len(roi)
         l1 = plt.plot(time, roi_trace + last_headspace, 
                     color=color,
                     label=label)
