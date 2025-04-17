@@ -484,8 +484,9 @@ for i_sp, sparsity in enumerate(sparsity_range):
                     soma_max, 
                     psf_2d, mode='same')
         # get the crosstalk fraction
-        crosstalk_fraction = np.sum(cell_soma_signal) / np.sum(all_signal)
-        crosstalk_fractions[i_sp].append(1-crosstalk_fraction)
+        if np.sum(all_signal) != 0:
+            crosstalk_fraction = np.sum(cell_soma_signal) / np.sum(all_signal)
+            crosstalk_fractions[i_sp].append(1-crosstalk_fraction)
 
 bio_sparsity = [biological_sparsity * sp for sp in sparsity_range]
 print(crosstalk_fractions)
