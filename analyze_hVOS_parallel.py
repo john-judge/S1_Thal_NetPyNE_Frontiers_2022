@@ -191,7 +191,7 @@ optical_readout = {'hVOS': hVOSReadout, 'VSD': VSDReadout}[optical_type]
 hvos_readout = optical_readout(target_hVOS_populations, 
                                {cell.get_cell_id(): cell for cell in cells_to_draw}, 
                                me_type_morphology_map,
-                               force_overwrite=False)
+                               force_overwrite=True)
 hvos_readout.compute_optical_signal(data_dir)
 #hvos_readout.show_voltage_to_intensity_curve()
 
