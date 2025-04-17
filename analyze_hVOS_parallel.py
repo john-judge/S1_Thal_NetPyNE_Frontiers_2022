@@ -99,6 +99,7 @@ for cell_id in loaded_compart_data.hash_map:
         print(' check get in loaded_compart_data', mmfp[i_data])
         break
     break
+print("Total nonzero:", np.sum(loaded_compart_data.mmap_fp != 0))
 
 # create a dict that maps compart_id 'Vcomp_#' to
 # dicts, which each map cell_id 'cell_#' to the 
