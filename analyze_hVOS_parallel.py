@@ -117,7 +117,8 @@ me_type_morphology_map = {}
 for cell_id in loaded_compart_data.hash_map.keys():
     axons, apics, dends, soma = {}, {}, {}, None
     for compart in loaded_compart_data.hash_map[cell_id].keys():
-        data = loaded_compart_data.get_item(cell_id, compart)
+        i_data, mm_fp = loaded_compart_data.get_item(cell_id, compart)
+        data = mm_fp[data]
         if data is None:
             print("Data not found for cell:", cell_id, "compartment:", compart)
             continue
