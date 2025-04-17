@@ -118,7 +118,7 @@ for cell_id in loaded_compart_data.hash_map.keys():
     axons, apics, dends, soma = {}, {}, {}, None
     for compart in loaded_compart_data.hash_map[cell_id].keys():
         i_data, mm_fp = loaded_compart_data.get_item(cell_id, compart)
-        data = mm_fp[data]
+        data = mm_fp[i_data]
         if data is None:
             print("Data not found for cell:", cell_id, "compartment:", compart)
             continue
