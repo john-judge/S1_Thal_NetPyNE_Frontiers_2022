@@ -16,7 +16,7 @@ class MemoryMappedCompartmentVoltages:
 
     def load_existing_mmap(self, hash_map_filename, mmap_filename, shape=(10000,)):
         self.hash_map = pickle.load(open(hash_map_filename, 'rb'))
-        self.mmap_fp = np.memmap(mmap_filename, dtype='float32', mode='r')
+        self.mmap_fp = np.require(np.memmap(mmap_filename, dtype='float32', mode='r'), requirements=['O'])
         self.mmap_fp = self.mmap_fp.reshape(shape)
         self.shape = self.mmap_fp.shape
         self.mmap_filename = mmap_filename
