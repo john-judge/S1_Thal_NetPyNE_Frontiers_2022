@@ -151,7 +151,7 @@ del loaded_compart_data.mmap_fp
 print('time shape', time.shape)
 test_compfile = MemoryMappedCompartmentVoltages(output_dir_final)
 test_compfile.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
-                                        loaded_compart_data.mmap_filename, (, time.shape[0]))
+                                        loaded_compart_data.mmap_filename)
 print('test_compfile shape', test_compfile.shape)
 # check get in loaded_compart_data
 for cell_id in test_compfile.hash_map:
