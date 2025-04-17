@@ -80,7 +80,7 @@ for file in os.listdir(data_dir):
                                     capture_output=True, text=True, check=True)
         
         input_dirs = []
-        for subdir in os.listdir(output_dir_extract):
+        for subdir in os.listdir(output_dir_extract + 'analyze_output/model_rec_final/'):
             print(subdir)
             if 'cell' in subdir:
                 cell_id = 'cell_' + subdir.split('cell_')[1]
