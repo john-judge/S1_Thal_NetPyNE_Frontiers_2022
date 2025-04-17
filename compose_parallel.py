@@ -386,7 +386,7 @@ for psf_type in final_arr.keys():
 # and save the image
 
 all_non_soma = (final_arr['no_psf']['soma']['syn'] == 0)[0, :, :]  # True if not soma
-avg_soma_size = np.mean([mask.sum() for mask in five_soma_masks])
+avg_soma_size = np.mean([(mask != 0).sum() for mask in five_soma_masks])
 print("avg_soma_size", avg_soma_size)
 avg_soma_size = min(np.abs(avg_soma_size), 10)  # default to 10 if way off...
 avg_soma_diameter = np.sqrt(avg_soma_size) / np.pi
