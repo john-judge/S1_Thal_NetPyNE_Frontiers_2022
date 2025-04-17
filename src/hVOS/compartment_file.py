@@ -15,10 +15,12 @@ class MemoryMappedCompartmentVoltages:
         self.fp_size_init = 10000
         self.disable_resize = True
 
-    def load_existing_mmap(self, hash_map_filename, mmap_filename):
+    def load_existing_mmap(self, hash_map_filename, mmap_filename, t_shape=999):
         self.hash_map = pickle.load(open(hash_map_filename, 'rb'))
         self.mmap_fp = np.memmap(mmap_filename, dtype='float32', mode='r')
-        #self.mmap_fp = self.mmap_fp.reshape(shape)
+
+        # skip 32 elements of offset
+        self.mmap_fp = self.mmap_fp[:32].reshape(-1, t_shape)
         self.shape = self.mmap_fp.shape
         self.mmap_filename = mmap_filename
 
