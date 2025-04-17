@@ -119,6 +119,7 @@ if should_create_mem_map:
                         print(k, cell_id)
 
                         loaded_compart_data.add_item(cell_id, k, np.array(data['simData'][k][cell_id]))
+                        print("Voltage of", k, np.array(data['simData'][k][cell_id]))
 
             # to avoid memory issues, delete data after it's been stored
             del data
