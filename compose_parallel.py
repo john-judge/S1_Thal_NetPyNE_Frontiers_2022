@@ -85,7 +85,7 @@ for file in os.listdir(data_dir):
             if 'cell' in subdir:
                 cell_id = 'cell_' + subdir.split('cell_')[1]
 
-                output_dir_dict[cell_id] = output_dir_extract + subdir + '/'
+                output_dir_dict[cell_id] = output_dir_extract + 'analyze_output/model_rec_final/' + subdir + '/'
                 input_dirs.append(output_dir_dict[cell_id])
 
         ################################################
