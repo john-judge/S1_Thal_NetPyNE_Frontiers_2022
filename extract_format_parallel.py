@@ -135,9 +135,21 @@ loaded_compart_data.dump_hash_map(output_dir_final + 'v7_batch1_0_0_hash_map.pkl
 loaded_compart_data.mmap_fp.flush()
 del loaded_compart_data.mmap_fp
 
+
+##########################################
 # try re-opening the memory mapped file to test
 print('time shape', time.shape)
-print(loaded_compart_data.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
-                                        loaded_compart_data.mmap_filename, (-1, time.shape[0])))
+test_compfile = MemoryMappedCompartmentVoltages(output_dir_final)
+test_compfile.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
+                                        loaded_compart_data.mmap_filename, (-1, time.shape[0]))
+
+# check get in loaded_compart_data
+for cell_id in loaded_compart_data.hash_map:
+    for comp in loaded_compart_data.hash_map[cell_id]:
+        i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
+        print(' check get in loaded_compart_data', mmfp[i_data])
+        break
+    break
+print("Total nonzero:", np.sum(loaded_compart_data.mmap_fp != 0))
                                     
 
