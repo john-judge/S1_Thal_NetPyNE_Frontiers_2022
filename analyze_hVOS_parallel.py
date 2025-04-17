@@ -195,7 +195,6 @@ hvos_readout = optical_readout(target_hVOS_populations,
 hvos_readout.compute_optical_signal(data_dir)
 #hvos_readout.show_voltage_to_intensity_curve()
 
-
 ####################################
 # Create PSF 
 ####################################
@@ -240,9 +239,10 @@ print("Any target cells missing structure data?:",
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
 
 time_step_size = time[1] - time[0]
-view_center_cell = 1  # view center cell is the cell to center on.
+view_center_cell = 0  # view center cell is the cell to center on.
 # other cells may or may not be in view.
 soma_position = target_population_cells[view_center_cell].get_soma_position()
+print("location of soma of cell to center on:", soma_position)
 if not no_psf_only:
     for target_cell in cells_to_draw:
         cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
