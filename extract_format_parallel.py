@@ -131,6 +131,24 @@ if should_create_mem_map:
         mm_time_fp[:] = time[:]
         mm_time_fp.flush()
 
+###############################################
+# Test: take all compart from one cell and plot voltage traces
+###############################################
+plt.clf()
+for cell_id in loaded_compart_data.hash_map:
+    for comp in loaded_compart_data.hash_map[cell_id]:
+        i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
+        plt.plot(time, mmfp[i_data], label=comp)
+    break
+plt.title('Cell ID: ' + str(cell_id) + ' compart: ' + str(comp))
+plt.xlabel('Time (ms)')
+plt.ylabel('Voltage (mV)')
+plt.legend()
+plt.savefig(output_dir_final + 'cell_id_' + str(cell_id) + '_compart_' + str(comp) + '.png')
+
+################################################
+# Save the memory mapped file and hash map
+################################################
 loaded_compart_data.dump_hash_map(output_dir_final + 'v7_batch1_0_0_hash_map.pkl')
 loaded_compart_data.save()
 for cell_id in loaded_compart_data.hash_map:
@@ -153,7 +171,7 @@ test_compfile = MemoryMappedCompartmentVoltages(output_dir_final)
 test_compfile.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
                                         loaded_compart_data.mmap_filename)
 print('test_compfile shape', test_compfile.shape)
-# check get in loaded_compart_data
+# check get in test_compfile
 for cell_id in test_compfile.hash_map:
     for comp in test_compfile.hash_map[cell_id]:
         i_data, mmfp = test_compfile.get_item(cell_id, comp)
@@ -162,4 +180,18 @@ for cell_id in test_compfile.hash_map:
     break
 print("Total nonzero:", np.sum(test_compfile.mmap_fp != 0))
                                     
+###############################################
+# Test: take all compart from one cell and plot voltage traces
+###############################################
+plt.clf()
+for cell_id in test_compfile.hash_map:
+    for comp in test_compfile.hash_map[cell_id]:
+        i_data, mmfp = test_compfile.get_item(cell_id, comp)
+        plt.plot(time, mmfp[i_data], label=comp)
+    break
+plt.title('Cell ID: ' + str(cell_id) + ' compart: ' + str(comp))
+plt.xlabel('Time (ms)')
+plt.ylabel('Voltage (mV)')
+plt.legend()
+plt.savefig(output_dir_final + 'test2_cell_id_' + str(cell_id) + '_compart_' + str(comp) + '.png')
 
