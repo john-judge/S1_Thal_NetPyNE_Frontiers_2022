@@ -90,7 +90,7 @@ analyze_dir = '../analyze_output/'
 loaded_compart_data = MemoryMappedCompartmentVoltages(analyze_dir)
 loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl', 
                         analyze_dir + 'S1_results.npy',
-                        shape=(-1, t_max))
+                        t_shape=t_max)
 
 # check get in loaded_compart_data
 for cell_id in loaded_compart_data.hash_map:
