@@ -222,8 +222,6 @@ for compart_id in compart_ids:
 axs[1].set_xlabel('Time (ms)')
 axs[0].set_ylabel('Membrane Potential (mV)')
 axs[1].set_ylabel('df/f')
-for ax in axs:
-    ax.set_xlim(0, 200)
 
 axs[0].set_title('ME-type:' + cell.get_me_type())
 plt.savefig(model_rec_final_out_dir + 'signal.png')
