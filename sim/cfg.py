@@ -13,7 +13,6 @@ import os
 import numpy as np
 
 from recordTraceBatchSettings import record_trace_setting
-from cam_params import cam_params
 
 
 cfg = specs.SimConfig()  
@@ -28,8 +27,6 @@ cfg = specs.SimConfig()
 # (145.,844.,34)) soma index0
 # near center L4: (185., 800., 64.,)
 xStimLocation =[185.,800.,64.]
-if cam_params['xstim_at_cam_fov'] and type(cam_params['cam_fov']) == list:
-    xStimLocation = cam_params['cam_fov']
 # z_recording_radius = 1000 # microns (box shape)
 cfg.simType='S1_TH_coreneuron'
 cfg.coreneuron = False
