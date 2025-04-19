@@ -13,6 +13,8 @@ import os
 import numpy as np
 
 from recordTraceBatchSettings import record_trace_setting
+from cam_params import cam_params
+
 
 cfg = specs.SimConfig()  
 
@@ -22,12 +24,24 @@ cfg = specs.SimConfig()
 #
 #------------------------------------------------------------------------------
 
-# (224.04323588068343, 752.2745354245205, 94.19539296396553) is the location of cell index1 soma
-# (145.39086029354118), np.float64(843.5036716987845), np.float64(33.646623368081585)) soma index0
-xStimLocation =[145,844,34]
+# (224., 752., 94.) is the location of cell index1 soma
+# (145.,844.,34)) soma index0
+# near center L4: (185., 800., 64.,)
+xStimLocation =[185.,800.,64.]
+if cam_params['xstim_at_cam_fov'] and type(cam_params['cam_fov']) == list:
+    xStimLocation = cam_params['cam_fov']
 # z_recording_radius = 1000 # microns (box shape)
 cfg.simType='S1_TH_coreneuron'
 cfg.coreneuron = False
+
+
+#------------------------------------------------------------------------------
+# Experiments
+#------------------------------------------------------------------------------
+
+cfg.experiment_NBQX_global = False  # For run9
+cfg.experiment_dendritic_somatic_inhibition = False  # for run10
+cfg.experiment_amp_stim = False  # for run11
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -248,15 +262,11 @@ cfg.rateStimI = 9.0
 ## S1->S1
 cfg.addConn = True
 
-cfg.experiment_NBQX_global = False  # For run9
-cfg.experiment_dendritic_somatic_inhibition = False  # for run10
-cfg.experiment_amp_stim = False  # for run11
-
 cfg.synWeightFractionEE = [1.0, 1.0] # E -> E AMPA to NMDA ratio
 cfg.synWeightFractionEI = [1.0, 1.0] # E -> I AMPA to NMDA ratio
 if cfg.experiment_NBQX_global:
-    cfg.synWeightFractionEE = [0.0, 1.0] # E -> E AMPA to NMDA ratio
-    cfg.synWeightFractionEI = [0.0, 1.0] # E -> I AMPA to NMDA ratio
+    cfg.synWeightFractionEE = [0.05, 1.0] # E -> E AMPA to NMDA ratio
+    cfg.synWeightFractionEI = [0.05, 1.0] # E -> I AMPA to NMDA ratio
 cfg.synWeightFractionII = [1.0, 1.0]  # I -> I GABAA to GABAB ratio
 cfg.synWeightFractionIE = [1.0, 1.0]  # I -> E GABAA to GABAB ratio
 cfg.EEGain = 1.0

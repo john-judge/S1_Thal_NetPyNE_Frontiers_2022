@@ -271,9 +271,20 @@ print("Any target cells missing structure data?:",
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
 
 time_step_size = time[1] - time[0]
+
+
 view_center_cell = 0  # view center cell is the cell to center on.
 # other cells may or may not be in view.
-soma_position = target_population_cells[view_center_cell].get_soma_position()
+soma_position = None
+if cam_params['cam_fov'] is not None:
+    if type(cam_params['cam_fov']) == int:
+        view_center_cell = cam_params['cam_fov']
+        soma_position = target_population_cells[view_center_cell].get_soma_position()
+    elif type(cam_params['cam_fov']) == list:
+        soma_position = cam_params['cam_fov']
+    else:
+        soma_position = target_population_cells[view_center_cell].get_soma_position()
+
 print("location of soma of cell to center on:", soma_position)
 if not no_psf_only:
     for target_cell in cells_to_draw:
