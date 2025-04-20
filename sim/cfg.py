@@ -249,7 +249,7 @@ cfg.scaleDensity = 1.0 # Number of cells = 31346
 #------------------------------------------------------------------------------
 # Spontaneous synapses + background - data from Rat
 #------------------------------------------------------------------------------
-cfg.addStimSynS1 = False
+cfg.addStimSynS1 = True
 cfg.rateStimE = 9.0
 cfg.rateStimI = 9.0
 
@@ -273,10 +273,10 @@ cfg.IEGain = 1.0
 
 #------------------------------------------------------------------------------
 ## Th->Th 
-cfg.connectTh = False
-cfg.connect_RTN_RTN     = False
-cfg.connect_TC_RTN      = False
-cfg.connect_RTN_TC      = False
+cfg.connectTh = True
+cfg.connect_RTN_RTN     = True
+cfg.connect_TC_RTN      = True
+cfg.connect_RTN_TC      = True
 
 cfg.yConnFactor             = 10 # y-tolerance form connection distance based on the x and z-plane radial tolerances (1=100%; 2=50%; 5=20%; 10=10%)
 
@@ -294,22 +294,22 @@ cfg.divergenceHO = 10
 
 #------------------------------------------------------------------------------
 ## Th->S1
-cfg.connect_Th_S1 = False
+cfg.connect_Th_S1 = True
 cfg.TC_S1 = {}
-cfg.TC_S1['VPL_sTC'] = False
-cfg.TC_S1['VPM_sTC'] = False
-cfg.TC_S1['POm_sTC_s1'] = False
+cfg.TC_S1['VPL_sTC'] = True
+cfg.TC_S1['VPM_sTC'] = True
+cfg.TC_S1['POm_sTC_s1'] = True
 
 cfg.frac_Th_S1 = 1.0
 #------------------------------------------------------------------------------
 ## S1->Th 
-cfg.connect_S1_Th = False
+cfg.connect_S1_Th = True
 
-cfg.connect_S1_RTN = False
+cfg.connect_S1_RTN = True
 cfg.convergence_S1_RTN         = 30.0  # dist_2D<R
 cfg.connWeight_S1_RTN       = 0.500
 
-cfg.connect_S1_TC = False
+cfg.connect_S1_TC = True
 cfg.convergence_S1_TC         = 30.0  # dist_2D<R
 cfg.connWeight_S1_TC       = 0.250
 
@@ -333,7 +333,7 @@ cfg.addExtracellularStim = True
 
 cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
-cfg.xStimAmp = 20  # amplitude in mA
+cfg.xStimAmp = 2  # amplitude in mA
 cfg.xStimDur = 2  # duration in ms
 cfg.xStimDel = 50  # delay in ms
 

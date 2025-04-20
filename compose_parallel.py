@@ -29,7 +29,6 @@ data_dir = '../analyze_output/'
 output_dir = '../composed_output/'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
-run_id = 2
 should_re_extract = True  # set to True if you want to re-extract the data into existing folders
 
 ############################################
@@ -131,7 +130,7 @@ for file in os.listdir(data_dir):
 
                     if len(five_soma_masks) < 5:
                         if compart_type == 'soma' and activity_type == 'syn' and psf_type == 'no_psf':
-                            if np.sum(-arr) > 0:
+                            if np.sum(np.abs(arr)) > 0:
                                 # take the first 5 masks
                                 five_soma_masks.append(np.max(arr, axis=0))
                     del arr
@@ -287,6 +286,10 @@ for i_roi in range(n_rois):
                 final_composed_arr['blurred_arr'].shape[1] - roi_diameter//2)
     roi_y = np.random.randint(roi_diameter//2,
                 final_composed_arr['blurred_arr'].shape[2] - roi_diameter//2)
+    if i_roi == 0:
+        # use the center of the image for the first ROI
+        roi_x = final_composed_arr['blurred_arr'].shape[1] // 2
+        roi_y = final_composed_arr['blurred_arr'].shape[2] // 2
 
     roi = [[roi_x, roi_y]]
     # add the roi_size nearest pixels to the roi by spiraling outward until limit reached
@@ -399,9 +402,9 @@ for i_non_soma in range(50):
     non_soma_y = np.random.randint(0, all_non_soma.shape[1])
 
     for i in range(max(0, int(non_soma_x - avg_soma_diameter // 2)), 
-                        min(all_non_soma.shape[1], int(non_soma_x + avg_soma_diameter // 2))):
+                        min(all_non_soma.shape[0], int(non_soma_x + avg_soma_diameter // 2))):
         for j in range(max(0, int(non_soma_y - avg_soma_diameter // 2)),
-                        min(all_non_soma.shape[2], int(non_soma_y + avg_soma_diameter // 2))):
+                        min(all_non_soma.shape[1], int(non_soma_y + avg_soma_diameter // 2))):
             if abs(i - non_soma_x) + abs(j - non_soma_y) <= avg_soma_diameter // 2:
                 if not (i == non_soma_x and j == non_soma_y):
                     if all_non_soma[i, j]:
