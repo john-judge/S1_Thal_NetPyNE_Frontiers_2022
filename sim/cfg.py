@@ -249,7 +249,7 @@ cfg.scaleDensity = 1.0 # Number of cells = 31346
 #------------------------------------------------------------------------------
 # Spontaneous synapses + background - data from Rat
 #------------------------------------------------------------------------------
-cfg.addStimSynS1 = True
+cfg.addStimSynS1 = False
 cfg.rateStimE = 9.0
 cfg.rateStimI = 9.0
 
@@ -334,7 +334,7 @@ cfg.addExtracellularStim = True
 cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
 cfg.xStimAmp = 2  # amplitude in mA
-cfg.xStimDur = 2  # duration in ms
+cfg.xStimDur = 0.2  # duration in ms
 cfg.xStimDel = 30  # delay in ms
 
 #------------------------------------------------------------------------------
