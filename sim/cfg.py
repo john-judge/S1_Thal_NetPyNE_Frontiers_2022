@@ -36,9 +36,10 @@ cfg.coreneuron = False
 # Experiments
 #------------------------------------------------------------------------------
 
+#run 10: no stim
 cfg.experiment_NBQX_global = True  # For run9
-cfg.experiment_dendritic_somatic_inhibition = False  # for run10
-cfg.experiment_amp_stim = False  # for run11
+cfg.experiment_dendritic_somatic_inhibition = False  # for run11
+cfg.experiment_amp_stim = False  # for run12
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -294,9 +295,10 @@ cfg.divergenceHO = 10
 
 #------------------------------------------------------------------------------
 ## Th->S1
-cfg.connect_Th_S1 = True
+cfg.connect_Th_S1 = False
 cfg.TC_S1 = {}
-cfg.TC_S1['VPL_sTC'] = True
+# Next 3 lines are only used if cfg.connect_Th_S1 = True
+cfg.TC_S1['VPL_sTC'] = True  
 cfg.TC_S1['VPM_sTC'] = True
 cfg.TC_S1['POm_sTC_s1'] = True
 
