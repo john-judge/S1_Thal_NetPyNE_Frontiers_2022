@@ -329,7 +329,7 @@ for popName in cfg.thalamocorticalconnections:
 #------------------------------------------------------------------------------
 # Extracellular stim
 #------------------------------------------------------------------------------
-cfg.addExtracellularStim = True
+cfg.addExtracellularStim = False
 
 cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
