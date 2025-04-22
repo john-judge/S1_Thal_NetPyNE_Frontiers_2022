@@ -877,7 +877,7 @@ if cfg.addExtracellularStim:
                                                                         'del': cfg.xStimDel,  # delay in ms
                                                         }
     }
-    stim_radius = 50
+    stim_radius = 100
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
         'conds': {'cellList': 'all', 

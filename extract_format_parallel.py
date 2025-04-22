@@ -109,17 +109,13 @@ if should_create_mem_map:
             except MemoryError:
                 print("MemoryError with file:", data_file)
                 raise MemoryError
-            print(data.keys())
             if time is None:  # store t only once
                 time = np.array(data['simData']['t'])
 
             for k in data['simData']:
                 if compart[:4] in k:
                     for cell_id in data['simData'][k]:
-                        print(k, cell_id)
-
                         loaded_compart_data.add_item(cell_id, k, np.array(data['simData'][k][cell_id]))
-                        print("Voltage of", k, loaded_compart_data.get_item(cell_id, k))
 
             # to avoid memory issues, delete data after it's been stored
             del data
@@ -135,6 +131,67 @@ if should_create_mem_map:
         mm_time_fp[:] = time[:]
         mm_time_fp.flush()
 
+###############################################
+# Test: take all compart from one cell and plot voltage traces
+###############################################
+plt.clf()
+for cell_id in loaded_compart_data.hash_map:
+    for comp in loaded_compart_data.hash_map[cell_id]:
+        i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
+        plt.plot(time, mmfp[i_data], label=comp)
+    break
+plt.title('Cell ID: ' + str(cell_id) + ' compart: ' + str(comp))
+plt.xlabel('Time (ms)')
+plt.ylabel('Voltage (mV)')
+plt.legend()
+plt.savefig(output_dir_final + 'cell_id_' + str(cell_id) + '_compart_' + str(comp) + '.png')
+
+################################################
+# Save the memory mapped file and hash map
+################################################
 loaded_compart_data.dump_hash_map(output_dir_final + 'v7_batch1_0_0_hash_map.pkl')
+#loaded_compart_data.save()
+for cell_id in loaded_compart_data.hash_map:
+    for comp in loaded_compart_data.hash_map[cell_id]:
+        i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
+        print(' check get in test_compfile', mmfp[i_data])
+        break
+    break
+print("Total nonzero:", np.sum(loaded_compart_data.mmap_fp != 0))
+
 loaded_compart_data.mmap_fp.flush()
+
+del loaded_compart_data.mmap_fp
+
+
+##########################################
+# try re-opening the memory mapped file to test
+print('time shape', time.shape)
+test_compfile = MemoryMappedCompartmentVoltages(output_dir_final)
+test_compfile.load_existing_mmap(output_dir_final + 'v7_batch1_0_0_hash_map.pkl',
+                                        loaded_compart_data.mmap_filename)
+print('test_compfile shape', test_compfile.shape)
+# check get in test_compfile
+for cell_id in test_compfile.hash_map:
+    for comp in test_compfile.hash_map[cell_id]:
+        i_data, mmfp = test_compfile.get_item(cell_id, comp)
+        print(' check get in test_compfile', mmfp[i_data])
+        break
+    break
+print("Total nonzero:", np.sum(test_compfile.mmap_fp != 0))
+                                    
+###############################################
+# Test: take all compart from one cell and plot voltage traces
+###############################################
+plt.clf()
+for cell_id in test_compfile.hash_map:
+    for comp in test_compfile.hash_map[cell_id]:
+        i_data, mmfp = test_compfile.get_item(cell_id, comp)
+        plt.plot(time, mmfp[i_data], label=comp)
+    break
+plt.title('Cell ID: ' + str(cell_id) + ' compart: ' + str(comp))
+plt.xlabel('Time (ms)')
+plt.ylabel('Voltage (mV)')
+plt.legend()
+plt.savefig(output_dir_final + 'test2_cell_id_' + str(cell_id) + '_compart_' + str(comp) + '.png')
 

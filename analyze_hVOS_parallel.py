@@ -90,7 +90,7 @@ analyze_dir = '../analyze_output/'
 loaded_compart_data = MemoryMappedCompartmentVoltages(analyze_dir)
 loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl', 
                         analyze_dir + 'S1_results.npy',
-                        shape=(-1, t_max))
+                        t_shape=t_max)
 
 # check get in loaded_compart_data
 for cell_id in loaded_compart_data.hash_map:
@@ -222,8 +222,6 @@ for compart_id in compart_ids:
 axs[1].set_xlabel('Time (ms)')
 axs[0].set_ylabel('Membrane Potential (mV)')
 axs[1].set_ylabel('df/f')
-for ax in axs:
-    ax.set_xlim(0, 200)
 
 axs[0].set_title('ME-type:' + cell.get_me_type())
 plt.savefig(model_rec_final_out_dir + 'signal.png')
@@ -273,9 +271,20 @@ print("Any target cells missing structure data?:",
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
 
 time_step_size = time[1] - time[0]
+
+
 view_center_cell = 0  # view center cell is the cell to center on.
 # other cells may or may not be in view.
-soma_position = target_population_cells[view_center_cell].get_soma_position()
+soma_position = None
+if cam_params['cam_fov'] is not None:
+    if type(cam_params['cam_fov']) == int:
+        view_center_cell = cam_params['cam_fov']
+        soma_position = target_population_cells[view_center_cell].get_soma_position()
+    elif type(cam_params['cam_fov']) == list:
+        soma_position = cam_params['cam_fov']
+    else:
+        soma_position = target_population_cells[view_center_cell].get_soma_position()
+
 print("location of soma of cell to center on:", soma_position)
 if not no_psf_only:
     for target_cell in cells_to_draw:

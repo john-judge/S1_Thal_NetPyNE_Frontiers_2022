@@ -14,6 +14,7 @@ import numpy as np
 
 from recordTraceBatchSettings import record_trace_setting
 
+
 cfg = specs.SimConfig()  
 
 #------------------------------------------------------------------------------
@@ -22,12 +23,22 @@ cfg = specs.SimConfig()
 #
 #------------------------------------------------------------------------------
 
-# (224.04323588068343, 752.2745354245205, 94.19539296396553) is the location of cell index1 soma
-# (145.39086029354118), np.float64(843.5036716987845), np.float64(33.646623368081585)) soma index0
-xStimLocation =[145,844,34]
+# (224., 752., 94.) is the location of cell index1 soma
+# (145.,844.,34)) soma index0
+# near center L4: (185., 800., 64.,)
+xStimLocation =[185.,800.,64.]
 # z_recording_radius = 1000 # microns (box shape)
 cfg.simType='S1_TH_coreneuron'
 cfg.coreneuron = False
+
+
+#------------------------------------------------------------------------------
+# Experiments
+#------------------------------------------------------------------------------
+
+cfg.experiment_NBQX_global = False  # For run9
+cfg.experiment_dendritic_somatic_inhibition = False  # for run10
+cfg.experiment_amp_stim = False  # for run11
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -35,7 +46,7 @@ cfg.coreneuron = False
 cfg.duration = 99.8 ## Duration of the sim, in ms  
 cfg.dt = 0.025
 cfg.seeds = {'cell': 4322, 'conn': 4322, 'stim': 4322, 'loc': 4322} 
-cfg.hParams = {'celsius': 22, 'v_init': -65} # room temperature (slice)
+cfg.hParams = {'celsius': 34, 'v_init': -65} # room temperature (slice)
 cfg.verbose = True
 cfg.createNEURONObj = True
 cfg.createPyStruct = True  
@@ -248,15 +259,11 @@ cfg.rateStimI = 9.0
 ## S1->S1
 cfg.addConn = True
 
-cfg.experiment_NBQX_global = False  # For run9
-cfg.experiment_dendritic_somatic_inhibition = False  # for run10
-cfg.experiment_amp_stim = False  # for run11
-
 cfg.synWeightFractionEE = [1.0, 1.0] # E -> E AMPA to NMDA ratio
 cfg.synWeightFractionEI = [1.0, 1.0] # E -> I AMPA to NMDA ratio
 if cfg.experiment_NBQX_global:
-    cfg.synWeightFractionEE = [0.0, 1.0] # E -> E AMPA to NMDA ratio
-    cfg.synWeightFractionEI = [0.0, 1.0] # E -> I AMPA to NMDA ratio
+    cfg.synWeightFractionEE = [0.05, 1.0] # E -> E AMPA to NMDA ratio
+    cfg.synWeightFractionEI = [0.05, 1.0] # E -> I AMPA to NMDA ratio
 cfg.synWeightFractionII = [1.0, 1.0]  # I -> I GABAA to GABAB ratio
 cfg.synWeightFractionIE = [1.0, 1.0]  # I -> E GABAA to GABAB ratio
 cfg.EEGain = 1.0
@@ -266,10 +273,10 @@ cfg.IEGain = 1.0
 
 #------------------------------------------------------------------------------
 ## Th->Th 
-cfg.connectTh = False
-cfg.connect_RTN_RTN     = False
-cfg.connect_TC_RTN      = False
-cfg.connect_RTN_TC      = False
+cfg.connectTh = True
+cfg.connect_RTN_RTN     = True
+cfg.connect_TC_RTN      = True
+cfg.connect_RTN_TC      = True
 
 cfg.yConnFactor             = 10 # y-tolerance form connection distance based on the x and z-plane radial tolerances (1=100%; 2=50%; 5=20%; 10=10%)
 
@@ -287,22 +294,22 @@ cfg.divergenceHO = 10
 
 #------------------------------------------------------------------------------
 ## Th->S1
-cfg.connect_Th_S1 = False
+cfg.connect_Th_S1 = True
 cfg.TC_S1 = {}
-cfg.TC_S1['VPL_sTC'] = False
-cfg.TC_S1['VPM_sTC'] = False
-cfg.TC_S1['POm_sTC_s1'] = False
+cfg.TC_S1['VPL_sTC'] = True
+cfg.TC_S1['VPM_sTC'] = True
+cfg.TC_S1['POm_sTC_s1'] = True
 
 cfg.frac_Th_S1 = 1.0
 #------------------------------------------------------------------------------
 ## S1->Th 
-cfg.connect_S1_Th = False
+cfg.connect_S1_Th = True
 
-cfg.connect_S1_RTN = False
+cfg.connect_S1_RTN = True
 cfg.convergence_S1_RTN         = 30.0  # dist_2D<R
 cfg.connWeight_S1_RTN       = 0.500
 
-cfg.connect_S1_TC = False
+cfg.connect_S1_TC = True
 cfg.convergence_S1_TC         = 30.0  # dist_2D<R
 cfg.connWeight_S1_TC       = 0.250
 
@@ -322,13 +329,13 @@ for popName in cfg.thalamocorticalconnections:
 #------------------------------------------------------------------------------
 # Extracellular stim
 #------------------------------------------------------------------------------
-cfg.addExtracellularStim = True
+cfg.addExtracellularStim = False
 
 cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
-cfg.xStimAmp = 0.2  # amplitude in mA
-cfg.xStimDur = 0.2  # duration in ms
-cfg.xStimDel = 20  # delay in ms
+cfg.xStimAmp = 2  # amplitude in mA
+cfg.xStimDur = 4  # duration in ms
+cfg.xStimDel = 25  # delay in ms
 
 #------------------------------------------------------------------------------
 # NetStim inputs 

@@ -3,5 +3,7 @@
 cam_params = {
     'cam_width': 100,
     'cam_height': 100,
-    'cam_resolution': 6.0
+    'cam_resolution': 2.0,
+    'cam_fov': [185.,800.,64.],  # or give index of cell to center on
+    'xstim_at_cam_fov': True
 }
