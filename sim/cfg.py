@@ -37,9 +37,9 @@ cfg.coreneuron = False
 #------------------------------------------------------------------------------
 
 #run 10: no stim
-cfg.experiment_NBQX_global = True  # For run9
-cfg.experiment_dendritic_somatic_inhibition = False  # for run11
-cfg.experiment_amp_stim = False  # for run12
+cfg.experiment_NBQX_global = False  # For run9
+cfg.experiment_dendritic_somatic_inhibition = False  # for run10
+cfg.experiment_amp_stim = False  # for run11
 
 #------------------------------------------------------------------------------
 # Run parameters
