@@ -267,7 +267,7 @@ cam.animate_frames_to_video(final_composed_arr['blurred_arr'],
 # Also show location of the ROIs overlaid in the image
 ###################################################
 n_rois = 10
-roi_diameter_range = [1, 15]  # size of the ROIs, they are distributed uniformly in size
+roi_diameter_range = [15, 35]  # size of the ROIs, they are distributed uniformly in size
 # matplotlib figure
 plt.clf()
 plt.figure(figsize=(10, 6))
@@ -290,17 +290,20 @@ for i_roi in range(n_rois):
         # use the center of the image for the first ROI
         roi_x = final_composed_arr['blurred_arr'].shape[1] // 2
         roi_y = final_composed_arr['blurred_arr'].shape[2] // 2
+        roi_diameter = 10
 
     roi = [[roi_x, roi_y]]
+    roi_map = {}
     # add the roi_size nearest pixels to the roi by spiraling outward until limit reached
     if roi_diameter > 1:
-        for i in range(max(0, i-roi_diameter//2), 
-                        min(final_composed_arr['blurred_arr'].shape[1], i+roi_diameter//2)):
-            for j in range(max(0, j-roi_diameter//2),
-                            min(final_composed_arr['blurred_arr'].shape[2], j+roi_diameter//2)):
-                if np.sqrt((i - roi_x)**2 + (j - roi_y)^2) <= roi_diameter // 2:
-                    if not (i == roi_x and j == roi_y):
+        for i in range(max(0, roi_x-roi_diameter//2), 
+                        min(final_composed_arr['blurred_arr'].shape[1], roi_x+roi_diameter//2)):
+            for j in range(max(0, roi_y-roi_diameter//2),
+                            min(final_composed_arr['blurred_arr'].shape[2], roi_y+roi_diameter//2)):
+                if np.sqrt((i - roi_x)**2 + (j - roi_y)**2) <= roi_diameter // 2:
+                    if (i, j) not in roi_map:
                         roi.append([i, j])
+                        roi_map[(i, j)] = True
     
     # for each pixel in roi, shade the pixel in the image
     for pixel in roi:

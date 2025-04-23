@@ -36,6 +36,7 @@ cfg.coreneuron = False
 # Experiments
 #------------------------------------------------------------------------------
 
+#run 10: no stim
 cfg.experiment_NBQX_global = False  # For run9
 cfg.experiment_dendritic_somatic_inhibition = False  # for run10
 cfg.experiment_amp_stim = False  # for run11
@@ -300,16 +301,17 @@ cfg.divergenceHO = 10
 
 #------------------------------------------------------------------------------
 ## Th->S1
-cfg.connect_Th_S1 = True
+cfg.connect_Th_S1 = False
 cfg.TC_S1 = {}
-cfg.TC_S1['VPL_sTC'] = True
+# Next 3 lines are only used if cfg.connect_Th_S1 = True
+cfg.TC_S1['VPL_sTC'] = True  
 cfg.TC_S1['VPM_sTC'] = True
 cfg.TC_S1['POm_sTC_s1'] = True
 
 cfg.frac_Th_S1 = 1.0
 #------------------------------------------------------------------------------
 ## S1->Th 
-cfg.connect_S1_Th = True
+cfg.connect_S1_Th = False
 
 cfg.connect_S1_RTN = True
 cfg.convergence_S1_RTN         = 30.0  # dist_2D<R
@@ -335,7 +337,7 @@ for popName in cfg.thalamocorticalconnections:
 #------------------------------------------------------------------------------
 # Extracellular stim
 #------------------------------------------------------------------------------
-cfg.addExtracellularStim = False
+cfg.addExtracellularStim = True
 
 cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
