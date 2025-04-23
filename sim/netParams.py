@@ -375,7 +375,8 @@ if cfg.addConn:
                                         'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                         'sec': 'spiny'}        
                         if experiment_dendritic_somatic_inhibition:
-                            del netParams.connParams['II_' + pre + '_' + post]['sec']
+                            netParams.subConnParams['II_' + pre + '_' + post] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                            #del netParams.connParams['II_' + pre + '_' + post]['sec']
                 # ------------------------------------------------------------------------------
                 #  I -> E  # with ME conn diversity
                 # ------------------------------------------------------------------------------
@@ -420,7 +421,8 @@ if cfg.addConn:
                                     'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                     'sec': 'spiny'}  
                         if experiment_dendritic_somatic_inhibition:
-                            del netParams.connParams['IE_'+pre+'_'+post]['sec']
+                            netParams.subConnParams['IE_'+pre+'_'+post] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                            #del netParams.connParams['IE_'+pre+'_'+post]['sec']
                 
 
                         if connID_B >= 0:          
@@ -437,7 +439,8 @@ if cfg.addConn:
                                         'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                         'sec': 'spiny'}            
                             if experiment_dendritic_somatic_inhibition:
-                                del netParams.connParams['IE_'+pre+'_'+post+'_B']['sec']           
+                                netParams.subConnParams['IE_'+pre+'_'+post+'_B'] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                                #del netParams.connParams['IE_'+pre+'_'+post+'_B']['sec']           
                 
                                 
                             if connID_C >= 0:          
@@ -454,7 +457,8 @@ if cfg.addConn:
                                             'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                             'sec': 'spiny'}                
                                 if experiment_dendritic_somatic_inhibition:
-                                    del netParams.connParams['IE_'+pre+'_'+post+'_C']['sec']       
+                                    netParams.subConnParams['IE_'+pre+'_'+post+'_C'] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                                    #del netParams.connParams['IE_'+pre+'_'+post+'_C']['sec']       
                                 
                 #------------------------------------------------------------------------------   
                 # E -> E
