@@ -305,7 +305,7 @@ cfg.TC_S1['POm_sTC_s1'] = True
 cfg.frac_Th_S1 = 1.0
 #------------------------------------------------------------------------------
 ## S1->Th 
-cfg.connect_S1_Th = True
+cfg.connect_S1_Th = False
 
 cfg.connect_S1_RTN = True
 cfg.convergence_S1_RTN         = 30.0  # dist_2D<R
