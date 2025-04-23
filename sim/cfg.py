@@ -37,9 +37,11 @@ cfg.coreneuron = False
 #------------------------------------------------------------------------------
 
 #run 10: no stim
+#run 8: baseline stim
+#run 11: NBQX + no stim
 cfg.experiment_NBQX_global = False  # For run9
-cfg.experiment_dendritic_somatic_inhibition = False  # for run10
-cfg.experiment_amp_stim = False  # for run11
+cfg.experiment_dendritic_somatic_inhibition = False  # for run12
+cfg.experiment_amp_stim = False  # for run13
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -262,15 +264,17 @@ cfg.addConn = True
 
 cfg.synWeightFractionEE = [1.0, 1.0] # E -> E AMPA to NMDA ratio
 cfg.synWeightFractionEI = [1.0, 1.0] # E -> I AMPA to NMDA ratio
-if cfg.experiment_NBQX_global:
-    cfg.synWeightFractionEE = [0.05, 1.0] # E -> E AMPA to NMDA ratio
-    cfg.synWeightFractionEI = [0.05, 1.0] # E -> I AMPA to NMDA ratio
 cfg.synWeightFractionII = [1.0, 1.0]  # I -> I GABAA to GABAB ratio
 cfg.synWeightFractionIE = [1.0, 1.0]  # I -> E GABAA to GABAB ratio
 cfg.EEGain = 1.0
 cfg.EIGain = 1.0
 cfg.IIGain = 1.0
 cfg.IEGain = 1.0
+if cfg.experiment_NBQX_global:
+    cfg.synWeightFractionEE = [0.05, 1.0] # E -> E AMPA to NMDA ratio
+    cfg.synWeightFractionEI = [0.05, 1.0] # E -> I AMPA to NMDA ratio
+    cfg.EEGain = 0.05
+    cfg.EIGain = 0.05
 
 #------------------------------------------------------------------------------
 ## Th->Th 
@@ -295,7 +299,7 @@ cfg.divergenceHO = 10
 
 #------------------------------------------------------------------------------
 ## Th->S1
-cfg.connect_Th_S1 = False
+cfg.connect_Th_S1 = True
 cfg.TC_S1 = {}
 # Next 3 lines are only used if cfg.connect_Th_S1 = True
 cfg.TC_S1['VPL_sTC'] = True  
@@ -305,7 +309,7 @@ cfg.TC_S1['POm_sTC_s1'] = True
 cfg.frac_Th_S1 = 1.0
 #------------------------------------------------------------------------------
 ## S1->Th 
-cfg.connect_S1_Th = False
+cfg.connect_S1_Th = True
 
 cfg.connect_S1_RTN = True
 cfg.convergence_S1_RTN         = 30.0  # dist_2D<R
