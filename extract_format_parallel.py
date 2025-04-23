@@ -39,7 +39,7 @@ for file in os.listdir(target_dir):
         compart_data[compart] = output_dir
 print("compart_data", compart_data)
 #######################################
-# load time 
+# load time and .run file
 #######################################
 data_file = compart_data['soma'] + '/S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/v7_batch1_0_0_data.pkl'
 with open(data_file, 'rb') as f:
@@ -50,7 +50,13 @@ with open(data_file, 'rb') as f:
         raise MemoryError
     print(data.keys())
     t = np.array(data['simData']['t'])
-len(t)
+
+# move the v7_batch1_0_0.run file to the final output directory
+data_file_run = compart_data['soma'] + '/S1_Thal_NetPyNE_Frontiers_2022/data/v7_batch1/v7_batch1_0_0.run'
+if os.path.exists(data_file_run):
+    os.rename(data_file_run, output_dir_final + 'v7_batch1_0_0.run')
+else:
+    print("File not found:", data_file_run)
 
 #########################################
 # load one pkl to look at cell data
@@ -162,7 +168,6 @@ print("Total nonzero:", np.sum(loaded_compart_data.mmap_fp != 0))
 loaded_compart_data.mmap_fp.flush()
 
 del loaded_compart_data.mmap_fp
-
 
 ##########################################
 # try re-opening the memory mapped file to test
