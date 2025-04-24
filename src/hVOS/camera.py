@@ -26,6 +26,7 @@ class Camera:
                  use_2d_psf=False,  # flatten entire image to z=0
                  spike_thresh=0.1674, # optial a.u., found in data['net']['params']['defaultThreshold'], then 0.196 + 0.00286 * -10 = 0.1674
                  init_dummy=False,
+                 draw_synapses=None,
                  ):  
         self.target_cells = target_cells
         self.morphologies = morphologies
@@ -38,6 +39,11 @@ class Camera:
         self.data_dir = data_dir
         self.use_2d_psf = use_2d_psf
         self.spike_thresh = spike_thresh  # optical units
+        # if draw synapses is not None but instead a 
+        # SubConnMap, also create a 2D mask
+        # showing the location of the synapses (the presynaptic cell id is recorded in the mask)
+        self.draw_synapses = draw_synapses
+        self.synapse_mask = np.zeros((camera_width, camera_height), dtype=np.uint8)
 
         # make memory-mapped numpy arrays.
         self.cell_recording = None
@@ -254,6 +260,18 @@ class Camera:
         y_seg_dist = float(segment['distal']['y']) + y_soma
         z_seg_dist = float(segment['distal']['z']) + z_soma
         diam_seg_dist = float(segment['distal']['diameter'])
+
+        if self.draw_synapses is not None:
+            if segment in self.draw_synapses.subconn_map:
+                for pre_cell_id in self.draw_synapses.subconn_map[segment]:
+                    for synapse_loc in self.draw_synapses.subconn_map[segment][pre_cell_id]:
+                        # draw the synapse location on the camera view
+                        x_synapse = x_seg_prox + (x_seg_dist - x_seg_prox) * synapse_loc
+                        y_synapse = y_seg_prox + (y_seg_dist - y_seg_prox) * synapse_loc
+                        z_synapse = z_seg_prox + (z_seg_dist - z_seg_prox) * synapse_loc
+                        i, j = self.map_point_to_pixel(x_synapse, y_synapse, z_synapse)
+                        if 0 <= i < self.camera_width and 0 <= j < self.camera_height:
+                            self.synapse_mask[i, j] = pre_cell_id
 
         # calculate lateral membrane surface area (um^2) of the segment
         # assuming the segment is a conical frustum. 
