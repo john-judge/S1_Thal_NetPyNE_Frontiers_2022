@@ -21,7 +21,8 @@ class SubConnMap:
         
         self.run_filepath = run_filepath
         self.post_cell_id = post_cell_id
-        self.subconn_map = self.get_subconn_map()
+        self.subconn_map = {}
+        self.get_subconn_map()
         
 
     def get_subconn_map(self):
@@ -55,4 +56,3 @@ class SubConnMap:
                 
                 self.subconn_map[sec][pre_cell_id].append(loc)
         
-        return self.subconn_map
