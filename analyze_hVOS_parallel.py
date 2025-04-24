@@ -26,6 +26,7 @@ from src.hVOS.psf import PSF
 from src.hVOS.mcPSF import mcPSF
 from src.hVOS.compartment_file import MemoryMappedCompartmentVoltages
 from cam_params import cam_params
+from src.hVOS.subconn import SubConnMap
 
 ####################################
 # read command line args
@@ -338,6 +339,37 @@ if not psf_only:
         print("No-PSF non-zero files:", no_psf_nonzero_files)
         cam_no_psf.close_memmaps()
 
+############################################
+# draw synapse locations for one cell
+############################################
+# subconn map on a cell
+if not psf_only:
+    subconn_map = SubConnMap(run_filepath=analyze_dir + 'v7_batch1_0_0.run',
+                            post_cell_id=target_population_cells[view_center_cell].get_cell_id())
+    os.makedirs(model_rec_out_dir + 'syn/', exist_ok=True)
+    cam_no_psf_syn = Camera([target_population_cells[view_center_cell]], 
+                        me_type_morphology_map, 
+                        time,
+                        fov_center=soma_position,
+                        camera_resolution=camera_resolution,
+                        camera_width=cam_width,
+                        camera_height=cam_height,
+                        psf=None,
+                        data_dir=model_rec_out_dir + 'syn/',
+                        use_2d_psf=True,
+                        draw_synapses=subconn_map)
+    cam_no_psf_syn._draw_cell(target_population_cells[view_center_cell])
+    syn_map = cam_no_psf_syn.synapse_mask
+    # write synapse map to memmap file in model_rec_out_dir
+    syn_map_file = model_rec_out_dir + 'syn/' + target_population_cells[view_center_cell].get_cell_id() + '_syn_map.npy'
+    mm_fp_syn = np.memmap(syn_map_file, dtype='float32', mode='w+', shape=(cam_height, cam_width))
+    mm_fp_syn[:] = syn_map[:]
+    mm_fp_syn.flush()
+    syn_nonzero_files = cam_no_psf_syn.get_cell_recording().get_non_zero_file_list()
+    syn_nonzero_files.append(syn_map_file)
+    cam_no_psf_syn.close_memmaps()
+    
+
 ###########################################
 # Copy non-zero files to model_rec_final_out_dir
 ###########################################
@@ -355,6 +387,15 @@ if not no_psf_only:
 if not psf_only:
     for file in no_psf_nonzero_files:
         file_name = "no_psf_" + file.split('/')[-1]
+        cell_subdir = file.split('/')[-2] + '/'
+        target_subdir = model_rec_final_out_dir + cell_subdir
+        if not os.path.exists(target_subdir):
+            os.makedirs(target_subdir)
+        target_file = model_rec_final_out_dir + cell_subdir + file_name
+        if not os.path.exists(target_file):
+            os.system('cp ' + file + ' ' + target_file)
+    for file in syn_nonzero_files:
+        file_name = "syn_" + file.split('/')[-1]
         cell_subdir = file.split('/')[-2] + '/'
         target_subdir = model_rec_final_out_dir + cell_subdir
         if not os.path.exists(target_subdir):
