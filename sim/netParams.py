@@ -885,6 +885,7 @@ if cfg.addExtracellularStim:
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
         'conds': {'cellList': 'all', 
+                  'secLists': {'all': ['apic', 'axon', 'soma', 'dend']},
                   'x': [cfg.xStimLocation[0]-stim_radius,cfg.xStimLocation[0]+stim_radius], 
                   'y': [cfg.xStimLocation[1]-stim_radius,cfg.xStimLocation[1]+stim_radius], 
                   'z': [cfg.xStimLocation[2]-stim_radius,cfg.xStimLocation[2]+stim_radius]},}
