@@ -267,7 +267,7 @@ print("Any target cells missing structure data?:",
 
 
 #######################################
-# Draw cell with PSF
+# Draw cells with PSF
 #######################################
 os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
 
@@ -309,7 +309,7 @@ if not no_psf_only:
 
 
 #########################################
-# Draw cell without PSF
+# Draw cells without PSF
 #########################################
 os.makedirs(model_rec_out_dir + 'no_psf/', exist_ok=True)
 if not psf_only:
@@ -343,32 +343,36 @@ if not psf_only:
 # draw synapse locations for one cell
 ############################################
 # subconn map on a cell
-if not psf_only:
-    subconn_map = SubConnMap(run_filepath=analyze_dir + 'v7_batch1_0_0.run',
-                            post_cell_id=target_population_cells[view_center_cell].get_cell_id())
-    os.makedirs(model_rec_out_dir + 'syn/', exist_ok=True)
-    cam_no_psf_syn = Camera([target_population_cells[view_center_cell]], 
-                        me_type_morphology_map, 
-                        time,
-                        fov_center=soma_position,
-                        camera_resolution=camera_resolution,
-                        camera_width=cam_width,
-                        camera_height=cam_height,
-                        psf=None,
-                        data_dir=model_rec_out_dir + 'syn/',
-                        use_2d_psf=True,
-                        draw_synapses=subconn_map)
-    cam_no_psf_syn._draw_cell(target_population_cells[view_center_cell])
-    syn_map = cam_no_psf_syn.synapse_mask
-    # write synapse map to memmap file in model_rec_out_dir
-    syn_map_file = model_rec_out_dir + 'syn/' + target_population_cells[view_center_cell].get_cell_id() + '_syn_map.npy'
-    mm_fp_syn = np.memmap(syn_map_file, dtype='float32', mode='w+', shape=(cam_height, cam_width))
-    mm_fp_syn[:] = syn_map[:]
-    mm_fp_syn.flush()
-    syn_nonzero_files = cam_no_psf_syn.get_cell_recording().get_non_zero_file_list()
-    syn_nonzero_files.append(syn_map_file)
-    cam_no_psf_syn.close_memmaps()
-    
+syn_nonzero_files = []
+if job_id ==0 and not psf_only:
+    try:
+        subconn_map = SubConnMap(run_filepath=analyze_dir + 'v7_batch1_0_0.run',
+                                post_cell_id=target_population_cells[view_center_cell].get_cell_id())
+        os.makedirs(model_rec_out_dir + 'syn/', exist_ok=True)
+        cam_no_psf_syn = Camera([target_population_cells[view_center_cell]], 
+                            me_type_morphology_map, 
+                            time,
+                            fov_center=soma_position,
+                            camera_resolution=camera_resolution,
+                            camera_width=cam_width,
+                            camera_height=cam_height,
+                            psf=None,
+                            data_dir=model_rec_out_dir + 'syn/',
+                            use_2d_psf=True,
+                            draw_synapses=subconn_map)
+        cam_no_psf_syn._draw_cell(target_population_cells[view_center_cell])
+        syn_map = cam_no_psf_syn.synapse_mask
+        # write synapse map to memmap file in model_rec_out_dir
+        syn_map_file = model_rec_out_dir + 'syn/' + target_population_cells[view_center_cell].get_cell_id() + '_syn_map.npy'
+        mm_fp_syn = np.memmap(syn_map_file, dtype='float32', mode='w+', shape=(cam_height, cam_width))
+        mm_fp_syn[:] = syn_map[:]
+        mm_fp_syn.flush()
+        syn_nonzero_files = cam_no_psf_syn.get_cell_recording().get_non_zero_file_list()
+        syn_nonzero_files.append(syn_map_file)
+        cam_no_psf_syn.close_memmaps()
+    except Exception as e:
+        print("Error in subconn map:", e)
+        print("No synapse map created.")
 
 ###########################################
 # Copy non-zero files to model_rec_final_out_dir
