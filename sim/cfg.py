@@ -350,7 +350,7 @@ cfg.addExtracellularStim = True
 
 cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
-cfg.xStimAmp = 2  # amplitude in mA
+cfg.xStimAmp = 20  # amplitude in mA
 cfg.xStimDur = 4  # duration in ms
 cfg.xStimDel = 25  # delay in ms
 
