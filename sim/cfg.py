@@ -183,12 +183,12 @@ elif cfg.cellsrec == 2:
                     else:
                         numberME+=int(cfg.cellNumber[metype]/5.0)
 elif cfg.cellsrec == 3:  # record all cells of target ME types
-    cfg.recordCells = []
-    for metype in cfg.cellParamLabels:
+    cfg.recordCells = [pop for pop in cfg.allpops if any([target in pop for target in target_me_types])]
+    '''for metype in cfg.cellParamLabels:
         if any([target in metype for target in target_me_types]):
             for numberME in range(cfg.cellNumber[metype]):
                 if np.random.rand() <= fraction_record:
-                    cfg.recordCells.append((metype,numberME))
+                    cfg.recordCells.append((metype,numberME))'''
 
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
@@ -208,7 +208,7 @@ else:
         #cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
         #cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
 
-cfg.recordStim = True			
+cfg.recordStim = False			
 cfg.recordTime = True  		
 cfg.recordStep = 0.1            
 
