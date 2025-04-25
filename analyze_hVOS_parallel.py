@@ -59,6 +59,9 @@ if 'no_psf_only' in sys.argv:
 # whether to use Monte Carlo scattering
 use_mc_scattering_psf = False
 
+# optical tuning: soma:dend hVOS expression ratio
+soma_dend_hVOS_ratio = 0.5
+
 #####################################
 # Find data in CHTC staging and extract data just for this job's cell
 #####################################
@@ -300,7 +303,9 @@ if not no_psf_only:
                     camera_height=cam_height,
                     psf=psf,
                     data_dir=cell_model_rec_out_dir, 
-                    use_2d_psf=False)
+                    use_2d_psf=False,
+                    soma_dend_hVOS_ratio=soma_dend_hVOS_ratio
+                    )
         cam._draw_cell(target_cell)
 
         psf_nonzero_files = cam.get_cell_recording().get_non_zero_file_list()
@@ -325,7 +330,8 @@ if not psf_only:
                     camera_height=cam_height,
                     psf=None,
                     data_dir=cell_model_rec_out_dir,#, #
-                    use_2d_psf=True)
+                    use_2d_psf=True,
+                    soma_dend_hVOS_ratio=soma_dend_hVOS_ratio)
         cam_no_psf._draw_cell(target_cell)
         '''for compart_id in ['soma', 'axon', 'apic', 'dend']:
             for activity_type in ['synaptic', 'spiking']:
@@ -359,7 +365,8 @@ if job_id ==0 and not psf_only:
                             psf=None,
                             data_dir=model_rec_out_dir + 'syn/',
                             use_2d_psf=True,
-                            draw_synapses=subconn_map)
+                            draw_synapses=subconn_map,
+                            soma_dend_hVOS_ratio=soma_dend_hVOS_ratio)
         cam_no_psf_syn._draw_cell(target_population_cells[view_center_cell])
         syn_map = cam_no_psf_syn.synapse_mask
         # write synapse map to memmap file in model_rec_out_dir

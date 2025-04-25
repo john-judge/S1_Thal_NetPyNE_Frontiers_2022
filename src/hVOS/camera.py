@@ -27,6 +27,7 @@ class Camera:
                  spike_thresh=0.1674, # optial a.u., found in data['net']['params']['defaultThreshold'], then 0.196 + 0.00286 * -10 = 0.1674
                  init_dummy=False,
                  draw_synapses=None,
+                 soma_dend_hVOS_ratio=1.0
                  ):  
         self.target_cells = target_cells
         self.morphologies = morphologies
@@ -44,6 +45,9 @@ class Camera:
         # showing the location of the synapses (the presynaptic cell id is recorded in the mask)
         self.draw_synapses = draw_synapses
         self.synapse_mask = np.zeros((camera_width, camera_height), dtype=np.uint8)
+
+        # optical tuning
+        self.soma_dend_hVOS_ratio = soma_dend_hVOS_ratio
 
         # make memory-mapped numpy arrays.
         self.cell_recording = None
@@ -235,11 +239,15 @@ class Camera:
                 intensity_value = intensity_value[time_step]
             for segment_id in structure[compartment]:
 
+                optical_tuning_weight = 1.0
+                if 'soma' in compartment:
+                    optical_tuning_weight = self.soma_dend_hVOS_ratio
+
                 decomp_type = self.classify_compartment(compartment)
                 # draw the optical trace on the camera view
                 is_cell_in_bounds = \
                     self._draw_segment(structure[compartment][segment_id], 
-                                   intensity_value,
+                                   intensity_value * optical_tuning_weight,
                                    x_soma, y_soma, z_soma, time_step, 
                                    decomp_type=decomp_type, spike_mask=spike_mask) \
                     or is_cell_in_bounds
