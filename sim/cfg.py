@@ -250,7 +250,7 @@ cfg.analysis['plotShape'] = {'includePre': [8008, 8239],
 #------------------------------------------------------------------------------
 
  # Number of cells = 31346 
-cfg.scale = 1.0 # reduce size
+cfg.scale = 0.5 # reduce size
 cfg.sizeY = 2082.0
 cfg.sizeX = 420.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = 420.0
