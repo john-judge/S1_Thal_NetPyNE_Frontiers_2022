@@ -60,7 +60,7 @@ if 'no_psf_only' in sys.argv:
 use_mc_scattering_psf = False
 
 # optical tuning: soma:dend hVOS expression ratio
-soma_dend_hVOS_ratio = 1.0
+soma_dend_hVOS_ratio = 0.5
 
 #####################################
 # Find data in CHTC staging and extract data just for this job's cell
