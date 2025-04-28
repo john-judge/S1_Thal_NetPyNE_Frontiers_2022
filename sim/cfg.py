@@ -254,7 +254,7 @@ cfg.scale = 0.5 # reduce size
 cfg.sizeY = 2082.0
 cfg.sizeX = 420.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = 420.0
-cfg.scaleDensity = 1.0 # run 8.1: increase density of cells by 2x
+cfg.scaleDensity = 2.0 # run 8.1: increase density of cells by 2x
 
 
 #------------------------------------------------------------------------------
