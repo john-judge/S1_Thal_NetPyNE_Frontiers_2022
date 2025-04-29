@@ -39,7 +39,7 @@ cfg.coreneuron = False
 #run 10: no stim
 #run 8: baseline stim
 #run 11: NBQX + no stim
-cfg.experiment_NBQX_global = False  # For run9
+cfg.experiment_NBQX_global = True  # For run9
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
 cfg.experiment_amp_stim = False  # for run13
 
@@ -250,7 +250,7 @@ cfg.analysis['plotShape'] = {'includePre': [8008, 8239],
 #------------------------------------------------------------------------------
 
  # Number of cells = 31346 
-cfg.scale = 0.5 # reduce size
+cfg.scale = 0.25 # reduce size
 cfg.sizeY = 2082.0
 cfg.sizeX = 420.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = 420.0
