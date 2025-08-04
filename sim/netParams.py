@@ -85,7 +85,11 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 
 for cellName in cfg.S1cells:
     for barrel in range(cfg.num_barrels):
-        x_range_barrel = [barrel*0.5, (barrel+1)*0.5]  # x-range for each barrel, fractional
+        septa_width = 50  # um
+        septa_width_fractional = septa_width / cfg.sizeX  # fractional width of the septa
+        barrel_width = (cfg.sizeX - septa_width) / cfg.num_barrels  # um
+        x_range_barrel = [barrel * (barrel_width + septa_width_fractional), 
+                          barrel * (barrel_width + septa_width_fractional) + barrel_width]  # x-range for the barrel
         layernumber = cellName[1:2]
         if layernumber == '2':
             netParams.popParams[cellName + 'barrel' + str(barrel)] = {'cellType': cellName, 'cellModel': 'HH_full', 
