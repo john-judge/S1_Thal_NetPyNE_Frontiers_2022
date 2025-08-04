@@ -84,13 +84,21 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 ## S1
 
 for cellName in cfg.S1cells:
-	layernumber = cellName[1:2]
-	if layernumber == '2':
-		netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 'ynormRange': layer['23'], 
-                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 'diversity': True}
-	else:
-		netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 'ynormRange': layer[layernumber], 
-                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 'diversity': True}
+    for barrel in range(cfg.num_barrels):
+        x_range_barrel = [barrel*0.5, (barrel+1)*0.5]  # x-range for each barrel, fractional
+        layernumber = cellName[1:2]
+        if layernumber == '2':
+            netParams.popParams[cellName + 'barrel' + str(barrel)] = {'cellType': cellName, 'cellModel': 'HH_full', 
+                                            'ynormRange': layer['23'], 
+                                            'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])),
+                                            'diversity': True,
+                                            'xnormRange': x_range_barrel}
+        else:
+            netParams.popParams[cellName + 'barrel' + str(barrel)] = {'cellType': cellName, 'cellModel': 'HH_full', 
+                                            'ynormRange': layer[layernumber], 
+                                            'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 
+                                            'diversity': True,
+                                            'xnormRange': x_range_barrel}
 
 ## THALAMIC POPULATIONS (from prev model)
 for popName in cfg.thalamicpops:
