@@ -92,13 +92,13 @@ for cellName in cfg.S1cells:
                           barrel * (barrel_width + septa_width_fractional) + barrel_width]  # x-range for the barrel
         layernumber = cellName[1:2]
         if layernumber == '2':
-            netParams.popParams[cellName + 'barrel' + str(barrel)] = {'cellType': cellName, 'cellModel': 'HH_full', 
+            netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
                                             'ynormRange': layer['23'], 
                                             'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])),
                                             'diversity': True,
                                             'xnormRange': x_range_barrel}
         else:
-            netParams.popParams[cellName + 'barrel' + str(barrel)] = {'cellType': cellName, 'cellModel': 'HH_full', 
+            netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
                                             'ynormRange': layer[layernumber], 
                                             'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 
                                             'diversity': True,
