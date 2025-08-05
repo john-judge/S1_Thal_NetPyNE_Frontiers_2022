@@ -88,7 +88,7 @@ for cellName in cfg.S1cells:
         septa_width = 50  # um
         septa_width_fractional = septa_width / cfg.sizeX  # fractional width of the septa
         barrel_width = (cfg.sizeX - septa_width) / cfg.num_barrels  # um
-        x_range_barrel = [barrel * (barrel_width + septa_width_fractional), 
+        z_range_barrel = [barrel * (barrel_width + septa_width_fractional), 
                           barrel * (barrel_width + septa_width_fractional) + barrel_width]  # x-range for the barrel
         layernumber = cellName[1:2]
         if layernumber == '2':
@@ -96,13 +96,13 @@ for cellName in cfg.S1cells:
                                             'ynormRange': layer['23'], 
                                             'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])),
                                             'diversity': True,
-                                            'xnormRange': x_range_barrel}
+                                            'znormRange': z_range_barrel}
         else:
             netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
                                             'ynormRange': layer[layernumber], 
                                             'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 
                                             'diversity': True,
-                                            'xnormRange': x_range_barrel}
+                                            'znormRange': z_range_barrel}
 
 ## THALAMIC POPULATIONS (from prev model)
 for popName in cfg.thalamicpops:
