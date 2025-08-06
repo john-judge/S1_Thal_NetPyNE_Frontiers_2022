@@ -126,22 +126,25 @@ cfg.S1cells = cellParam[0:207]
 #------------------------------------------------------------------------------  
 # Thalamic Cells
 
-cfg.thalamicpops = ['ss_RTN_o', 'ss_RTN_m', 'ss_RTN_i', 'VPL_sTC', 'VPM_sTC', 'POm_sTC_s1']
+remove_thalamic_cells = True
 
-cfg.cellNumber['ss_RTN_o'] = int(382 * (210**2/150**2)) # from mouse model (r = 150 um)
-cfg.cellNumber['ss_RTN_m'] = int(382 * (210**2/150**2))
-cfg.cellNumber['ss_RTN_i'] = int(765 * (210**2/150**2))
-cfg.cellNumber['VPL_sTC'] = int(656 * (210**2/150**2))
-cfg.cellNumber['VPM_sTC'] = int(839 * (210**2/150**2))
-cfg.cellNumber['POm_sTC_s1'] = int(685 * (210**2/150**2))
+if not remove_thalamic_cells:
+    cfg.thalamicpops = ['ss_RTN_o', 'ss_RTN_m', 'ss_RTN_i', 'VPL_sTC', 'VPM_sTC', 'POm_sTC_s1']
 
-for mtype in cfg.thalamicpops: # No diversity
-	metype = mtype
-	popParam.append(mtype)
-	cfg.popLabel[metype] = mtype
-	cellParam.append(metype)
+    cfg.cellNumber['ss_RTN_o'] = int(382 * (210**2/150**2)) # from mouse model (r = 150 um)
+    cfg.cellNumber['ss_RTN_m'] = int(382 * (210**2/150**2))
+    cfg.cellNumber['ss_RTN_i'] = int(765 * (210**2/150**2))
+    cfg.cellNumber['VPL_sTC'] = int(656 * (210**2/150**2))
+    cfg.cellNumber['VPM_sTC'] = int(839 * (210**2/150**2))
+    cfg.cellNumber['POm_sTC_s1'] = int(685 * (210**2/150**2))
 
-	cfg.popNumber[mtype] = cfg.cellNumber[metype]
+    for mtype in cfg.thalamicpops: # No diversity
+        metype = mtype
+        popParam.append(mtype)
+        cfg.popLabel[metype] = mtype
+        cellParam.append(metype)
+
+        cfg.popNumber[mtype] = cfg.cellNumber[metype]
 
 #------------------------------------------------------------------------------  
 cfg.popParamLabels = popParam
@@ -249,11 +252,11 @@ cfg.analysis['plotShape'] = {'includePre': [8008, 8239],
 # Network 
 #------------------------------------------------------------------------------
 
- # Number of cells = 31346 
+ # Number of cells at full scale = 31346 
 cfg.scale = 0.25 # reduce size (per barrel)
 cfg.sizeY = 2082.0
-cfg.sizeX = 150.0 # r = 210 um and hexagonal side length = 230.9 um
-cfg.sizeZ = 150.0
+cfg.sizeX = 310.0 # r = 210 um and hexagonal side length = 230.9 um
+cfg.sizeZ = 310.0
 cfg.scaleDensity = 1.0 # run 8.1: increase density of cells by 2x
 cfg.num_barrels = 2 # number of barrels in S1, along the x-axis (2 barrels, 1 barrel = 210 um)
 
@@ -292,7 +295,7 @@ if cfg.experiment_NBQX_global:
 
 #------------------------------------------------------------------------------
 ## Th->Th 
-cfg.connectTh = True
+cfg.connectTh = (not remove_thalamic_cells) # True if thalamic cells are included in the model
 cfg.connect_RTN_RTN     = True
 cfg.connect_TC_RTN      = True
 cfg.connect_RTN_TC      = True
@@ -313,7 +316,7 @@ cfg.divergenceHO = 10
 
 #------------------------------------------------------------------------------
 ## Th->S1
-cfg.connect_Th_S1 = True
+cfg.connect_Th_S1 = (not remove_thalamic_cells)
 cfg.TC_S1 = {}
 # Next 3 lines are only used if cfg.connect_Th_S1 = True
 cfg.TC_S1['VPL_sTC'] = True  
@@ -323,7 +326,7 @@ cfg.TC_S1['POm_sTC_s1'] = True
 cfg.frac_Th_S1 = 1.0
 #------------------------------------------------------------------------------
 ## S1->Th 
-cfg.connect_S1_Th = True
+cfg.connect_S1_Th = (not remove_thalamic_cells)
 
 cfg.connect_S1_RTN = True
 cfg.convergence_S1_RTN         = 30.0  # dist_2D<R

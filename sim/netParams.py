@@ -85,7 +85,7 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 
 for cellName in cfg.S1cells:
     for barrel in range(cfg.num_barrels):
-        septa_width = 30  # um
+        septa_width = 70  # um
         septa_width_fractional = septa_width / cfg.sizeZ  # fractional width of the septa
         barrel_width = 120  # um
         barrel_width_fractional = barrel_width / cfg.sizeZ  # fractional width of the barrel
