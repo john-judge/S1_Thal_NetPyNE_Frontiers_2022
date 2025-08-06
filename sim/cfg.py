@@ -128,6 +128,7 @@ cfg.S1cells = cellParam[0:207]
 
 remove_thalamic_cells = True
 
+cfg.thalamicpops = []
 if not remove_thalamic_cells:
     cfg.thalamicpops = ['ss_RTN_o', 'ss_RTN_m', 'ss_RTN_i', 'VPL_sTC', 'VPM_sTC', 'POm_sTC_s1']
 
