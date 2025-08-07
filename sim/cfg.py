@@ -61,6 +61,7 @@ cfg.printRunTime = 0.1
 cfg.includeParamsLabel = True
 cfg.printPopAvgRates = True
 cfg.checkErrors = False
+cfg.num_barrels = 2 # number of barrels in S1, along the x-axis (2 barrels, 1 barrel = 210 um)
 
 #------------------------------------------------------------------------------
 # Cells
@@ -105,23 +106,24 @@ cfg.popLabelEl = {}
 cfg.cellLabel = {}
 
 for line in mtype_content.split('\n')[:-1]:
-    cellname, mtype, etype, n, m = line.split()
-    metype = mtype + '_' + etype[0:3]
-    cfg.cellNumber[metype] = int(n)
-    cfg.popLabel[metype] = mtype
-    cfg.popNumber[mtype] = int(m)
-    cfg.cellLabel[metype] = cellname
+    for barrel in range(cfg.num_barrels):
+        cellname, mtype, etype, n, m = line.split()
+        metype = mtype + '_' + etype[0:3]
+        cfg.cellNumber[metype] = int(n)
+        cfg.popLabel[metype] = mtype
+        cfg.popNumber[mtype] = int(m)
+        cfg.cellLabel[metype] = cellname
 
-    if mtype not in popParam:
-        popParam.append(mtype)
-        cfg.popLabelEl[mtype] = [] 
-               
-    cfg.popLabelEl[mtype].append(metype)
+        if mtype not in popParam:
+            popParam.append(mtype)
+            cfg.popLabelEl[mtype] = [] 
+                
+        cfg.popLabelEl[mtype].append(metype)
+        
+        cellParam.append(mtype + '_' + etype[0:3])
     
-    cellParam.append(mtype + '_' + etype[0:3])
-    
-cfg.S1pops = popParam[0:55]
-cfg.S1cells = cellParam[0:207]
+cfg.S1pops = popParam[0:55 * cfg.num_barrels]
+cfg.S1cells = cellParam[0:207 * cfg.num_barrels]
 
 #------------------------------------------------------------------------------  
 # Thalamic Cells
@@ -259,7 +261,6 @@ cfg.sizeY = 2082.0
 cfg.sizeX = 310.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = 310.0
 cfg.scaleDensity = 1.0 # run 8.1: increase density of cells by 2x
-cfg.num_barrels = 2 # number of barrels in S1, along the x-axis (2 barrels, 1 barrel = 210 um)
 
 #------------------------------------------------------------------------------
 # Spontaneous synapses + background - data from Rat
@@ -357,7 +358,7 @@ cfg.addExtracellularStim = True
 
 cfg.xStimLocation = xStimLocation 
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
-cfg.xStimAmp = 20  # amplitude in mA
+cfg.xStimAmp = 200  # amplitude in mA
 cfg.xStimDur = 4  # duration in ms
 cfg.xStimDel = 25  # delay in ms
 

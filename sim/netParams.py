@@ -54,9 +54,10 @@ netParams.shape = 'cylinder' # cylindrical (column-like) volume
 experiment_dendritic_somatic_inhibition = cfg.experiment_dendritic_somatic_inhibition
 
 cellModels = ['HH_full']
-Epops = ['L23_PC', 'L4_PC', 'L4_SS', 'L4_SP', 
+Epops_ = ['L23_PC', 'L4_PC', 'L4_SS', 'L4_SP', 
              'L5_TTPC1', 'L5_TTPC2', 'L5_STPC', 'L5_UTPC',
              'L6_TPC_L1', 'L6_TPC_L4', 'L6_BPC', 'L6_IPC', 'L6_UTPC']
+Epops = [ep + '_barrel' + str(barrel) for ep in Epops_ for barrel in range(cfg.num_barrels)]
 
 Ipops = []
 for popName in cfg.S1pops:
@@ -84,27 +85,27 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 ## S1
 
 for cellName in cfg.S1cells:
-    for barrel in range(cfg.num_barrels):
-        septa_width = 70  # um
-        septa_width_fractional = septa_width / cfg.sizeZ  # fractional width of the septa
-        barrel_width = 120  # um
-        barrel_width_fractional = barrel_width / cfg.sizeZ  # fractional width of the barrel
-        z_range_barrel = [barrel * (barrel_width_fractional + septa_width_fractional), 
-                          barrel * (barrel_width_fractional + septa_width_fractional) + barrel_width_fractional]
-        print("z_range_barrel:", z_range_barrel)
-        layernumber = cellName[1:2]
-        if layernumber == '2':
-            netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
-                                            'ynormRange': layer['23'], 
-                                            'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])),
-                                            'diversity': True,
-                                            'znormRange': z_range_barrel}
-        else:
-            netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
-                                            'ynormRange': layer[layernumber], 
-                                            'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 
-                                            'diversity': True,
-                                            'znormRange': z_range_barrel}
+    barrel = int(cellName.split('_barrel')[-1])  # get barrel number from cellName
+    septa_width = 70  # um
+    septa_width_fractional = septa_width / cfg.sizeZ  # fractional width of the septa
+    barrel_width = 120  # um
+    barrel_width_fractional = barrel_width / cfg.sizeZ  # fractional width of the barrel
+    z_range_barrel = [barrel * (barrel_width_fractional + septa_width_fractional), 
+                        barrel * (barrel_width_fractional + septa_width_fractional) + barrel_width_fractional]
+    print("z_range_barrel:", z_range_barrel)
+    layernumber = cellName[1:2]
+    if layernumber == '2':
+        netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
+                                        'ynormRange': layer['23'], 
+                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])),
+                                        'diversity': True,
+                                        'znormRange': z_range_barrel}
+    else:
+        netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
+                                        'ynormRange': layer[layernumber], 
+                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 
+                                        'diversity': True,
+                                        'znormRange': z_range_barrel}
 
 ## THALAMIC POPULATIONS (from prev model)
 for popName in cfg.thalamicpops:
@@ -133,7 +134,9 @@ for cellName in cfg.S1cells:
         
         cellMe = cfg.cellLabel[cellName] + '_' + str(morphoNumber+1)
         
-        netParams.loadCellParamsRule(label = cellMe, fileName = 'cells/' + cellMe + '_cellParams.json')   
+        netParams.loadCellParamsRule(label = cellMe, fileName = 'cells/' + cellMe + '_cellParams.json')
+        
+        # do we need to strip the barrel no. from cellName to get the cell type? Seems like not needed
 
         cellRule = {'conds': {'cellType': cellName}, 'diversityFraction': cellFraction, 'secs': {}}  # cell rule dict
         cellRule['secs'] = netParams.cellParams[cellMe]['secs']     
