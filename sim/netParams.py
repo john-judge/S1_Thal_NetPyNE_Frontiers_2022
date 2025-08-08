@@ -54,10 +54,9 @@ netParams.shape = 'cylinder' # cylindrical (column-like) volume
 experiment_dendritic_somatic_inhibition = cfg.experiment_dendritic_somatic_inhibition
 
 cellModels = ['HH_full']
-Epops_ = ['L23_PC', 'L4_PC', 'L4_SS', 'L4_SP', 
+Epops = ['L23_PC', 'L4_PC', 'L4_SS', 'L4_SP', 
              'L5_TTPC1', 'L5_TTPC2', 'L5_STPC', 'L5_UTPC',
              'L6_TPC_L1', 'L6_TPC_L4', 'L6_BPC', 'L6_IPC', 'L6_UTPC']
-Epops = [ep + '_barrel' + str(barrel) for ep in Epops_ for barrel in range(cfg.num_barrels)]
 
 Ipops = []
 for popName in cfg.S1pops:

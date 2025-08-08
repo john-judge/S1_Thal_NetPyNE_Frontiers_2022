@@ -120,9 +120,9 @@ for line in mtype_content.split('\n')[:-1]:
                 
         cfg.popLabelEl[mtype].append(metype)
         
-        cellParam.append(mtype + '_' + etype[0:3])
+        cellParam.append(mtype + '_' + etype[0:3] + '_barrel' + str(barrel))
     
-cfg.S1pops = popParam[0:55 * cfg.num_barrels]
+cfg.S1pops = popParam[0:55]
 cfg.S1cells = cellParam[0:207 * cfg.num_barrels]
 
 #------------------------------------------------------------------------------  
