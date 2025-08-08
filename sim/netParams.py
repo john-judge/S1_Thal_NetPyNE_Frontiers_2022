@@ -85,6 +85,7 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 
 for cellName in cfg.S1cells:
     barrel = int(cellName.split('_barrel')[-1])  # get barrel number from cellName
+    metype = cellName.split('_barrel')[0]  # get metype from cellName
     septa_width = 70  # um
     septa_width_fractional = septa_width / cfg.sizeZ  # fractional width of the septa
     barrel_width = 120  # um
@@ -96,13 +97,13 @@ for cellName in cfg.S1cells:
     if layernumber == '2':
         netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
                                         'ynormRange': layer['23'], 
-                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])),
+                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[metype])),
                                         'diversity': True,
                                         'znormRange': z_range_barrel}
     else:
         netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
                                         'ynormRange': layer[layernumber], 
-                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[cellName])), 
+                                        'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[metype])), 
                                         'diversity': True,
                                         'znormRange': z_range_barrel}
 
@@ -121,9 +122,11 @@ for popName in cfg.thalamicpops:
 ## S1 cell property rules
 
 for cellName in cfg.S1cells:
-    
-    if cfg.cellNumber[cellName] < 5:
-        morphoNumbers = cfg.cellNumber[cellName]
+
+    metype = cellName.split('_barrel')[0]  # get metype from cellName
+
+    if cfg.cellNumber[metype] < 5:
+        morphoNumbers = cfg.cellNumber[metype]
     else:
         morphoNumbers = 5
     
