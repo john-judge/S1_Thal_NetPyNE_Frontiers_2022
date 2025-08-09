@@ -134,7 +134,7 @@ for cellName in cfg.S1cells:
     
     for morphoNumber in range(morphoNumbers):
         
-        cellMe = cfg.cellLabel[cellName] + '_' + str(morphoNumber+1)
+        cellMe = cfg.cellLabel[metype] + '_' + str(morphoNumber+1)
         
         netParams.loadCellParamsRule(label = cellMe, fileName = 'cells/' + cellMe + '_cellParams.json')
         
