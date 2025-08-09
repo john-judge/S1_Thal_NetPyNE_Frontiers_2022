@@ -112,23 +112,23 @@ for line in mtype_content.split('\n')[:-1]:
         if n < 1:
             n = 1
         metype = mtype + '_' + etype[0:3]
-        #cellname += ('_barrel' + str(barrel))
-        #metype += ('_barrel' + str(barrel))
+        cellname += ('_barrel' + str(barrel))
+        metype += ('_barrel' + str(barrel))
         cfg.cellNumber[metype] = n
         cfg.popLabel[metype] = mtype
-        cfg.popNumber[mtype] = int(m)
+        cfg.popNumber[metype] = int(m)
         cfg.cellLabel[metype] = cellname
 
         if mtype not in popParam:
-            popParam.append(mtype)
-            cfg.popLabelEl[mtype] = [] 
-                
-        cfg.popLabelEl[mtype].append(metype)
+            popParam.append(metype)
+            cfg.popLabelEl[metype] = [] 
         
-        cellParam.append(mtype + '_' + etype[0:3] + '_barrel' + str(barrel))
+        cfg.popLabelEl[metype].append(metype)
+        
+        cellParam.append(metype)
     
-cfg.S1pops = popParam[0:55]
-cfg.S1cells = cellParam[0:207 * cfg.num_barrels]
+cfg.S1pops = popParam
+cfg.S1cells = cellParam
 
 #------------------------------------------------------------------------------  
 # Thalamic Cells
