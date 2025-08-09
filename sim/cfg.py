@@ -108,8 +108,13 @@ cfg.cellLabel = {}
 for line in mtype_content.split('\n')[:-1]:
     for barrel in range(cfg.num_barrels):
         cellname, mtype, etype, n, m = line.split()
+        n = int(n) #// cfg.num_barrels
+        if n < 1:
+            n = 1
         metype = mtype + '_' + etype[0:3]
-        cfg.cellNumber[metype] = int(n)
+        #cellname += ('_barrel' + str(barrel))
+        #metype += ('_barrel' + str(barrel))
+        cfg.cellNumber[metype] = n
         cfg.popLabel[metype] = mtype
         cfg.popNumber[mtype] = int(m)
         cfg.cellLabel[metype] = cellname

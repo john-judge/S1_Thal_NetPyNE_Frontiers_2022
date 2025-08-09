@@ -141,10 +141,10 @@ for cellName in cfg.S1cells:
         # do we need to strip the barrel no. from cellName to get the cell type? Seems like not needed
 
         cellRule = {'conds': {'cellType': cellName}, 'diversityFraction': cellFraction, 'secs': {}}  # cell rule dict
+        
         cellRule['secs'] = netParams.cellParams[cellMe]['secs']     
         cellRule['conds'] = netParams.cellParams[cellMe]['conds']    
         cellRule['conds']['cellType'] = cellName
-        cellRule['conds']['label'] = cellName
         cellRule['globals'] = netParams.cellParams[cellMe]['globals']       
         cellRule['secLists'] = netParams.cellParams[cellMe]['secLists']      
         cellRule['secLists']['spiny'] = {}
@@ -153,6 +153,7 @@ for cellName in cfg.S1cells:
         cellRule['secLists']['spiny'] = [sec for sec in cellRule['secLists']['all'] if sec not in nonSpiny]
         nonSpinyEE = ['axon_0', 'axon_1', 'soma']
         cellRule['secLists']['spinyEE'] = [sec for sec in cellRule['secLists']['all'] if sec not in nonSpinyEE]
+        cellRule['label'] = cellRule['secLists']['all']
         netParams.cellParams[cellMe] = cellRule   # add dict to list of cell params  
 
         #-----------------------------------------------------------------------------------#
