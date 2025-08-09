@@ -144,6 +144,7 @@ for cellName in cfg.S1cells:
         cellRule['secs'] = netParams.cellParams[cellMe]['secs']     
         cellRule['conds'] = netParams.cellParams[cellMe]['conds']    
         cellRule['conds']['cellType'] = cellName
+        cellRule['conds']['label'] = cellName
         cellRule['globals'] = netParams.cellParams[cellMe]['globals']       
         cellRule['secLists'] = netParams.cellParams[cellMe]['secLists']      
         cellRule['secLists']['spiny'] = {}
