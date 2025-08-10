@@ -345,8 +345,9 @@ contA = 0
 if cfg.addConn:    
     for pre_ in Ipops+Epops:
         for post_ in Ipops+Epops:
-            pre = pre_.split('_barrel')[0]  # get cell type from cell name
-            post = post_.split('_barrel')[0]  # get cell type from cell name
+            pre = "_".join(pre_.split('_')[0:1])
+            post = "_".join(post_.split('_')[0:1])
+
             try:
                 print(connNumber[pre][post])
             except KeyError as e:
