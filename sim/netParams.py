@@ -92,7 +92,7 @@ for cellName in cfg.S1cells:
     barrel_width_fractional = barrel_width / cfg.sizeZ  # fractional width of the barrel
     z_range_barrel = [barrel * (barrel_width_fractional + septa_width_fractional), 
                         barrel * (barrel_width_fractional + septa_width_fractional) + barrel_width_fractional]
-    print("z_range_barrel:", z_range_barrel)
+    #print("z_range_barrel:", z_range_barrel)
     layernumber = cellName[1:2]
     if layernumber == '2':
         netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
@@ -353,14 +353,6 @@ if cfg.addConn:
             for p in connNumber[pre].keys():
                 if p in post_:
                     post = p
-
-            try:
-                print(connNumber[pre][post])
-            except KeyError as e:
-                print(connNumber.keys())
-                print(pre, post, pre_, post_)
-                raise(e)
-
 
             if float(connNumber[pre][post]) > 0:           
                 # ------------------------------------------------------------------------------    
