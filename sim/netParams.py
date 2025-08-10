@@ -347,6 +347,14 @@ if cfg.addConn:
         for post_ in Ipops+Epops:
             pre = pre_.split('_barrel')[0]  # get cell type from cell name
             post = post_.split('_barrel')[0]  # get cell type from cell name
+            try:
+                print(connNumber[pre][post])
+            except KeyError as e:
+                print(connNumber.keys())
+                print(pre, post, pre_, post_)
+                raise(e)
+
+
             if float(connNumber[pre][post]) > 0:           
                 # ------------------------------------------------------------------------------    
                 #  2D distance prob rules
