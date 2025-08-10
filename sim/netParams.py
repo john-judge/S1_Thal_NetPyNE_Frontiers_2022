@@ -345,8 +345,8 @@ contA = 0
 if cfg.addConn:    
     for pre_ in Ipops+Epops:
         for post_ in Ipops+Epops:
-            pre = "_".join(pre_.split('_')[0:1])
-            post = "_".join(post_.split('_')[0:1])
+            pre = "_".join(pre_.split('_')[0:2])
+            post = "_".join(post_.split('_')[0:2])
 
             try:
                 print(connNumber[pre][post])
