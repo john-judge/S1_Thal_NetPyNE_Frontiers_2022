@@ -133,10 +133,11 @@ for cellName in cfg.S1cells:
     cellFraction = 1.0/morphoNumbers
     
     for morphoNumber in range(morphoNumbers):
-        
+        cell_lbl = cfg.cellLabel[metype].split('_barrel')[0]  # get cell label from metype
         cellMe = cfg.cellLabel[metype] + '_' + str(morphoNumber+1)
         
-        netParams.loadCellParamsRule(label = cellMe, fileName = 'cells/' + cellMe + '_cellParams.json')
+        netParams.loadCellParamsRule(label = cell_lbl + '_' + str(morphoNumber+1), 
+                                     fileName = 'cells/' + cellMe + '_cellParams.json')
         
         # do we need to strip the barrel no. from cellName to get the cell type? Seems like not needed
 

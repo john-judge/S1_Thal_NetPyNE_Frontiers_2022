@@ -24,7 +24,7 @@ sim.net.createCells()              			# instantiate network cells based on defin
 sim.net.connectCells()            			# create connections between cells based on params
 for c in sim.net.cells:
     if 'label' not in c.tags:
-        print(c.gid, c.tags)
+        print("c.gid, c.tags", c.gid, c.tags)
 sim.net.addStims() 							# add network stimulation
 sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 sim.runSim()                      			# run parallel Neuron simulation  
