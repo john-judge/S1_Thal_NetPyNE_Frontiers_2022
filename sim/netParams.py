@@ -343,8 +343,10 @@ NGFSynMech_Th  = ['GABAA_Th', 'GABAB_Th']
 contA = 0
 
 if cfg.addConn:    
-    for pre in Ipops+Epops:
-        for post in Ipops+Epops:
+    for pre_ in Ipops+Epops:
+        for post_ in Ipops+Epops:
+            pre = pre_.split('_barrel')[0]  # get cell type from cell name
+            post = post_.split('_barrel')[0]  # get cell type from cell name
             if float(connNumber[pre][post]) > 0:           
                 # ------------------------------------------------------------------------------    
                 #  2D distance prob rules
