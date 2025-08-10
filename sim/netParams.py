@@ -345,6 +345,10 @@ contA = 0
 if cfg.addConn:    
     for pre_ in Ipops+Epops:
         for post_ in Ipops+Epops:
+
+            pre_ = pre_.split('_barrel')[0]  
+            post_ = post_.split('_barrel')[0]
+
             # remove etype by removing last 4 characters
             pre = pre_[:-4] 
             post = post_[:-4]
