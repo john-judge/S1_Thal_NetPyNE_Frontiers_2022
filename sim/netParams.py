@@ -350,8 +350,12 @@ if cfg.addConn:
             post_ = post_.split('_barrel')[0]
 
             # remove etype by removing last 4 characters
-            pre = pre_[:-4] 
-            post = post_[:-4]
+            pre = pre_
+            post = post_
+            if pre_ not in connNumber.keys():
+                pre_ = pre_[:-4] 
+            if post_ not in connNumber.keys():
+                post_ = post_[:-4]
 
             try:
                 print(connNumber[pre][post])
