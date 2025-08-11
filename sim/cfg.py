@@ -25,8 +25,8 @@ cfg = specs.SimConfig()
 
 # (224., 752., 94.) is the location of cell index1 soma
 # (145.,844.,34)) soma index0
-# near center L4: (185., 800., 64.,)
-xStimLocation =[185.,800.,64.]
+# near center L4: (185., 800., 164.)
+xStimLocation =[185.,800.,164.]
 # z_recording_radius = 1000 # microns (box shape)
 cfg.simType='S1_TH_coreneuron'
 cfg.coreneuron = False
