@@ -347,6 +347,8 @@ if cfg.addConn:
         for post_ in Ipops+Epops:
 
             # match pop keys
+            # Note that if they are the same pop in different barrels,
+            # they will get the same connection parameters as recurrent connections
             for p in connNumber.keys():
                 if p in pre_:
                     pre = p
@@ -390,14 +392,14 @@ if cfg.addConn:
                 # ------------------------------------------------------------------------------    
                 # I -> I
                 # ------------------------------------------------------------------------------
-                if pre in Ipops:
-                    if post in Ipops:                             
+                if pre_ in Ipops:
+                    if post_ in Ipops:                             
                         connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_II_STP_Det_' + str(connID)   
                         contA+= 1
-                        netParams.connParams['II_' + pre + '_' + post] = { 
-                                        'preConds': {'pop': cfg.popLabelEl[pre]}, 
-                                        'postConds': {'pop': cfg.popLabelEl[post]},
+                        netParams.connParams['II_' + pre_ + '_' + post_] = { 
+                                        'preConds': {'pop': cfg.popLabelEl[pre_]}, 
+                                        'postConds': {'pop': cfg.popLabelEl[post_]},
                                         'synMech': synMechType,
                                         'probability': prob,
                                         'weight': parameters_syn['gsyn',connID] * cfg.IIGain, 
@@ -406,24 +408,26 @@ if cfg.addConn:
                                         'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                         'sec': 'spiny'}        
                         if experiment_dendritic_somatic_inhibition:
-                            netParams.subConnParams['II_' + pre + '_' + post] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
-                            #del netParams.connParams['II_' + pre + '_' + post]['sec']
+                            netParams.subConnParams['II_' + pre_ + '_' + post_] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                            #del netParams.connParams['II_' + pre_ + '_' + post_]['sec']
                 # ------------------------------------------------------------------------------
                 #  I -> E  # with ME conn diversity
                 # ------------------------------------------------------------------------------
-                if pre in Ipops:
-                    if post in Epops:                                                       
+                if pre_ in Ipops:
+                    if post_ in Epops:                                                       
                         cellpreList_A = []
                         cellpreList_B = []
                         cellpreList_C = []
-                        connID_B = -1    
-                        connID_C = -1                               
-                        if 'SBC' in pre or 'LBC' in pre or 'NBC' in pre:                              
-                            cellpost = cfg.popLabelEl[post][0]   
-                            for npre,cellpre in enumerate(cfg.popLabelEl[pre]):   
+                        connID_B = -1
+                        connID_C = -1
+                        if 'SBC' in pre_ or 'LBC' in pre_ or 'NBC' in pre_:
+                            cellpost = cfg.popLabelEl[post_][0]
+                            for npre,cellpre in enumerate(cfg.popLabelEl[pre_]):
+                                # remove barrel number from cellpre
+                                cellpre = cellpre.split('_barrel')[0]
                                 premtype = pre[-3:]
-                                preetype = cellpre[-3:]                                    
-                                connID = connIEtype[premtype][preetype]                                     
+                                preetype = cellpre[-3:]
+                                connID = connIEtype[premtype][preetype]
                                 if connID == ConnTypes[pre][post][0]:
                                     cellpreList_A.append(cellpre)    
                                 elif connID == ConnTypes[pre][post][1]:
@@ -441,7 +445,7 @@ if cfg.addConn:
                         synMechType = 'S1_IE_STP_Det_' + str(connID)
                         
                         contA+= 1                          
-                        netParams.connParams['IE_'+pre+'_'+post] = { 
+                        netParams.connParams['IE_'+pre_+'_'+post_] = { 
                                     'preConds': {'pop': cellpreList_A}, 
                                     'postConds': {'pop': cfg.popLabelEl[post]},
                                     'synMech': synMechType,
@@ -452,14 +456,14 @@ if cfg.addConn:
                                     'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                     'sec': 'spiny'}  
                         if experiment_dendritic_somatic_inhibition:
-                            netParams.subConnParams['IE_'+pre+'_'+post] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                            netParams.subConnParams['IE_'+pre_+'_'+post_] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
                             #del netParams.connParams['IE_'+pre+'_'+post]['sec']
                 
 
                         if connID_B >= 0:          
                             connID = connID_B
                             synMechType = 'S1_IE_STP_Det_' + str(connID)         
-                            netParams.connParams['IE_'+pre+'_'+post+'_B'] = { 
+                            netParams.connParams['IE_'+pre_+'_'+post_+'_B'] = { 
                                         'preConds': {'pop': cellpreList_B}, 
                                         'postConds': {'pop': cfg.popLabelEl[post]},
                                         'synMech': synMechType,
@@ -470,14 +474,13 @@ if cfg.addConn:
                                         'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                         'sec': 'spiny'}            
                             if experiment_dendritic_somatic_inhibition:
-                                netParams.subConnParams['IE_'+pre+'_'+post+'_B'] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
-                                #del netParams.connParams['IE_'+pre+'_'+post+'_B']['sec']           
-                
-                                
+                                netParams.subConnParams['IE_'+pre_+'_'+post_+'_B'] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                                #del netParams.connParams['IE_'+pre_+'_'+post_+'_B']['sec']           
+
                             if connID_C >= 0:          
                                 connID = connID_C
                                 synMechType = 'S1_IE_STP_Det_' + str(connID)         
-                                netParams.connParams['IE_'+pre+'_'+post+'_C'] = { 
+                                netParams.connParams['IE_'+pre_+'_'+post_+'_C'] = { 
                                             'preConds': {'pop': cellpreList_C}, 
                                             'postConds': {'pop': cfg.popLabelEl[post]},
                                             'synMech': synMechType,
@@ -488,20 +491,20 @@ if cfg.addConn:
                                             'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                             'sec': 'spiny'}                
                                 if experiment_dendritic_somatic_inhibition:
-                                    netParams.subConnParams['IE_'+pre+'_'+post+'_C'] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
-                                    #del netParams.connParams['IE_'+pre+'_'+post+'_C']['sec']       
-                                
+                                    netParams.subConnParams['IE_'+pre_+'_'+post_+'_C'] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
+                                    #del netParams.connParams['IE_'+pre_+'_'+post_+'_C']['sec']       
+
                 #------------------------------------------------------------------------------   
                 # E -> E
                 #------------------------------------------------------------------------------
-                if pre in Epops:
-                    if post in Epops:    
+                if pre_ in Epops:
+                    if post_ in Epops:    
                         connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_EE_STP_Det_' + str(connID)   
                         contA+= 1   
-                        netParams.connParams['EE_'+pre+'_'+post] = { 
-                            'preConds': {'pop': cfg.popLabelEl[pre]}, 
-                            'postConds': {'pop': cfg.popLabelEl[post]},
+                        netParams.connParams['EE_'+pre_+'_'+post_] = { 
+                            'preConds': {'pop': cfg.popLabelEl[pre_]}, 
+                            'postConds': {'pop': cfg.popLabelEl[post_]},
                             'synMech': synMechType,
                             'probability': prob, 
                             'weight': parameters_syn['gsyn',connID] * cfg.EEGain, 
@@ -513,16 +516,18 @@ if cfg.addConn:
                 #------------------------------------------------------------------------------               
                 #  E -> I  with ME conn diversity
                 #------------------------------------------------------------------------------   
-                if pre in Epops:
-                    if post in Ipops:                        
+                if pre_ in Epops:
+                    if post_ in Ipops:                        
                         cellpostList_A = []
                         cellpostList_B = []
                         connID_B = -1                          
                         if ConnTypes[pre][post][0] == 131 or ConnTypes[pre][post][0] == 132: # EXCEPTIONS -> L6_IPC:L6_(DBC-LBC-NBC-SBC) and  L6_TPC_L:L6_(DBC-LBC-NBC-SBC)    
                             cellpostList_A = cfg.popLabelEl[post]     
                         elif 'LBC' in post or 'NBC' in post or 'BP' in post or 'DBC' in post or 'BTC' in post:    
-                            cellpre = cfg.popLabelEl[pre][0]
-                            for npost,cellpost in enumerate(cfg.popLabelEl[post]):                                
+                            cellpre = cfg.popLabelEl[pre_][0]
+                            for npost,cellpost in enumerate(cfg.popLabelEl[post_]):                                
+                                # remove barrel number from cellpost
+                                cellpost = cellpost.split('_barrel')[0]
                                 postmtype = post[-3:]
                                 postetype = cellpost[-3:]
                                 if 'BP' in postmtype:
@@ -536,7 +541,7 @@ if cfg.addConn:
                                 else:
                                     print('ERROR')                                
                         else:                           
-                            cellpostList_A = cfg.popLabelEl[post]         
+                            cellpostList_A = cfg.popLabelEl[post_]         
                              
                         connID = ConnTypes[pre][post][0]  
 
@@ -546,8 +551,8 @@ if cfg.addConn:
                             synMechType = 'S1_EIproximal_STP_Det_' + str(connID)  
 
                         contA+= 1                                                              
-                        netParams.connParams['EI_'+pre+'_'+post] = { 
-                                        'preConds': {'pop': cfg.popLabelEl[pre]}, 
+                        netParams.connParams['EI_'+pre_+'_'+post_] = { 
+                                        'preConds': {'pop': cfg.popLabelEl[pre_]}, 
                                         'postConds': {'pop': cellpostList_A},
                                         'synMech': synMechType,
                                         'probability': prob, 
@@ -561,13 +566,13 @@ if cfg.addConn:
 
                             connID = connID_B
 
-                            if 'DBC' in post or 'BTC' in post or 'MC' in post or 'BP' in post:  # steep Ca2+ dependence for connections between PC-distal targeting cell types (DBC, BTC, MC, BP)
+                            if 'DBC' in post_ or 'BTC' in post_ or 'MC' in post_ or 'BP' in post_:  # steep Ca2+ dependence for connections between PC-distal targeting cell types (DBC, BTC, MC, BP)
                                 synMechType = 'S1_EIdistal_STP_Det_' + str(connID)
                             else: # shallow dependence between PC-proximal targeting cell types (LBCs, NBCs, SBCs, ChC) + L1s and NGCs ????
                                 synMechType = 'S1_EIproximal_STP_Det_' + str(connID)  
 
-                            netParams.connParams['EI_'+pre+'_'+post+'_B'] = { 
-                                            'preConds': {'pop': cfg.popLabelEl[pre]}, 
+                            netParams.connParams['EI_'+pre_+'_'+post_+'_B'] = {
+                                            'preConds': {'pop': cfg.popLabelEl[pre_]}, 
                                             'postConds': {'pop': cellpostList_B},
                                             'synMech': synMechType,
                                             'probability': prob, 
