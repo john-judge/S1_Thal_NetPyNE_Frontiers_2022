@@ -19,8 +19,7 @@ cfg, netParams = sim.readCmdLineArgs()
 sim.initialize(
     simConfig = cfg, 	
     netParams = netParams)  				# create network object and set cfg and net params
-sim.net.createPops()               			# instantiate network populations
-sim.net.createCells()              			# instantiate network cells based on defined populations
+
 
 # Collect all synapse mechanism names from connection rules
 all_conn_mechs = set()
@@ -60,6 +59,12 @@ if missing_mechs:
     print("\nSynapse mechanisms with zero matching post cellTypes:", missing_mechs)
 
 raise Exception("Simulation cannot proceed due to missing synapse mechanisms!")
+
+
+sim.net.createPops()               			# instantiate network populations
+sim.net.createCells()              			# instantiate network cells based on defined populations
+
+
 
 
 sim.net.connectCells()            			# create connections between cells based on params
