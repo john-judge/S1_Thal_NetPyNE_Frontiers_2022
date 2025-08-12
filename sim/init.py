@@ -86,8 +86,7 @@ print("Check connection probabilities")
 num_checks = 50
 for connName, conn in sim.net.params.connParams.items():
     prob = conn.get('probability', None)
-    numConns = conn.get('numConns', None)
-    print(f"{connName}: prob={prob}, numConns={numConns}")
+    print(f"{connName}: prob={prob}")
     num_checks -= 1
     if num_checks <= 0:
         break

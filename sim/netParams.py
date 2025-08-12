@@ -100,12 +100,14 @@ for cellName in cfg.S1cells:
     layernumber = cellName[1:2]
     if layernumber == '2':
         netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
+                                         'tags': {'pop': cellName},
                                         'ynormRange': layer['23'], 
                                         'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[metype])),
                                         'diversity': True,
                                         'znormRange': z_range_barrel}
     else:
         netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
+                                         'tags': {'pop': cellName},
                                         'ynormRange': layer[layernumber], 
                                         'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[metype])), 
                                         'diversity': True,
