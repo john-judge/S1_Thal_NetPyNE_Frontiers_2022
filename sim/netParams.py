@@ -407,7 +407,7 @@ for syntype in syntypes:
 #------------------------------------------------------------------------------
 #  mods from S1 BBP - deterministic version
 for syntype in syntypes:
-    if syntype > 50:  # Exc
+    if int(syntype.split("_")[0]) > 50:  # Exc
         
         netParams.synMechParams['S1_EE_STP_Det_' + str(syntype)] = {'mod': 'DetAMPANMDA',
                                          'Use': dfS6['use'][syntype]*cfg.use_frac['EE'], # ± dfS6['useStd'][syntype]
