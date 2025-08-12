@@ -557,7 +557,7 @@ if cfg.addConn:
                             # see if any of these are populated
                             if post in ConnTypes.keys() and pre in ConnTypes[post].keys():
                                 connID = ConnTypes[post][pre][0]
-                            elif pre in ConnTypes.keys() and post in ConnTypes[pre].keys():
+                            elif pre in ConnTypes.keys() and pre in ConnTypes[pre].keys():
                                 connID = ConnTypes[pre][pre][0]
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
                                 connID = ConnTypes[post][post][0]
@@ -619,12 +619,13 @@ if cfg.addConn:
                             # see if any of these are populated
                             if post in ConnTypes.keys() and pre in ConnTypes[post].keys():
                                 connID = ConnTypes[post][pre][0]
-                            elif pre in ConnTypes.keys() and post in ConnTypes[pre].keys():
+                            elif pre in ConnTypes.keys() and pre in ConnTypes[post].keys():
                                 connID = ConnTypes[pre][pre][0]
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
                                 connID = ConnTypes[post][post][0]
                             else:
-                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys())
+                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys(),
+                                                "ConnTypes[pre]:", ConnTypes[pre].keys(), "ConnTypes[post]:", ConnTypes[post].keys())
                         else:
                             connID = ConnTypes[pre][post][0]                            
                         synMechType = 'S1_IE_STP_Det_' + str(connID)
@@ -691,12 +692,13 @@ if cfg.addConn:
                             # see if any of these are populated
                             if post in ConnTypes.keys() and pre in ConnTypes[post].keys():
                                 connID = ConnTypes[post][pre][0]
-                            elif pre in ConnTypes.keys() and post in ConnTypes[pre].keys():
+                            elif pre in ConnTypes.keys() and pre in ConnTypes[pre].keys():
                                 connID = ConnTypes[pre][pre][0]
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
                                 connID = ConnTypes[post][post][0]
                             else:
-                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys())
+                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys(),
+                                                "ConnTypes[pre]:", ConnTypes[pre].keys(), "ConnTypes[post]:", ConnTypes[post].keys())
                         else:
                             connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_EE_STP_Det_' + str(connID)   
@@ -750,12 +752,13 @@ if cfg.addConn:
                             # see if any of these are populated
                             if post in ConnTypes.keys() and pre in ConnTypes[post].keys():
                                 connID = ConnTypes[post][pre][0]
-                            elif pre in ConnTypes.keys() and post in ConnTypes[pre].keys():
+                            elif pre in ConnTypes.keys() and pre in ConnTypes[pre].keys():
                                 connID = ConnTypes[pre][pre][0]
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
                                 connID = ConnTypes[post][post][0]
                             else:
-                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys())
+                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys(),
+                                                "ConnTypes[pre]:", ConnTypes[pre].keys(), "ConnTypes[post]:", ConnTypes[post].keys())
                         else:
                             connID = ConnTypes[pre][post][0]  
 
