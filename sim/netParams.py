@@ -606,11 +606,12 @@ if cfg.addConn:
                         else:   
                             cellpreList_A = cfg.popLabelEl[pre]                              
                             
-                        if pre not in ConnTypes.keys():
-                            print(pre, post, "not in ConnTypes (I -> E):", ConnTypes.keys())
                         if post not in ConnTypes[pre].keys():
-                            print(pre, post, "not in ConnTypes[pre] (I -> E):", ConnTypes[pre].keys())
-                        connID = ConnTypes[pre][post][0]                            
+                            # then it could be mtype_barrel0 -> mtype_barrel1
+                            # replace with mtype_barrel0 -> mtype_barrel0
+                            connID = ConnTypes[pre][pre][0]
+                        else:
+                            connID = ConnTypes[pre][post][0]                            
                         synMechType = 'S1_IE_STP_Det_' + str(connID)
                         
                         contA+= 1                          
@@ -720,7 +721,12 @@ if cfg.addConn:
                         else:                           
                             cellpostList_A = cfg.popLabelEl[post]         
                              
-                        connID = ConnTypes[pre][post][0]  
+                        if post not in ConnTypes[pre].keys():
+                            # then it could be mtype_barrel0 -> mtype_barrel1
+                            # replace with mtype_barrel0 -> mtype_barrel0
+                            connID = ConnTypes[pre][pre][0]
+                        else:
+                            connID = ConnTypes[pre][post][0]  
 
                         if 'DBC' in post or 'BTC' in post or 'MC' in post or 'BP' in post:  # steep Ca2+ dependence for connections between PC-distal targeting cell types (DBC, BTC, MC, BP)
                             synMechType = 'S1_EIdistal_STP_Det_' + str(connID)
