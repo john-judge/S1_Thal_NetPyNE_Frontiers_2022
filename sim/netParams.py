@@ -322,7 +322,7 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
             for tgt_base, old_ids in connDict[src_base].items():
                 # Same-barrel target
                 tgt_full_same = tgt_base + barrel_src
-                expanded[src_full][tgt_full_same] = [x + barrel_src for x in old_ids]
+                expanded[src_full][tgt_full_same] = [str(x) + barrel_src for x in old_ids]
 
                 # Cross-barrel target (optional)
                 #for barrel_tgt in barrel_suffixes:
@@ -345,7 +345,7 @@ def expand_connType_single_id(connDict, barrel_suffixes=('_barrel0', '_barrel1')
 
             for tgt_base, old_id in connDict[src_base].items():
                 tgt_full_same = tgt_base + barrel_src
-                expanded[src_full][tgt_full_same] = old_id + barrel_src
+                expanded[src_full][tgt_full_same] = str(old_id) + barrel_src
 
                 # Optional cross-barrel (comment/uncomment as needed)
                 # for barrel_tgt in barrel_suffixes:
