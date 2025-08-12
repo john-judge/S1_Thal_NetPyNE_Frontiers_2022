@@ -24,12 +24,10 @@ sim.net.createCells()              			# instantiate network cells based on defin
 
 # Collect all synapse mechanism names from connection rules
 all_conn_mechs = set()
-for connName, conn in sim.net.params.connParams.items():
-    synMech = conn.get('synMech')
-    if isinstance(synMech, list):
-        all_conn_mechs.update(synMech)
-    elif synMech:
-        all_conn_mechs.add(synMech)
+print(f"Number of connection rules in netParams.connParams: {len(sim.net.params.connParams)}")
+for key, val in list(sim.net.params.connParams.items())[:5]:
+    print(f"Conn rule: {key}, synMech: {val.get('synMech')}")
+    all_conn_mechs.add(val.get('synMech'))
 
 print(f"Total synapse mechanisms in connection rules: {len(all_conn_mechs)}")
 
