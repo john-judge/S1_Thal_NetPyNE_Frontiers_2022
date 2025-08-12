@@ -273,9 +273,9 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
     return expanded
 
 
-connTypes_expanded = expand_connTypes_with_new_ids(connTypes)
-connIEtype_expanded = expand_connTypes_with_new_ids(connIEtype)
-connEItype_expanded = expand_connTypes_with_new_ids(connEItype)
+ConnTypes = expand_connTypes_with_new_ids(ConnTypes)
+connIEtype = expand_connTypes_with_new_ids(connIEtype)
+connEItype = expand_connTypes_with_new_ids(connEItype)
 
 
 physColumnNames = []
