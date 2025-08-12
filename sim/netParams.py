@@ -360,7 +360,7 @@ connIEtype = expand_connType_single_id(connIEtype)
 connEItype = expand_connType_single_id(connEItype)
 
 # print only 5 entries for debugging
-print("extended connData", {k: connData[k] for k in list(connData.keys())[:2]})
+print("extended connData", {k: ConnTypes[k] for k in list(connData.keys())[:2]})
 print("connIEtype", {k: connIEtype[k] for k in list(connIEtype.keys())[:5]})
 print("connEItype", {k: connEItype[k] for k in list(connEItype.keys())[:5]})
 
@@ -546,6 +546,7 @@ if cfg.addConn:
                                 connID = None
                         else:                     
                             connID = ConnTypes[pre][post][0]
+                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:                    
                             synMechType = 'S1_II_STP_Det_' + str(connID) 
                             contA+= 1
@@ -610,7 +611,7 @@ if cfg.addConn:
                                 connID = None
                         else:
                             connID = ConnTypes[pre][post][0] 
-
+                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:                           
                             synMechType = 'S1_IE_STP_Det_' + str(connID)
                             
@@ -687,6 +688,7 @@ if cfg.addConn:
                                 connID = None
                         else:
                             connID = ConnTypes[pre][post][0]           
+                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:             
                             synMechType = 'S1_EE_STP_Det_' + str(connID)   
                             contA+= 1   
@@ -724,7 +726,7 @@ if cfg.addConn:
                         else:
                             connID = ConnTypes[pre][post][0] 
                          
-
+                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:
                             cellpostList_A = []
                             cellpostList_B = []
