@@ -612,7 +612,7 @@ if cfg.addConn:
                                 #del netParams.connParams['IE_'+pre+'_'+post]['sec']
                     
 
-                            if int(connID_B.split("_")[0]) >= 0:          
+                            if (type(connID_B) == str and int(connID_B.split("_")[0]) >= 0) or (type(connID_B) == int and connID_B >= 0):          
                                 synMechType = 'S1_IE_STP_Det_' + str(connID_B)
                                 netParams.connParams['IE_'+pre +'_'+post+'_B'] = { 
                                             'preConds': {'pop': cellpreList_B}, 
@@ -628,7 +628,7 @@ if cfg.addConn:
                                     netParams.subConnParams['IE_'+pre +'_'+post +'_B'] = {'type':'1Dmap','gridY': [0,-200,-400,-600,-800], 'fixedSomaY':0,'gridValues':[0,0.2,0.7,1.0,1.0]}
                                     #del netParams.connParams['IE_'+pre+'_'+post+'_B']['sec']           
 
-                                if int(connID_C.split("_")[0]) >= 0:          
+                                if type(connID_C) == str and int(connID_C.split("_")[0]) >= 0 or (type(connID_C) == int and connID_C >= 0):
                                     synMechType = 'S1_IE_STP_Det_' + str(connID_C)
                                     netParams.connParams['IE_'+pre+'_'+post+'_C'] = { 
                                                 'preConds': {'pop': cellpreList_C}, 
@@ -747,21 +747,19 @@ if cfg.addConn:
                                             'synsPerConn': int(synperconnNumber[pre][post]+0.5),
                                             'sec': 'spiny'}   
 
-                            if int(connID_B.split("_")[0]) >= 0:      
-
-                                connID = connID_B
+                            if (type(connID_B) == str and (int(connID_B.split("_")[0]) >= 0)) or connID_B >= 0:      
 
                                 if 'DBC' in post or 'BTC' in post or 'MC' in post or 'BP' in post:  # steep Ca2+ dependence for connections between PC-distal targeting cell types (DBC, BTC, MC, BP)
-                                    synMechType = 'S1_EIdistal_STP_Det_' + str(connID)
+                                    synMechType = 'S1_EIdistal_STP_Det_' + str(connID_B)
                                 else: # shallow dependence between PC-proximal targeting cell types (LBCs, NBCs, SBCs, ChC) + L1s and NGCs ????
-                                    synMechType = 'S1_EIproximal_STP_Det_' + str(connID)  
+                                    synMechType = 'S1_EIproximal_STP_Det_' + str(connID_B)  
 
                                 netParams.connParams['EI_'+pre+'_'+post+'_B'] = {
                                                 'preConds': {'pop': cfg.popLabelEl[pre]}, 
                                                 'postConds': {'pop': cellpostList_B},
                                                 'synMech': synMechType,
                                                 'probability': prob, 
-                                                'weight': parameters_syn['gsyn',connID] * cfg.EIGain, 
+                                                'weight': parameters_syn['gsyn',connID_B] * cfg.EIGain, 
                                                 'synMechWeightFactor': cfg.synWeightFractionEI,
                                                 'delay': 'defaultDelay+dist_3D/propVelocity',
                                                 'synsPerConn': int(synperconnNumber[pre][post]+0.5),
