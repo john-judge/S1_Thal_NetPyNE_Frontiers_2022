@@ -428,14 +428,14 @@ if cfg.addConn:
                                 premtype = pre[-3:]
                                 preetype = cellpre[-3:]
                                 connID = connIEtype[premtype][preetype]
-                                print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
-                                      "ConnTypes[pre][post]:", ConnTypes[pre][post])
-                                if connID == ConnTypes[pre][post][0]:
+                                #print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
+                                #      "ConnTypes[pre][post]:", ConnTypes[pre][post])
+                                if connID == ConnTypes[pre][post][0] or len(ConnTypes[pre][post]) == 1:
                                     cellpreList_A.append(cellpre)    
-                                elif connID == ConnTypes[pre][post][1]:
+                                elif connID == ConnTypes[pre][post][1] or len(ConnTypes[pre][post]) == 2:
                                     cellpreList_B.append(cellpre)
                                     connID_B = ConnTypes[pre][post][1]
-                                elif connID == ConnTypes[pre][post][2]:
+                                elif connID == ConnTypes[pre][post][2] or len(ConnTypes[pre][post]) == 3:
                                     cellpreList_C.append(cellpre)
                                     connID_C = ConnTypes[pre][post][2]
                                 else:
