@@ -272,16 +272,6 @@ use = connData['use']
 ConnTypesNumber = connData['ConnTypesNumber'] 
 ConnTypes = connData['ConnTypes']   
 
-'''
-print("connNumber", list(connNumber.keys())[0], connNumber[list(connNumber.keys())[0]])
-print("ConnTypesNumber", list(ConnTypesNumber.keys())[0], ConnTypesNumber[list(ConnTypesNumber.keys())[0]])
-print("synperconnNumber", list(synperconnNumber.keys())[0], synperconnNumber[list(synperconnNumber.keys())[0]])
-print("decay", list(decay.keys())[0], decay[list(decay.keys())[0]])
-print("gsyn", list(gsyn.keys())[0], gsyn[list(gsyn.keys())[0]])
-print("use", list(use.keys())[0], use[list(use.keys())[0]])
-print("parameters_syn", list(parameters_syn.keys())[0], parameters_syn[list(parameters_syn.keys())[0]])
-raise Exception("connData loaded, check conn/conn.pkl for details")  # remove this line when done debugging
-'''
 
 # to match the barrel structure in cfg.S1pops,
 # need to expand connTypes, connIEtype, connEItype
@@ -299,7 +289,6 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
                     # Same-barrel target
                     tgt_full_same = tgt_base + barrel_src
                     expanded[src_full][tgt_full_same] = [str(x) + barrel_src + barrel_tgt for x in old_ids]
-                    print(old_ids, "->", expanded[src_full][tgt_full_same])  # Debug print
 
                     # Cross-barrel target (optional)
                     #for barrel_tgt in barrel_suffixes:
@@ -541,7 +530,6 @@ if cfg.addConn:
                                 connID = None
                         else:                     
                             connID = ConnTypes[pre][post][0]
-                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:                    
                             synMechType = 'S1_II_STP_Det_' + str(connID) 
                             contA+= 1
@@ -605,7 +593,6 @@ if cfg.addConn:
                                 connID = None
                         else:
                             connID = ConnTypes[pre][post][0] 
-                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:                           
                             synMechType = 'S1_IE_STP_Det_' + str(connID)
                             
@@ -679,7 +666,6 @@ if cfg.addConn:
                                 connID = None
                         else:
                             connID = ConnTypes[pre][post][0]           
-                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:             
                             synMechType = 'S1_EE_STP_Det_' + str(connID)   
                             contA+= 1   
@@ -716,7 +702,6 @@ if cfg.addConn:
                         else:
                             connID = ConnTypes[pre][post][0] 
                          
-                        print(connID, "connID for", pre, post, "ConnTypes:", connID)
                         if connID is not None:
                             cellpostList_A = []
                             cellpostList_B = []
