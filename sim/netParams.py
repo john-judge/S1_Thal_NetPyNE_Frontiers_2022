@@ -282,31 +282,6 @@ print("use", list(use.keys())[0], use[list(use.keys())[0]])
 print("parameters_syn", list(parameters_syn.keys())[0], parameters_syn[list(parameters_syn.keys())[0]])
 raise Exception("connData loaded, check conn/conn.pkl for details")  # remove this line when done debugging
 '''
-# to match the barrel structure in cfg.S1pops,
-# need to expand connTypes, connIEtype, connEItype
-def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barrel1')):
-    base_pops = list(connDict.keys())
-    expanded = {}
-
-    for barrel_src in barrel_suffixes:
-        for src_base in base_pops:
-            src_full = src_base + barrel_src
-            expanded[src_full] = {}
-
-            for tgt_base, old_ids in connDict[src_base].items():
-                # Same-barrel target
-                tgt_full_same = tgt_base + barrel_src
-                expanded[src_full][tgt_full_same] = old_ids  # keep original list of IDs
-
-                # Cross-barrel target (optional)
-                #for barrel_tgt in barrel_suffixes:
-                #    if barrel_tgt != barrel_src:
-                #        tgt_full_cross = tgt_base + barrel_tgt
-                #        # Uncomment below to add cross-barrel connections with same old IDs
-                #        # expanded[src_full][tgt_full_cross] = old_ids
-
-    return expanded
-
 
 # to match the barrel structure in cfg.S1pops,
 # need to expand connTypes, connIEtype, connEItype
@@ -324,6 +299,7 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
                     # Same-barrel target
                     tgt_full_same = tgt_base + barrel_src
                     expanded[src_full][tgt_full_same] = [str(x) + barrel_src + barrel_tgt for x in old_ids]
+                    print(old_ids, "->", expanded[src_full][tgt_full_same])  # Debug print
 
                     # Cross-barrel target (optional)
                     #for barrel_tgt in barrel_suffixes:
@@ -393,8 +369,6 @@ print("connEItype", {k: connEItype[k] for k in list(connEItype.keys())[:5]})
 # syntypes match connIDs
 # Now parameters_syn keys are like ('gsyn', '114_barrel0'), ('gsyn', '114_barrel1'), etc.
 parameters_syn = expand_parameters_syn_with_suffix(parameters_syn)
-
-
 
 physColumnNames = []
 syntypes = []
