@@ -360,12 +360,6 @@ ConnTypes = expand_connTypes_with_new_ids(ConnTypes)
 connIEtype = expand_connType_single_id(connIEtype)
 connEItype = expand_connType_single_id(connEItype)
 
-# print only 5 entries for debugging
-print("extended ConnTypes", {k: ConnTypes[k] for k in list(ConnTypes.keys())[:2]})
-print("connIEtype", {k: connIEtype[k] for k in list(connIEtype.keys())[:5]})
-print("connEItype", {k: connEItype[k] for k in list(connEItype.keys())[:5]})
-
-
 # expand parameters_syn to expanded set of syntypes
 # syntypes match connIDs
 # Now parameters_syn keys are like ('gsyn', '114_barrel0'), ('gsyn', '114_barrel1'), etc.
@@ -551,7 +545,6 @@ if cfg.addConn:
                         if connID is not None:                    
                             synMechType = 'S1_II_STP_Det_' + str(connID) 
                             contA+= 1
-                            print("Adding connection: II", pre, post, "connID:", connID, "prob:", prob)
                             netParams.connParams['II_' + pre + '_' + post] = { 
                                             'preConds': {'pop': cfg.popLabelEl[pre]}, 
                                             'postConds': {'pop': cfg.popLabelEl[post]},
@@ -617,7 +610,6 @@ if cfg.addConn:
                             synMechType = 'S1_IE_STP_Det_' + str(connID)
                             
                             contA+= 1          
-                            print("Adding connection: II", pre, post, "connID:", connID, "prob:", prob)                
                             netParams.connParams['IE_'+pre+'_'+post] = { 
                                         'preConds': {'pop': cellpreList_A}, 
                                         'postConds': {'pop': cfg.popLabelEl[post]},
@@ -636,7 +628,6 @@ if cfg.addConn:
                             if connID_B >= 0:          
                                 connID = connID_B
                                 synMechType = 'S1_IE_STP_Det_' + str(connID)
-                                print("Adding connection: II", pre, post, "connID:", connID, "prob:", prob)
                                 netParams.connParams['IE_'+pre +'_'+post+'_B'] = { 
                                             'preConds': {'pop': cellpreList_B}, 
                                             'postConds': {'pop': cfg.popLabelEl[post]},
@@ -654,7 +645,6 @@ if cfg.addConn:
                                 if connID_C >= 0:          
                                     connID = connID_C
                                     synMechType = 'S1_IE_STP_Det_' + str(connID)
-                                    print("Adding connection: II", pre, post, "connID:", connID, "prob:", prob)
                                     netParams.connParams['IE_'+pre+'_'+post+'_C'] = { 
                                                 'preConds': {'pop': cellpreList_C}, 
                                                 'postConds': {'pop': cfg.popLabelEl[post]},
@@ -693,7 +683,6 @@ if cfg.addConn:
                         if connID is not None:             
                             synMechType = 'S1_EE_STP_Det_' + str(connID)   
                             contA+= 1   
-                            print("Adding connection: II", pre, post, "connID:", connID, "prob:", prob)
                             netParams.connParams['EE_'+pre+'_'+post] = { 
                                 'preConds': {'pop': cfg.popLabelEl[pre]}, 
                                 'postConds': {'pop': cfg.popLabelEl[post]},
@@ -764,7 +753,6 @@ if cfg.addConn:
                                 synMechType = 'S1_EIproximal_STP_Det_' + str(connID)  
 
                             contA+= 1               
-                            print("Adding connection: II", pre, post, "connID:", connID, "prob:", prob)                                              
                             netParams.connParams['EI_'+pre+'_'+post] = { 
                                             'preConds': {'pop': cfg.popLabelEl[pre]}, 
                                             'postConds': {'pop': cellpostList_A},
@@ -785,7 +773,6 @@ if cfg.addConn:
                                 else: # shallow dependence between PC-proximal targeting cell types (LBCs, NBCs, SBCs, ChC) + L1s and NGCs ????
                                     synMechType = 'S1_EIproximal_STP_Det_' + str(connID)  
 
-                                print("Adding connection: II", pre, post, "connID:", connID, "prob:", prob)
                                 netParams.connParams['EI_'+pre+'_'+post+'_B'] = {
                                                 'preConds': {'pop': cfg.popLabelEl[pre]}, 
                                                 'postConds': {'pop': cellpostList_B},
