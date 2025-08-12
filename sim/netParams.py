@@ -273,9 +273,45 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
     return expanded
 
 
+def expand_connType_single_id(connDict, barrel_suffixes=('_barrel0', '_barrel1')):
+    base_pops = list(connDict.keys())
+    expanded = {}
+
+    # Find max existing connID
+    max_id = 0
+    for src in connDict:
+        for tgt in connDict[src]:
+            val = connDict[src][tgt]
+            if val > max_id:
+                max_id = val
+    next_conn_id = max_id + 1
+
+    def get_next_id():
+        nonlocal next_conn_id
+        cid = next_conn_id
+        next_conn_id += 1
+        return cid
+
+    for barrel_src in barrel_suffixes:
+        for src_base in base_pops:
+            src_full = src_base + barrel_src
+            expanded[src_full] = {}
+
+            for tgt_base, old_id in connDict[src_base].items():
+                tgt_full_same = tgt_base + barrel_src
+                expanded[src_full][tgt_full_same] = get_next_id()
+
+                # Optional cross-barrel (comment/uncomment as needed)
+                # for barrel_tgt in barrel_suffixes:
+                #     if barrel_tgt != barrel_src:
+                #         tgt_full_cross = tgt_base + barrel_tgt
+                #         expanded[src_full][tgt_full_cross] = get_next_id()
+
+    return expanded
+
 ConnTypes = expand_connTypes_with_new_ids(ConnTypes)
-connIEtype = expand_connTypes_with_new_ids(connIEtype)
-connEItype = expand_connTypes_with_new_ids(connEItype)
+connIEtype = expand_connType_single_id(connIEtype)
+connEItype = expand_connType_single_id(connEItype)
 
 
 physColumnNames = []
