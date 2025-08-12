@@ -468,7 +468,10 @@ contA = 0
 if cfg.addConn:    
     for pre in Ipops+Epops:
         for post in Ipops+Epops:
-
+            if pre not in connNumber.keys():
+                print(pre, post, "not in connNumber:", connNumber.keys())
+            if post not in connNumber[pre].keys():
+                print(pre, post, "not in connNumber[pre]:", connNumber[pre].keys())
             if float(connNumber[pre][post]) > 0:           
                 # ------------------------------------------------------------------------------    
                 #  2D distance prob rules
