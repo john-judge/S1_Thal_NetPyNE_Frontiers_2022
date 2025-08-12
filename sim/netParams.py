@@ -548,7 +548,11 @@ if cfg.addConn:
                 # I -> I
                 # ------------------------------------------------------------------------------
                 if pre in Ipops:
-                    if post in Ipops:                             
+                    if post in Ipops:
+                        if pre not in ConnTypes.keys():
+                            print(pre, post, "not in ConnTypes:", ConnTypes.keys())
+                        if post not in ConnTypes[pre].keys():
+                            print(pre, post, "not in ConnTypes[pre]:", ConnTypes[pre].keys())                       
                         connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_II_STP_Det_' + str(connID) 
                         print("Assigning synMech:", synMechType) 
