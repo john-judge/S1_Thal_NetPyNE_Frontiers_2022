@@ -12,6 +12,7 @@ import pickle, json
 import os
 import numpy as np
 import pandas as pd
+import copy
 
 netParams = specs.NetParams()   # object of class NetParams to store the network parameters
 
@@ -195,9 +196,11 @@ netParams.cellParams['sRE_cell']['conds']={}
 #------------------------------------------------------------------------------
 with open('conn/conn.pkl', 'rb') as fileObj: connData = pickle.load(fileObj)
 
+# Save original before expansion
+#original_connData = copy.deepcopy(connData)
+
 connIEtype = connData['connIEtype']  
 connEItype = connData['connEItype']
-parameters_syn = connData['parameters_syn']
 
 
 def expand_conn_data_dict(data_dict, barrel_suffixes=('_barrel0', '_barrel1')):
@@ -222,7 +225,8 @@ keys_to_expand = [
     'd0', 'dfinal', 'lmat', 
     'a0mat', 'a0e', 'l0e', 'd0e',
     'a0g', 'x0g', 'l0g', 'd0g',
-] 
+    "best_fit",
+]
 
 for key in keys_to_expand:
     if key in connData:
@@ -241,6 +245,7 @@ a0g = connData['a0mat_gauss']
 x0g = connData['x0_gauss']
 l0g = connData['lmat_gauss']
 d0g = connData['d0_gauss']
+parameters_syn = connData['parameters_syn']  # expanded below
 
 dfinal = connData['dfinal']
 pmat = {}
@@ -283,21 +288,31 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
     base_pops = list(connDict.keys())
     expanded = {}
 
-    # Find max existing connID to start new IDs from
-    max_id = 0
-    for src in connDict:
-        for tgt in connDict[src]:
-            max_in_list = max(connDict[src][tgt]) if connDict[src][tgt] else 0
-            if max_in_list > max_id:
-                max_id = max_in_list
+    for barrel_src in barrel_suffixes:
+        for src_base in base_pops:
+            src_full = src_base + barrel_src
+            expanded[src_full] = {}
 
-    next_conn_id = max_id + 1
+            for tgt_base, old_ids in connDict[src_base].items():
+                # Same-barrel target
+                tgt_full_same = tgt_base + barrel_src
+                expanded[src_full][tgt_full_same] = old_ids  # keep original list of IDs
 
-    def new_ids_list(length):
-        nonlocal next_conn_id
-        ids = list(range(next_conn_id, next_conn_id + length))
-        next_conn_id += length
-        return ids
+                # Cross-barrel target (optional)
+                #for barrel_tgt in barrel_suffixes:
+                #    if barrel_tgt != barrel_src:
+                #        tgt_full_cross = tgt_base + barrel_tgt
+                #        # Uncomment below to add cross-barrel connections with same old IDs
+                #        # expanded[src_full][tgt_full_cross] = old_ids
+
+    return expanded
+
+
+# to match the barrel structure in cfg.S1pops,
+# need to expand connTypes, connIEtype, connEItype
+def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barrel1')):
+    base_pops = list(connDict.keys())
+    expanded = {}
 
     for barrel_src in barrel_suffixes:
         for src_base in base_pops:
@@ -307,14 +322,14 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
             for tgt_base, old_ids in connDict[src_base].items():
                 # Same-barrel target
                 tgt_full_same = tgt_base + barrel_src
-                expanded[src_full][tgt_full_same] = new_ids_list(len(old_ids))
+                expanded[src_full][tgt_full_same] = [x + barrel_src for x in old_ids]
 
                 # Cross-barrel target (optional)
-                for barrel_tgt in barrel_suffixes:
-                    if barrel_tgt != barrel_src:
-                        tgt_full_cross = tgt_base + barrel_tgt
-                        # Uncomment below line to add cross-barrel connections with new IDs
-                        # expanded[src_full][tgt_full_cross] = new_ids_list(len(old_ids))
+                #for barrel_tgt in barrel_suffixes:
+                #    if barrel_tgt != barrel_src:
+                #        tgt_full_cross = tgt_base + barrel_tgt
+                #        # Uncomment below line to add cross-barrel connections with new IDs
+                #        # expanded[src_full][tgt_full_cross] = new_ids_list(len(old_ids))
 
     return expanded
 
@@ -323,21 +338,6 @@ def expand_connType_single_id(connDict, barrel_suffixes=('_barrel0', '_barrel1')
     base_pops = list(connDict.keys())
     expanded = {}
 
-    # Find max existing connID
-    max_id = 0
-    for src in connDict:
-        for tgt in connDict[src]:
-            val = connDict[src][tgt]
-            if val > max_id:
-                max_id = val
-    next_conn_id = max_id + 1
-
-    def get_next_id():
-        nonlocal next_conn_id
-        cid = next_conn_id
-        next_conn_id += 1
-        return cid
-
     for barrel_src in barrel_suffixes:
         for src_base in base_pops:
             src_full = src_base + barrel_src
@@ -345,7 +345,7 @@ def expand_connType_single_id(connDict, barrel_suffixes=('_barrel0', '_barrel1')
 
             for tgt_base, old_id in connDict[src_base].items():
                 tgt_full_same = tgt_base + barrel_src
-                expanded[src_full][tgt_full_same] = get_next_id()
+                expanded[src_full][tgt_full_same] = old_id + barrel_src
 
                 # Optional cross-barrel (comment/uncomment as needed)
                 # for barrel_tgt in barrel_suffixes:
@@ -355,9 +355,38 @@ def expand_connType_single_id(connDict, barrel_suffixes=('_barrel0', '_barrel1')
 
     return expanded
 
+def expand_parameters_syn_with_suffix(parameters_syn, barrel_suffixes=('_barrel0', '_barrel1')):
+    """
+    Expand parameters_syn dict from (param_name, connID) to (param_name, connID_with_suffix),
+    where connID_with_suffix = str(connID) + barrel_suffix.
+
+    Args:
+        parameters_syn: dict keyed by (param_name, connID), values are parameters.
+        barrel_suffixes: tuple/list of suffixes to append to connID as strings.
+
+    Returns:
+        dict keyed by (param_name, connID_with_suffix) with values copied from original connID.
+    """
+    expanded = {}
+
+    for (param_name, connID), value in parameters_syn.items():
+        connID_str = str(connID)
+        for suffix in barrel_suffixes:
+            new_connID = connID_str + suffix
+            expanded[(param_name, new_connID)] = value
+
+    return expanded
+
 ConnTypes = expand_connTypes_with_new_ids(ConnTypes)
 connIEtype = expand_connType_single_id(connIEtype)
 connEItype = expand_connType_single_id(connEItype)
+
+
+# expand parameters_syn to expanded set of syntypes
+# syntypes match connIDs
+# Now parameters_syn keys are like ('gsyn', '114_barrel0'), ('gsyn', '114_barrel1'), etc.
+parameters_syn = expand_parameters_syn_with_suffix(parameters_syn)
+
 
 
 physColumnNames = []
@@ -665,11 +694,7 @@ if cfg.addConn:
                                     postmtype = post[-2:]       
                                 #print("connEItype:", connEItype.keys(), "pre:", pre, "post:", post, "connID:", connID,
                                 #      "connEItype[postmtype]:", connEItype[postmtype].keys(),
-                                #        "postmtype:", postmtype, "postetype:", postetype)
-                                if postetype not in connEItype[postmtype].keys():
-                                    connID = ConnTypes[pre][post][0]  # default connID
-                                else:
-                                    connID = connEItype[postmtype][postetype]              
+                                #        "postmtype:", postmtype, "postetype:", postetype)           
 
                                 if connID == ConnTypes[pre][post][0]:
                                     cellpostList_A.append(cellpost)    
