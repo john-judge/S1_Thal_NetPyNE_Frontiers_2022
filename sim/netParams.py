@@ -230,7 +230,7 @@ connIEtype = connData['connIEtype']
 connEItype = connData['connEItype']
 parameters_syn = connData['parameters_syn']
 
-print("connNumber", connNumber.keys()[0], connNumber[connNumber.keys()[0]]],
+print("connNumber", connNumber.keys()[0], connNumber[connNumber.keys()[0]],
       "ConnTypesNumber", ConnTypesNumber.keys()[0], ConnTypesNumber[ConnTypesNumber.keys()[0]],
       "synperconnNumber", synperconnNumber.keys()[0], synperconnNumber[synperconnNumber.keys()[0]],
       "decay", decay.keys()[0], decay[decay.keys()[0]],
