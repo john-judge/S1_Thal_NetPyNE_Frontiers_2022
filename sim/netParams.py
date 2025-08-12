@@ -555,6 +555,8 @@ if cfg.addConn:
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1
                             # replace with mtype_barrel0 -> mtype_barrel0
+                            if pre not in ConnTypes[pre].keys():
+                                print(pre, post, "PRE not in ConnTypes[pre]:", ConnTypes[pre].keys())
                             connID = ConnTypes[pre][pre][0]  # use first connID
                             #print(pre, post, "not in ConnTypes[pre]:", ConnTypes[pre].keys())  
                         else:                     
