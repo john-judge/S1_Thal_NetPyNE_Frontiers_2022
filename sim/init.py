@@ -44,7 +44,6 @@ else:
 
 # Step 4: Check synMech conds cellType coverage
 all_cell_types = {pop['cellType'] for pop in sim.net.params.popParams.values()}
-print(f"\nAll cellTypes present in populations: {sorted(all_cell_types)}")
 
 print("\nChecking synMech conds against populations:")
 for mech in all_defined_mechs:
@@ -70,8 +69,6 @@ for mech in all_defined_mechs:
 
 print("\nDone checking synMechs.")
 
-
-raise Exception("Simulation cannot proceed due to missing synapse mechanisms!")
 
 
 sim.net.createPops()               			# instantiate network populations
