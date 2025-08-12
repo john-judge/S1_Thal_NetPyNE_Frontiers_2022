@@ -360,7 +360,7 @@ connIEtype = expand_connType_single_id(connIEtype)
 connEItype = expand_connType_single_id(connEItype)
 
 # print only 5 entries for debugging
-print("extended connData", {k: ConnTypes[k] for k in list(connData.keys())[:2]})
+print("extended ConnTypes", {k: ConnTypes[k] for k in list(ConnTypes.keys())[:2]})
 print("connIEtype", {k: connIEtype[k] for k in list(connIEtype.keys())[:5]})
 print("connEItype", {k: connEItype[k] for k in list(connEItype.keys())[:5]})
 
