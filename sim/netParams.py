@@ -202,12 +202,6 @@ with open('conn/conn.pkl', 'rb') as fileObj: connData = pickle.load(fileObj)
 connIEtype = connData['connIEtype']  
 connEItype = connData['connEItype']
 
-# print only 5 entries for debugging
-print("original connData five entries", {k: connData[k] for k in list(connData.keys())[:5]})
-print("connIEtype", {k: connIEtype[k] for k in list(connIEtype.keys())[:5]})
-print("connEItype", {k: connEItype[k] for k in list(connEItype.keys())[:5]})
-
-
 def expand_conn_data_dict(data_dict, barrel_suffixes=('_barrel0', '_barrel1')):
     expanded = {}
     for src_base, tgt_dict in data_dict.items():
@@ -388,6 +382,11 @@ def expand_parameters_syn_with_suffix(parameters_syn, barrel_suffixes=('_barrel0
 ConnTypes = expand_connTypes_with_new_ids(ConnTypes)
 connIEtype = expand_connType_single_id(connIEtype)
 connEItype = expand_connType_single_id(connEItype)
+
+# print only 5 entries for debugging
+print("extended connData", {k: connData[k] for k in list(connData.keys())[:2]})
+print("connIEtype", {k: connIEtype[k] for k in list(connIEtype.keys())[:5]})
+print("connEItype", {k: connEItype[k] for k in list(connEItype.keys())[:5]})
 
 
 # expand parameters_syn to expanded set of syntypes
