@@ -20,24 +20,34 @@ sim.initialize(
     simConfig = cfg, 	
     netParams = netParams)  				# create network object and set cfg and net params
 
-
-# Collect all synapse mechanism names from connection rules
 all_conn_mechs = set()
-print(f"Number of connection rules in netParams.connParams: {len(sim.net.params.connParams)}")
-for key, val in list(sim.net.params.connParams.items())[:500]:
-    print(f"Conn rule: {key}, synMech: {val.get('synMech')}")
-    all_conn_mechs.add(val.get('synMech'))
+for connName, conn in sim.net.params.connParams.items():
+    synMech = conn.get('synMech')
+    if isinstance(synMech, list):
+        all_conn_mechs.update(synMech)
+    elif synMech:
+        all_conn_mechs.add(synMech)
 
-print(f"Total synapse mechanisms in connection rules: {len(all_conn_mechs)}")
+all_defined_mechs = set(sim.net.params.synMechParams.keys())
 
-# Check if each conn mech has conds that match at least one post cellType
-missing_mechs = []
+print(f"Total synMechs referenced in connParams: {len(all_conn_mechs)}")
+print(f"Total synMechs defined in synMechParams: {len(all_defined_mechs)}")
+
+# Step 3: Missing synMechs
+missing_mechs = all_conn_mechs - all_defined_mechs
+if missing_mechs:
+    print(f"\nERROR: SynMechs referenced in connParams but missing in synMechParams ({len(missing_mechs)}):")
+    for mech in missing_mechs:
+        print(f"  - {mech}")
+else:
+    print("\nNo synMechs missing from synMechParams.")
+
+# Step 4: Check synMech conds cellType coverage
 all_cell_types = {pop['cellType'] for pop in sim.net.params.popParams.values()}
-print("all synMechParams", sim.net.params.synMechParams.keys())
-for mech in all_conn_mechs:
-    if mech not in sim.net.params.synMechParams:
-        print(f"ERROR: synMech '{mech}' is not defined in netParams.synMechParams!")
-        continue
+print(f"\nAll cellTypes present in populations: {sorted(all_cell_types)}")
+
+print("\nChecking synMech conds against populations:")
+for mech in all_defined_mechs:
     conds = sim.net.params.synMechParams[mech].get('conds', {})
     cond_types = set()
     if 'cellType' in conds:
@@ -45,18 +55,21 @@ for mech in all_conn_mechs:
             cond_types.update(conds['cellType'])
         else:
             cond_types.add(conds['cellType'])
-    missing_targets = all_cell_types - cond_types
-    if missing_targets == all_cell_types:
-        missing_mechs.append(mech)
-        print(f"WARNING: synMech '{mech}' has no matching cellTypes in network!")
     else:
-        # Optionally check which cellTypes are NOT covered by this synMech
-        uncovered = all_cell_types - cond_types
-        if uncovered:
-            print(f"synMech '{mech}' missing {len(uncovered)} cellTypes (showing first 5): {list(uncovered)[:5]}")
+        # No cellType condition means synMech applies to all cellTypes
+        continue
 
-if missing_mechs:
-    print("\nSynapse mechanisms with zero matching post cellTypes:", missing_mechs)
+    missing_targets = cond_types - all_cell_types
+    unused_targets = all_cell_types - cond_types
+    if cond_types.isdisjoint(all_cell_types):
+        print(f"WARNING: synMech '{mech}' conds cellType(s) {cond_types} do not match ANY populations' cellTypes!")
+    elif missing_targets:
+        print(f"WARNING: synMech '{mech}' conds include cellTypes not in populations: {missing_targets}")
+    elif unused_targets:
+        print(f"NOTE: synMech '{mech}' does not cover cellTypes: {unused_targets}")
+
+print("\nDone checking synMechs.")
+
 
 raise Exception("Simulation cannot proceed due to missing synapse mechanisms!")
 
