@@ -230,13 +230,13 @@ connIEtype = connData['connIEtype']
 connEItype = connData['connEItype']
 parameters_syn = connData['parameters_syn']
 
-print("connNumber", connNumber.keys()[0], connNumber[connNumber.keys()[0]],
-      "ConnTypesNumber", ConnTypesNumber.keys()[0], ConnTypesNumber[ConnTypesNumber.keys()[0]],
-      "synperconnNumber", synperconnNumber.keys()[0], synperconnNumber[synperconnNumber.keys()[0]],
-      "decay", decay.keys()[0], decay[decay.keys()[0]],
-      "gsyn", gsyn.keys()[0], gsyn[gsyn.keys()[0]],
-      "use", use.keys()[0], use[use.keys()[0]],
-      "parameters_syn", parameters_syn.keys()[0], parameters_syn[parameters_syn.keys()[0]])
+print("connNumber", list(connNumber.keys())[0], connNumber[list(connNumber.keys())[0]])
+print("ConnTypesNumber", list(ConnTypesNumber.keys())[0], ConnTypesNumber[list(ConnTypesNumber.keys())[0]])
+print("synperconnNumber", list(synperconnNumber.keys())[0], synperconnNumber[list(synperconnNumber.keys())[0]])
+print("decay", list(decay.keys())[0], decay[list(decay.keys())[0]])
+print("gsyn", list(gsyn.keys())[0], gsyn[list(gsyn.keys())[0]])
+print("use", list(use.keys())[0], use[list(use.keys())[0]])
+print("parameters_syn", list(parameters_syn.keys())[0], parameters_syn[list(parameters_syn.keys())[0]])
 raise Exception("connData loaded, check conn/conn.pkl for details")  # remove this line when done debugging
 
 # to match the barrel structure in cfg.S1pops,
