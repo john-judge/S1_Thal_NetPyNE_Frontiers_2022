@@ -21,6 +21,34 @@ sim.initialize(
     netParams = netParams)  				# create network object and set cfg and net params
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
+
+# Get all synapse mechanism names used in your connection rules
+all_conn_mechs = set()
+for connName, conn in sim.net.params.connParams.items():
+    synMech = conn.get('synMech')
+    if isinstance(synMech, list):
+        all_conn_mechs.update(synMech)
+    elif synMech:
+        all_conn_mechs.add(synMech)
+
+print(f"Checking {len(all_conn_mechs)} synaptic mechanisms from connection rules...")
+
+# Check each cell to see if it has the required synMech objects
+missing_report = []
+for cell in sim.net.cells:
+    existing_mechs = {sm['label'] for sm in cell.synMechs}
+    for mech in all_conn_mechs:
+        if mech not in existing_mechs:
+            missing_report.append((cell.gid, cell.tags['cellType'], mech))
+
+# Show just the first 20 missing for sanity
+print("Example missing synapses (gid, cellType, synMech):")
+for r in missing_report[:20]:
+    print(r)
+
+print(f"Total missing synapse assignments: {len(missing_report)}")
+
+
 sim.net.connectCells()            			# create connections between cells based on params
 #for c in sim.net.cells:
 #    if 'label' not in c.tags:

@@ -402,8 +402,8 @@ if cfg.addConn:
                         synMechType = 'S1_II_STP_Det_' + str(connID)   
                         contA+= 1
                         netParams.connParams['II_' + pre_ + '_' + post_] = { 
-                                        'preConds': {'pop': cfg.popLabelEl[pre_].split('_barrel')[0]}, 
-                                        'postConds': {'pop': cfg.popLabelEl[post_].split('_barrel')[0]},
+                                        'preConds': {'pop': cfg.popLabelEl[pre_]}, 
+                                        'postConds': {'pop': cfg.popLabelEl[post_]},
                                         'synMech': synMechType,
                                         'probability': prob,
                                         'weight': parameters_syn['gsyn',connID] * cfg.IIGain, 
@@ -445,7 +445,7 @@ if cfg.addConn:
                                 else:
                                     print('ERROR')                                    
                         else:   
-                            cellpreList_A = [x.split('_barrel')[0] for x in cfg.popLabelEl[pre_]]
+                            cellpreList_A = cfg.popLabelEl[pre]                              
                             
                         connID = ConnTypes[pre][post][0]                            
                         synMechType = 'S1_IE_STP_Det_' + str(connID)
@@ -453,7 +453,7 @@ if cfg.addConn:
                         contA+= 1                          
                         netParams.connParams['IE_'+pre_+'_'+post_] = { 
                                     'preConds': {'pop': cellpreList_A}, 
-                                    'postConds': {'pop': cfg.popLabelEl[post_].split('_barrel')[0]},
+                                    'postConds': {'pop': cfg.popLabelEl[post]},
                                     'synMech': synMechType,
                                     'probability': prob,
                                     'weight': parameters_syn['gsyn',connID] * cfg.IEGain, 
@@ -471,7 +471,7 @@ if cfg.addConn:
                             synMechType = 'S1_IE_STP_Det_' + str(connID)         
                             netParams.connParams['IE_'+pre_+'_'+post_+'_B'] = { 
                                         'preConds': {'pop': cellpreList_B}, 
-                                        'postConds': {'pop': cfg.popLabelEl[post_].split('_barrel')[0]},
+                                        'postConds': {'pop': cfg.popLabelEl[post]},
                                         'synMech': synMechType,
                                         'probability': prob,
                                         'weight': parameters_syn['gsyn',connID] * cfg.IEGain, 
@@ -488,7 +488,7 @@ if cfg.addConn:
                                 synMechType = 'S1_IE_STP_Det_' + str(connID)         
                                 netParams.connParams['IE_'+pre_+'_'+post_+'_C'] = { 
                                             'preConds': {'pop': cellpreList_C}, 
-                                            'postConds': {'pop': cfg.popLabelEl[post_].split('_barrel')[0]},
+                                            'postConds': {'pop': cfg.popLabelEl[post]},
                                             'synMech': synMechType,
                                             'probability': prob,
                                             'weight': parameters_syn['gsyn',connID] * cfg.IEGain, 
@@ -509,8 +509,8 @@ if cfg.addConn:
                         synMechType = 'S1_EE_STP_Det_' + str(connID)   
                         contA+= 1   
                         netParams.connParams['EE_'+pre_+'_'+post_] = { 
-                            'preConds': {'pop': cfg.popLabelEl[pre_].split('_barrel')[0]}, 
-                            'postConds': {'pop': cfg.popLabelEl[post_].split('_barrel')[0]},
+                            'preConds': {'pop': cfg.popLabelEl[pre_]}, 
+                            'postConds': {'pop': cfg.popLabelEl[post_]},
                             'synMech': synMechType,
                             'probability': prob, 
                             'weight': parameters_syn['gsyn',connID] * cfg.EEGain, 
@@ -528,7 +528,7 @@ if cfg.addConn:
                         cellpostList_B = []
                         connID_B = -1                          
                         if ConnTypes[pre][post][0] == 131 or ConnTypes[pre][post][0] == 132: # EXCEPTIONS -> L6_IPC:L6_(DBC-LBC-NBC-SBC) and  L6_TPC_L:L6_(DBC-LBC-NBC-SBC)    
-                            cellpostList_A = [x.split("_barrel")[0] for x in cfg.popLabelEl[post_]]
+                            cellpostList_A = cfg.popLabelEl[post]     
                         elif 'LBC' in post or 'NBC' in post or 'BP' in post or 'DBC' in post or 'BTC' in post:    
                             cellpre = cfg.popLabelEl[pre_][0]
                             for npost,cellpost in enumerate(cfg.popLabelEl[post_]):                                
@@ -554,7 +554,7 @@ if cfg.addConn:
                                 else:
                                     print('ERROR')                                
                         else:                           
-                            cellpostList_A = [x.split("_barrel")[0] for x in cfg.popLabelEl[post_]]
+                            cellpostList_A = cfg.popLabelEl[post_]         
                              
                         connID = ConnTypes[pre][post][0]  
 
@@ -565,7 +565,7 @@ if cfg.addConn:
 
                         contA+= 1                                                              
                         netParams.connParams['EI_'+pre_+'_'+post_] = { 
-                                        'preConds': {'pop': cfg.popLabelEl[pre_].split('_barrel')[0]}, 
+                                        'preConds': {'pop': cfg.popLabelEl[pre_]}, 
                                         'postConds': {'pop': cellpostList_A},
                                         'synMech': synMechType,
                                         'probability': prob, 
@@ -585,7 +585,7 @@ if cfg.addConn:
                                 synMechType = 'S1_EIproximal_STP_Det_' + str(connID)  
 
                             netParams.connParams['EI_'+pre_+'_'+post_+'_B'] = {
-                                            'preConds': {'pop': cfg.popLabelEl[pre_].split('_barrel')[0]}, 
+                                            'preConds': {'pop': cfg.popLabelEl[pre_]}, 
                                             'postConds': {'pop': cellpostList_B},
                                             'synMech': synMechType,
                                             'probability': prob, 
