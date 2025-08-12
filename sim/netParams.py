@@ -534,6 +534,9 @@ if cfg.addConn:
                                 postetype = cellpost[-3:]
                                 if 'BP' in postmtype:
                                     postmtype = post[-2:]       
+                                print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
+                                      "ConnTypes[pre][post]:", ConnTypes[pre][post],
+                                        "postmtype:", postmtype, "postetype:", postetype)
                                 connID = connEItype[postmtype][postetype]                                
                                 if connID == ConnTypes[pre][post][0]:
                                     cellpostList_A.append(cellpost)    
