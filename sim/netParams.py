@@ -232,7 +232,7 @@ parameters_syn = connData['parameters_syn']
 
 print("connTypes", ConnTypes, 
       "connIEtype", connIEtype, "connEItype", connEItype)
-
+raise Exception("Check connTypes, connIEtype, connEItype in netParams.py!")
 
 physColumnNames = []
 syntypes = []
