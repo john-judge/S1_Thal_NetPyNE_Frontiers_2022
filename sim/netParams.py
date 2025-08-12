@@ -722,34 +722,8 @@ if cfg.addConn:
                 #  E -> I  with ME conn diversity
                 #------------------------------------------------------------------------------   
                 if pre in Epops:
-                    if post in Ipops:                        
-                        cellpostList_A = []
-                        cellpostList_B = []
-                        connID_B = -1                          
-                        if ConnTypes[pre][post][0] == 131 or ConnTypes[pre][post][0] == 132: # EXCEPTIONS -> L6_IPC:L6_(DBC-LBC-NBC-SBC) and  L6_TPC_L:L6_(DBC-LBC-NBC-SBC)    
-                            cellpostList_A = cfg.popLabelEl[post]     
-                        elif 'LBC' in post or 'NBC' in post or 'BP' in post or 'DBC' in post or 'BTC' in post:    
-                            cellpre = cfg.popLabelEl[pre][0]
-                            for npost,cellpost in enumerate(cfg.popLabelEl[post]):                                
-                                # remove barrel number from cellpost
-                                postmtype = post[-3:]
-                                postetype = cellpost[-3:]
-                                if 'BP' in postmtype:
-                                    postmtype = post[-2:]       
-                                #print("connEItype:", connEItype.keys(), "pre:", pre, "post:", post, "connID:", connID,
-                                #      "connEItype[postmtype]:", connEItype[postmtype].keys(),
-                                #        "postmtype:", postmtype, "postetype:", postetype)           
+                    if post in Ipops:        
 
-                                if connID == ConnTypes[pre][post][0]:
-                                    cellpostList_A.append(cellpost)    
-                                elif connID == ConnTypes[pre][post][1]:
-                                    cellpostList_B.append(cellpost)
-                                    connID_B = ConnTypes[pre][post][1]
-                                else:
-                                    print('ERROR')                                
-                        else:                           
-                            cellpostList_A = cfg.popLabelEl[post]         
-                             
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1 is not populated
                             # but it is the same as mtype_barrel0 -> mtype_barrel0, mtype_barrel1 -> mtype_barrel0, or mtype_barrel1 -> mtype_barrel1
@@ -764,9 +738,39 @@ if cfg.addConn:
                                 # no recurrent connection within this population
                                 connID = None
                         else:
-                            connID = ConnTypes[pre][post][0]  
+                            connID = ConnTypes[pre][post][0] 
+                         
 
                         if connID is not None:
+                            cellpostList_A = []
+                            cellpostList_B = []
+                            connID_B = -1                          
+                            if connID == 131 or connID == 132: # EXCEPTIONS -> L6_IPC:L6_(DBC-LBC-NBC-SBC) and  L6_TPC_L:L6_(DBC-LBC-NBC-SBC)    
+                                cellpostList_A = cfg.popLabelEl[post]     
+                            elif 'LBC' in post or 'NBC' in post or 'BP' in post or 'DBC' in post or 'BTC' in post:    
+                                cellpre = cfg.popLabelEl[pre][0]
+                                for npost,cellpost in enumerate(cfg.popLabelEl[post]):                                
+                                    # remove barrel number from cellpost
+                                    postmtype = post[-3:]
+                                    postetype = cellpost[-3:]
+                                    if 'BP' in postmtype:
+                                        postmtype = post[-2:]
+                                    connID_div = connEItype[postmtype][postetype]       
+                                    #print("connEItype:", connEItype.keys(), "pre:", pre, "post:", post, "connID:", connID,
+                                    #      "connEItype[postmtype]:", connEItype[postmtype].keys(),
+                                    #        "postmtype:", postmtype, "postetype:", postetype)           
+
+                                    if connID_div == ConnTypes[pre][post][0]:
+                                        cellpostList_A.append(cellpost)    
+                                    elif connID_div == ConnTypes[pre][post][1]:
+                                        cellpostList_B.append(cellpost)
+                                        connID_B = ConnTypes[pre][post][1]
+                                    else:
+                                        print('ERROR')                                
+                            else:                           
+                                cellpostList_A = cfg.popLabelEl[post]         
+                             
+
                             if 'DBC' in post or 'BTC' in post or 'MC' in post or 'BP' in post:  # steep Ca2+ dependence for connections between PC-distal targeting cell types (DBC, BTC, MC, BP)
                                 synMechType = 'S1_EIdistal_STP_Det_' + str(connID)
                             else: # shallow dependence between PC-proximal targeting cell types (LBCs, NBCs, SBCs, ChC) + L1s and NGCs ????
