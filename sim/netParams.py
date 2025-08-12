@@ -202,6 +202,10 @@ with open('conn/conn.pkl', 'rb') as fileObj: connData = pickle.load(fileObj)
 connIEtype = connData['connIEtype']  
 connEItype = connData['connEItype']
 
+print("original connData", connData)
+print("connIEtype", connIEtype)
+print("connEItype", connEItype)
+
 
 def expand_conn_data_dict(data_dict, barrel_suffixes=('_barrel0', '_barrel1')):
     expanded = {}
