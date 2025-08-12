@@ -352,9 +352,13 @@ if cfg.addConn:
             for p in connNumber.keys():
                 if p in pre_:
                     pre = p
+                if p == pre_:  # resolve multiple matches by exact match
+                    break
             for p in connNumber[pre].keys():
                 if p in post_:
                     post = p
+                if p == post_:  # resolve multiple matches by exact match
+                    break
 
             if float(connNumber[pre][post]) > 0:           
                 # ------------------------------------------------------------------------------    
