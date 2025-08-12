@@ -22,7 +22,7 @@ sim.initialize(
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
 
-# Get all synapse mechanism names used in your connection rules
+# Collect all synapse mechanism names from connection rules
 all_conn_mechs = set()
 for connName, conn in sim.net.params.connParams.items():
     synMech = conn.get('synMech')
@@ -31,22 +31,36 @@ for connName, conn in sim.net.params.connParams.items():
     elif synMech:
         all_conn_mechs.add(synMech)
 
-print(f"Checking {len(all_conn_mechs)} synaptic mechanisms from connection rules...")
+print(f"Total synapse mechanisms in connection rules: {len(all_conn_mechs)}")
 
-# Check each cell to see if it has the required synMech objects
-missing_report = []
-for cell in sim.net.cells:
-    existing_mechs = {sm['label'] for sm in cell.synMechs}
-    for mech in all_conn_mechs:
-        if mech not in existing_mechs:
-            missing_report.append((cell.gid, cell.tags['cellType'], mech))
+# Check if each conn mech has conds that match at least one post cellType
+missing_mechs = []
+all_cell_types = {pop['cellType'] for pop in sim.net.params.popParams.values()}
 
-# Show just the first 20 missing for sanity
-print("Example missing synapses (gid, cellType, synMech):")
-for r in missing_report[:20]:
-    print(r)
+for mech in all_conn_mechs:
+    if mech not in sim.net.params.synMechParams:
+        print(f"ERROR: synMech '{mech}' is not defined in netParams.synMechParams!")
+        continue
+    conds = sim.net.params.synMechParams[mech].get('conds', {})
+    cond_types = set()
+    if 'cellType' in conds:
+        if isinstance(conds['cellType'], list):
+            cond_types.update(conds['cellType'])
+        else:
+            cond_types.add(conds['cellType'])
+    missing_targets = all_cell_types - cond_types
+    if missing_targets == all_cell_types:
+        missing_mechs.append(mech)
+        print(f"WARNING: synMech '{mech}' has no matching cellTypes in network!")
+    else:
+        # Optionally check which cellTypes are NOT covered by this synMech
+        uncovered = all_cell_types - cond_types
+        if uncovered:
+            print(f"synMech '{mech}' missing {len(uncovered)} cellTypes (showing first 5): {list(uncovered)[:5]}")
 
-print(f"Total missing synapse assignments: {len(missing_report)}")
+if missing_mechs:
+    print("\nSynapse mechanisms with zero matching post cellTypes:", missing_mechs)
+
 
 
 sim.net.connectCells()            			# create connections between cells based on params
