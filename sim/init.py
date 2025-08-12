@@ -20,47 +20,6 @@ sim.initialize(
     simConfig = cfg, 	
     netParams = netParams)  				# create network object and set cfg and net params
 
-
-# Collect all synapse mechanism names from connection rules
-all_conn_mechs = set()
-print(f"Number of connection rules in netParams.connParams: {len(sim.net.params.connParams)}")
-for key, val in list(sim.net.params.connParams.items())[:5]:
-    print(f"Conn rule: {key}, synMech: {val.get('synMech')}")
-    all_conn_mechs.add(val.get('synMech'))
-
-print(f"Total synapse mechanisms in connection rules: {len(all_conn_mechs)}")
-
-# Check if each conn mech has conds that match at least one post cellType
-missing_mechs = []
-all_cell_types = {pop['cellType'] for pop in sim.net.params.popParams.values()}
-print("all synMechParams", sim.net.params.synMechParams.keys())
-for mech in all_conn_mechs:
-    if mech not in sim.net.params.synMechParams:
-        print(f"ERROR: synMech '{mech}' is not defined in netParams.synMechParams!")
-        continue
-    conds = sim.net.params.synMechParams[mech].get('conds', {})
-    cond_types = set()
-    if 'cellType' in conds:
-        if isinstance(conds['cellType'], list):
-            cond_types.update(conds['cellType'])
-        else:
-            cond_types.add(conds['cellType'])
-    missing_targets = all_cell_types - cond_types
-    if missing_targets == all_cell_types:
-        missing_mechs.append(mech)
-        print(f"WARNING: synMech '{mech}' has no matching cellTypes in network!")
-    else:
-        # Optionally check which cellTypes are NOT covered by this synMech
-        uncovered = all_cell_types - cond_types
-        if uncovered:
-            print(f"synMech '{mech}' missing {len(uncovered)} cellTypes (showing first 5): {list(uncovered)[:5]}")
-
-if missing_mechs:
-    print("\nSynapse mechanisms with zero matching post cellTypes:", missing_mechs)
-
-raise Exception("Simulation cannot proceed due to missing synapse mechanisms!")
-
-
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
 
