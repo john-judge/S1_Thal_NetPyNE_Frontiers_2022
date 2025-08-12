@@ -192,6 +192,40 @@ netParams.cellParams['sRE_cell']['conds']={}
 #------------------------------------------------------------------------------
 with open('conn/conn.pkl', 'rb') as fileObj: connData = pickle.load(fileObj)
 
+connIEtype = connData['connIEtype']  
+connEItype = connData['connEItype']
+parameters_syn = connData['parameters_syn']
+
+
+def expand_conn_data_dict(data_dict, barrel_suffixes=('_barrel0', '_barrel1')):
+    expanded = {}
+    for src_base, tgt_dict in data_dict.items():
+        for barrel_src in barrel_suffixes:
+            src_full = src_base + barrel_src
+            if src_full not in expanded:
+                expanded[src_full] = {}
+            for tgt_base, val in tgt_dict.items():
+                for barrel_tgt in barrel_suffixes:
+                    tgt_full = tgt_base + barrel_tgt
+                    expanded[src_full][tgt_full] = val
+    return expanded
+
+# List of keys in connData to expand
+keys_to_expand = [
+    'connNumber',
+    'ConnTypesNumber',
+    'synperconnNumber',
+    'decay', 'gsyn', 'use',
+    'd0', 'dfinal', 'lmat', 
+    'a0mat', 'a0e', 'l0e', 'd0e',
+    'a0g', 'x0g', 'l0g', 'd0g',
+] 
+
+for key in keys_to_expand:
+    if key in connData:
+        connData[key] = expand_conn_data_dict(connData[key])
+
+
 lmat = connData['lmat']
 a0mat = connData['a0mat']
 d0 = connData['d0']
@@ -216,41 +250,6 @@ pmat[125] = connData['pmat125um']
 pmat[150] = connData['pmat150um']
 pmat[175] = connData['pmat175um']
 pmat[200] = connData['pmat200um'] #max value for d0=200
-
-
-connIEtype = connData['connIEtype']  
-connEItype = connData['connEItype']
-parameters_syn = connData['parameters_syn']
-
-
-def expand_conn_data_dict(data_dict, barrel_suffixes=('_barrel0', '_barrel1')):
-    expanded = {}
-    for src_base, tgt_dict in data_dict.items():
-        for barrel_src in barrel_suffixes:
-            src_full = src_base + barrel_src
-            if src_full not in expanded:
-                expanded[src_full] = {}
-            for tgt_base, val in tgt_dict.items():
-                for barrel_tgt in barrel_suffixes:
-                    tgt_full = tgt_base + barrel_tgt
-                    expanded[src_full][tgt_full] = val
-    return expanded
-
-# List of keys in connData to expand
-keys_to_expand = [
-    'connNumber',
-    'ConnTypesNumber',
-    'synperconnNumber',
-    'decay',
-    'gsyn',
-    'use',
-    'd0', 'lmat', 'a0mat', 'a0e', 'l0e', 'd0e',
-    'a0g', 'x0g', 'l0g', 'd0g',
-] 
-
-for key in keys_to_expand:
-    if key in connData:
-        connData[key] = expand_conn_data_dict(connData[key])
 
 # expand each dict in pmat
 for dist_key in pmat:
