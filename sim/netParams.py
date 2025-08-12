@@ -217,6 +217,40 @@ pmat[150] = connData['pmat150um']
 pmat[175] = connData['pmat175um']
 pmat[200] = connData['pmat200um'] #max value for d0=200
 
+
+connIEtype = connData['connIEtype']  
+connEItype = connData['connEItype']
+parameters_syn = connData['parameters_syn']
+
+
+def expand_conn_data_dict(data_dict, barrel_suffixes=('_barrel0', '_barrel1')):
+    expanded = {}
+    for src_base, tgt_dict in data_dict.items():
+        for barrel_src in barrel_suffixes:
+            src_full = src_base + barrel_src
+            if src_full not in expanded:
+                expanded[src_full] = {}
+            for tgt_base, val in tgt_dict.items():
+                for barrel_tgt in barrel_suffixes:
+                    tgt_full = tgt_base + barrel_tgt
+                    expanded[src_full][tgt_full] = val
+    return expanded
+
+# List of keys in connData to expand
+keys_to_expand = [
+    'connNumber',
+    'ConnTypesNumber',
+    'synperconnNumber',
+    'decay',
+    'gsyn',
+    'use'
+]
+
+for key in keys_to_expand:
+    if key in connData:
+        connData[key] = expand_conn_data_dict(connData[key])
+
+
 synperconnNumber = connData['synperconnNumber']
 connNumber = connData['connNumber']
 decay = connData['decay']
@@ -226,10 +260,7 @@ use = connData['use']
 ConnTypesNumber = connData['ConnTypesNumber'] 
 ConnTypes = connData['ConnTypes']   
 
-connIEtype = connData['connIEtype']  
-connEItype = connData['connEItype']
-parameters_syn = connData['parameters_syn']
-
+'''
 print("connNumber", list(connNumber.keys())[0], connNumber[list(connNumber.keys())[0]])
 print("ConnTypesNumber", list(ConnTypesNumber.keys())[0], ConnTypesNumber[list(ConnTypesNumber.keys())[0]])
 print("synperconnNumber", list(synperconnNumber.keys())[0], synperconnNumber[list(synperconnNumber.keys())[0]])
@@ -238,7 +269,7 @@ print("gsyn", list(gsyn.keys())[0], gsyn[list(gsyn.keys())[0]])
 print("use", list(use.keys())[0], use[list(use.keys())[0]])
 print("parameters_syn", list(parameters_syn.keys())[0], parameters_syn[list(parameters_syn.keys())[0]])
 raise Exception("connData loaded, check conn/conn.pkl for details")  # remove this line when done debugging
-
+'''
 # to match the barrel structure in cfg.S1pops,
 # need to expand connTypes, connIEtype, connEItype
 def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barrel1')):
