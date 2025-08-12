@@ -243,8 +243,10 @@ keys_to_expand = [
     'synperconnNumber',
     'decay',
     'gsyn',
-    'use'
-]
+    'use',
+    'd0', 'lmat', 'a0mat', 'a0e', 'l0e', 'd0e',
+    'a0g', 'x0g', 'l0g', 'd0g',
+] + [pmat[key] for key in pmat.keys() if isinstance(key, int)]
 
 for key in keys_to_expand:
     if key in connData:
