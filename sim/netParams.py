@@ -230,6 +230,13 @@ connIEtype = connData['connIEtype']
 connEItype = connData['connEItype']
 parameters_syn = connData['parameters_syn']
 
+print("connNumber", connNumber,
+      "ConnTypesNumber", ConnTypesNumber,
+      "synperconnNumber", synperconnNumber,
+      "decay", decay,
+      "gsyn", gsyn,
+      "use", use)
+raise Exception("connData loaded, check conn/conn.pkl for details")  # remove this line when done debugging
 
 # to match the barrel structure in cfg.S1pops,
 # need to expand connTypes, connIEtype, connEItype
