@@ -543,22 +543,6 @@ if cfg.addConn:
                             prob = '%s*exp(-dist_2D/%s)*(dist_2D<%s) if dist_2D > %s else %f' % (a0e[pre][post],l0e[pre][post],dfinal[pre][post],d0e[pre][post],float(pmat[12.5][pre][post]))      
                     
                     else: # gaussian
-                        # find the KeyError
-                        if pre not in a0g.keys():
-                            print(pre, post, "not in a0g:", a0g.keys())
-                        if post not in a0g[pre].keys():
-                            print(pre, post, "not in a0g[pre]:", a0g[pre].keys())
-                        if pre not in x0g.keys():
-                            print(pre, post, "not in x0g:", x0g.keys())
-                        if post not in x0g[pre].keys():
-                            print(pre, post, "not in x0g[pre]:", x0g[pre].keys())
-                        if pre not in l0g.keys():
-                            print(pre, post, "not in l0g:", l0g.keys())
-                        if post not in l0g[pre].keys():
-                            print(pre, post, "not in l0g[pre]:", l0g[pre].keys())
-                        if pre not in dfinal.keys():
-                            print(pre, post, "not in dfinal:", dfinal.keys())
-
                         prob = '%s*exp(-(dist_2D-%s)**2/(2*%s**2))*(dist_2D<%s)' % (a0g[pre][post],x0g[pre][post],l0g[pre][post],dfinal[pre][post])             
                         
                 # ------------------------------------------------------------------------------    
@@ -576,7 +560,6 @@ if cfg.addConn:
                         else:                     
                             connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_II_STP_Det_' + str(connID) 
-                        print("Assigning synMech:", synMechType) 
                         contA+= 1
                         netParams.connParams['II_' + pre + '_' + post] = { 
                                         'preConds': {'pop': cfg.popLabelEl[pre]}, 
@@ -623,9 +606,12 @@ if cfg.addConn:
                         else:   
                             cellpreList_A = cfg.popLabelEl[pre]                              
                             
+                        if pre not in ConnTypes.keys():
+                            print(pre, post, "not in ConnTypes (I -> E):", ConnTypes.keys())
+                        if post not in ConnTypes[pre].keys():
+                            print(pre, post, "not in ConnTypes[pre] (I -> E):", ConnTypes[pre].keys())
                         connID = ConnTypes[pre][post][0]                            
                         synMechType = 'S1_IE_STP_Det_' + str(connID)
-                        print("Assigning synMech:", synMechType)
                         
                         contA+= 1                          
                         netParams.connParams['IE_'+pre+'_'+post] = { 
@@ -646,7 +632,6 @@ if cfg.addConn:
                         if connID_B >= 0:          
                             connID = connID_B
                             synMechType = 'S1_IE_STP_Det_' + str(connID)
-                            print("Assigning synMech:", synMechType)
 
                             netParams.connParams['IE_'+pre +'_'+post+'_B'] = { 
                                         'preConds': {'pop': cellpreList_B}, 
@@ -665,7 +650,6 @@ if cfg.addConn:
                             if connID_C >= 0:          
                                 connID = connID_C
                                 synMechType = 'S1_IE_STP_Det_' + str(connID)
-                                print("Assigning synMech:", synMechType)         
                                 netParams.connParams['IE_'+pre+'_'+post+'_C'] = { 
                                             'preConds': {'pop': cellpreList_C}, 
                                             'postConds': {'pop': cfg.popLabelEl[post]},
@@ -692,7 +676,6 @@ if cfg.addConn:
                         else:
                             connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_EE_STP_Det_' + str(connID)   
-                        print("Assigning synMech:", synMechType)
                         contA+= 1   
                         netParams.connParams['EE_'+pre+'_'+post] = { 
                             'preConds': {'pop': cfg.popLabelEl[pre]}, 
