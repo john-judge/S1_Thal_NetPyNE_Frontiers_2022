@@ -552,8 +552,12 @@ if cfg.addConn:
                         if pre not in ConnTypes.keys():
                             print(pre, post, "not in ConnTypes:", ConnTypes.keys())
                         if post not in ConnTypes[pre].keys():
-                            print(pre, post, "not in ConnTypes[pre]:", ConnTypes[pre].keys())                       
-                        connID = ConnTypes[pre][post][0]                        
+                            # then it could be mtype_barrel0 -> mtype_barrel1
+                            # replace with mtype_barrel0 -> mtype_barrel0
+                            connID = ConnTypes[pre][pre][0]  # use first connID
+                            #print(pre, post, "not in ConnTypes[pre]:", ConnTypes[pre].keys())  
+                        else:                     
+                            connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_II_STP_Det_' + str(connID) 
                         print("Assigning synMech:", synMechType) 
                         contA+= 1
@@ -664,7 +668,12 @@ if cfg.addConn:
                 #------------------------------------------------------------------------------
                 if pre in Epops:
                     if post in Epops:    
-                        connID = ConnTypes[pre][post][0]                        
+                        if post not in ConnTypes[pre].keys():
+                            # then it could be mtype_barrel0 -> mtype_barrel1
+                            # replace with mtype_barrel0 -> mtype_barrel0
+                            connID = ConnTypes[pre][pre][0]
+                        else:
+                            connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_EE_STP_Det_' + str(connID)   
                         print("Assigning synMech:", synMechType)
                         contA+= 1   
