@@ -71,6 +71,29 @@ print("\nDone checking synMechs.")
 
 
 
+print("Verify cell populations contain cells with correct cellType and tags...")
+num_checks = 50
+for popName, pop in sim.net.params.popParams.items():
+    size = pop.get('numCells', 'unknown')
+    cellType = pop.get('cellType', 'unknown')
+    tags = pop.get('tags', {})
+    print(f"Pop {popName}: size={size}, cellType={cellType}, tags={tags}")
+    num_checks -= 1
+    if num_checks <= 0:
+        break
+
+print("Check connection probabilities")
+num_checks = 50
+for connName, conn in sim.net.params.connParams.items():
+    prob = conn.get('probability', None)
+    numConns = conn.get('numConns', None)
+    print(f"{connName}: prob={prob}, numConns={numConns}")
+    num_checks -= 1
+    if num_checks <= 0:
+        break
+
+
+
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
 
@@ -78,9 +101,15 @@ sim.net.createCells()              			# instantiate network cells based on defin
 
 
 sim.net.connectCells()            			# create connections between cells based on params
-#for c in sim.net.cells:
-#    if 'label' not in c.tags:
-#        print("c.gid, c.tags", c.gid, c.tags)
+
+print("check the number of connections in the network...")
+total_conns = 0
+for cell in sim.net.allCells:
+    num = len(cell.conns)
+    total_conns += num
+print(f"Total connections created: {total_conns}")
+
+
 sim.net.addStims() 							# add network stimulation
 sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 sim.runSim()                      			# run parallel Neuron simulation  
