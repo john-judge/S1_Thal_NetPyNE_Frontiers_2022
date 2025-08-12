@@ -223,8 +223,9 @@ keys_to_expand = [
     'synperconnNumber',
     'decay', 'gsyn', 'use',
     'd0', 'dfinal', 'lmat', 
-    'a0mat', 'a0e', 'l0e', 'd0e',
-    'a0g', 'x0g', 'l0g', 'd0g',
+    'a0mat', 
+    'lmat_exp', 'd0_exp', 'a0mat_exp',
+    'a0mat_gauss', 'x0_gauss', 'lmat_gauss', 'd0_gauss',
     "best_fit",
 ]
 
@@ -557,7 +558,7 @@ if cfg.addConn:
                             print(pre, post, "not in l0g[pre]:", l0g[pre].keys())
                         if pre not in dfinal.keys():
                             print(pre, post, "not in dfinal:", dfinal.keys())
-                            
+
                         prob = '%s*exp(-(dist_2D-%s)**2/(2*%s**2))*(dist_2D<%s)' % (a0g[pre][post],x0g[pre][post],l0g[pre][post],dfinal[pre][post])             
                         
                 # ------------------------------------------------------------------------------    
