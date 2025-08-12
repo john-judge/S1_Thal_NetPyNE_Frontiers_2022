@@ -246,12 +246,15 @@ keys_to_expand = [
     'use',
     'd0', 'lmat', 'a0mat', 'a0e', 'l0e', 'd0e',
     'a0g', 'x0g', 'l0g', 'd0g',
-] + [pmat[key] for key in pmat.keys() if isinstance(key, int)]
+] 
 
 for key in keys_to_expand:
     if key in connData:
         connData[key] = expand_conn_data_dict(connData[key])
 
+# expand each dict in pmat
+for dist_key in pmat:
+    pmat[dist_key] = expand_conn_data_dict(pmat[dist_key])
 
 synperconnNumber = connData['synperconnNumber']
 connNumber = connData['connNumber']
