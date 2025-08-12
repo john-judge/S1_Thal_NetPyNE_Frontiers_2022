@@ -36,7 +36,7 @@ print(f"Total synapse mechanisms in connection rules: {len(all_conn_mechs)}")
 # Check if each conn mech has conds that match at least one post cellType
 missing_mechs = []
 all_cell_types = {pop['cellType'] for pop in sim.net.params.popParams.values()}
-
+print("all synMechParams", sim.net.params.synMechParams.keys())
 for mech in all_conn_mechs:
     if mech not in sim.net.params.synMechParams:
         print(f"ERROR: synMech '{mech}' is not defined in netParams.synMechParams!")
