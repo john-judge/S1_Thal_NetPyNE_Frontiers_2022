@@ -316,21 +316,22 @@ def expand_connTypes_with_new_ids(connDict, barrel_suffixes=('_barrel0', '_barre
     expanded = {}
 
     for barrel_src in barrel_suffixes:
-        for src_base in base_pops:
-            src_full = src_base + barrel_src
-            expanded[src_full] = {}
+        for barrel_tgt in barrel_suffixes:
+            for src_base in base_pops:
+                src_full = src_base + barrel_src
+                expanded[src_full] = {}
 
-            for tgt_base, old_ids in connDict[src_base].items():
-                # Same-barrel target
-                tgt_full_same = tgt_base + barrel_src
-                expanded[src_full][tgt_full_same] = [str(x) + barrel_src for x in old_ids]
+                for tgt_base, old_ids in connDict[src_base].items():
+                    # Same-barrel target
+                    tgt_full_same = tgt_base + barrel_src
+                    expanded[src_full][tgt_full_same] = [str(x) + barrel_src + barrel_tgt for x in old_ids]
 
-                # Cross-barrel target (optional)
-                #for barrel_tgt in barrel_suffixes:
-                #    if barrel_tgt != barrel_src:
-                #        tgt_full_cross = tgt_base + barrel_tgt
-                #        # Uncomment below line to add cross-barrel connections with new IDs
-                #        # expanded[src_full][tgt_full_cross] = new_ids_list(len(old_ids))
+                    # Cross-barrel target (optional)
+                    #for barrel_tgt in barrel_suffixes:
+                    #    if barrel_tgt != barrel_src:
+                    #        tgt_full_cross = tgt_base + barrel_tgt
+                    #        # Uncomment below line to add cross-barrel connections with new IDs
+                    #        # expanded[src_full][tgt_full_cross] = new_ids_list(len(old_ids))
 
     return expanded
 
@@ -340,19 +341,20 @@ def expand_connType_single_id(connDict, barrel_suffixes=('_barrel0', '_barrel1')
     expanded = {}
 
     for barrel_src in barrel_suffixes:
-        for src_base in base_pops:
-            src_full = src_base + barrel_src
-            expanded[src_full] = {}
+        for barrel_tgt in barrel_suffixes:
+            for src_base in base_pops:
+                src_full = src_base + barrel_src
+                expanded[src_full] = {}
 
-            for tgt_base, old_id in connDict[src_base].items():
-                tgt_full_same = tgt_base + barrel_src
-                expanded[src_full][tgt_full_same] = str(old_id) + barrel_src
+                for tgt_base, old_id in connDict[src_base].items():
+                    tgt_full_same = tgt_base + barrel_src
+                    expanded[src_full][tgt_full_same] = str(old_id) + barrel_src + barrel_tgt
 
-                # Optional cross-barrel (comment/uncomment as needed)
-                # for barrel_tgt in barrel_suffixes:
-                #     if barrel_tgt != barrel_src:
-                #         tgt_full_cross = tgt_base + barrel_tgt
-                #         expanded[src_full][tgt_full_cross] = get_next_id()
+                    # Optional cross-barrel (comment/uncomment as needed)
+                    # for barrel_tgt in barrel_suffixes:
+                    #     if barrel_tgt != barrel_src:
+                    #         tgt_full_cross = tgt_base + barrel_tgt
+                    #         expanded[src_full][tgt_full_cross] = get_next_id()
 
     return expanded
 
