@@ -428,7 +428,8 @@ if cfg.addConn:
                                 premtype = pre[-3:]
                                 preetype = cellpre[-3:]
                                 connID = connIEtype[premtype][preetype]
-                                print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID)
+                                print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
+                                      "ConnTypes[pre][post]:", ConnTypes[pre][post])
                                 if connID == ConnTypes[pre][post][0]:
                                     cellpreList_A.append(cellpre)    
                                 elif connID == ConnTypes[pre][post][1]:
