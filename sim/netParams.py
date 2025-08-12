@@ -230,6 +230,10 @@ connIEtype = connData['connIEtype']
 connEItype = connData['connEItype']
 parameters_syn = connData['parameters_syn']
 
+print("connTypes", ConnTypes, 
+      "connIEtype", connIEtype, "connEItype", connEItype)
+
+
 physColumnNames = []
 syntypes = []
 for name,syntype in parameters_syn:    
