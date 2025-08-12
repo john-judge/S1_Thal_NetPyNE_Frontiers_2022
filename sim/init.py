@@ -92,7 +92,7 @@ for connName, conn in sim.net.params.connParams.items():
     if num_checks <= 0:
         break
 
-
+raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")
 
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
@@ -102,12 +102,7 @@ sim.net.createCells()              			# instantiate network cells based on defin
 
 sim.net.connectCells()            			# create connections between cells based on params
 
-print("check the number of connections in the network...")
-total_conns = 0
-for cell in sim.net.allCells:
-    num = len(cell.conns)
-    total_conns += num
-print(f"Total connections created: {total_conns}")
+
 
 
 sim.net.addStims() 							# add network stimulation
