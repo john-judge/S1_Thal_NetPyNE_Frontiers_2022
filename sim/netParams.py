@@ -557,10 +557,9 @@ if cfg.addConn:
                             # replace with mtype_barrel0 -> mtype_barrel0
                             if pre not in ConnTypes[pre].keys():
                                 # also try mtype_barrel1 -> mtype_barrel0
-                                if post in ConnTypes[pre].keys():
-                                    connID = ConnTypes[post][pre][0]
-                                else:
-                                    connID = ConnTypes[pre][pre][0]  # use first connID
+                                connID = ConnTypes[post][pre][0]
+                            else:
+                                connID = ConnTypes[pre][pre][0]  # use first connID
                             #print(pre, post, "not in ConnTypes[pre]:", ConnTypes[pre].keys())  
                         else:                     
                             connID = ConnTypes[pre][post][0]                        
@@ -614,7 +613,10 @@ if cfg.addConn:
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1
                             # replace with mtype_barrel0 -> mtype_barrel0
-                            connID = ConnTypes[pre][pre][0]
+                            if post in ConnTypes[pre].keys():
+                                connID = ConnTypes[post][pre][0]
+                            else:
+                                connID = ConnTypes[pre][pre][0]  # use first connID
                         else:
                             connID = ConnTypes[pre][post][0]                            
                         synMechType = 'S1_IE_STP_Det_' + str(connID)
@@ -678,7 +680,10 @@ if cfg.addConn:
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1
                             # replace with mtype_barrel0 -> mtype_barrel0
-                            connID = ConnTypes[pre][pre][0]
+                            if post in ConnTypes[pre].keys():
+                                connID = ConnTypes[post][pre][0]
+                            else:
+                                connID = ConnTypes[pre][pre][0]  # use first connID
                         else:
                             connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_EE_STP_Det_' + str(connID)   
@@ -729,7 +734,10 @@ if cfg.addConn:
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1
                             # replace with mtype_barrel0 -> mtype_barrel0
-                            connID = ConnTypes[pre][pre][0]
+                            if post in ConnTypes[pre].keys():
+                                connID = ConnTypes[post][pre][0]
+                            else:
+                                connID = ConnTypes[pre][pre][0]  # use first connID
                         else:
                             connID = ConnTypes[pre][post][0]  
 
