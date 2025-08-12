@@ -61,6 +61,7 @@ for mech in all_conn_mechs:
 if missing_mechs:
     print("\nSynapse mechanisms with zero matching post cellTypes:", missing_mechs)
 
+raise Exception("Simulation cannot proceed due to missing synapse mechanisms!")
 
 
 sim.net.connectCells()            			# create connections between cells based on params
