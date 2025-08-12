@@ -550,8 +550,7 @@ if cfg.addConn:
                 # ------------------------------------------------------------------------------
                 if pre in Ipops:
                     if post in Ipops:
-                        if pre not in ConnTypes.keys():
-                            print(pre, post, "not in ConnTypes:", ConnTypes.keys())
+
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1 is not populated
                             # but it is the same as mtype_barrel0 -> mtype_barrel0, mtype_barrel1 -> mtype_barrel0, or mtype_barrel1 -> mtype_barrel1
@@ -563,7 +562,8 @@ if cfg.addConn:
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
                                 connID = ConnTypes[post][post][0]
                             else:
-                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys())
+                                raise Exception("pre:", pre, "post:", post, "not in ConnTypes:", ConnTypes.keys(),
+                                                "ConnTypes[pre]:", ConnTypes[pre].keys(), "ConnTypes[post]:", ConnTypes[post].keys())
                         else:                     
                             connID = ConnTypes[pre][post][0]                        
                         synMechType = 'S1_II_STP_Det_' + str(connID) 
