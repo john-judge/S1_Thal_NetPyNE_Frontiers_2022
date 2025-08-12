@@ -420,16 +420,16 @@ for syntype in syntypes:
 #                                          'GABAB_ratio': 1.0,  #=0(1):The ratio of GABAB to GABAA  ?          
                                             }
         
-        netParams.synMechParams['S1_IE_STP_Det_' + str(syntype)] = {'mod': 'DetGABAAB',
-                                         'Use': dfS6['use'][syntype]*cfg.use_frac['Inh'], # ± dfS6['useStd'][syntype]
-                                         'Dep': dfS6['dep'][syntype], # ± dfS6['depStd'][syntype]  
-                                         'Fac': dfS6['fac'][syntype], # ± dfS6['facStd'][syntype]
-                                         'tau_d_GABAA': dfS6['decay'][syntype], # ± dfS6['decayStd'][syntype]
-                                         'tau_r_GABAA': 0.2,   #rng.lognormal(0.2, 0.1) in synapses.hoc  
-                                         'tau_d_GABAB': 260.9,
-                                         'tau_r_GABAB': 3.5,
+    netParams.synMechParams['S1_IE_STP_Det_' + str(syntype)] = {'mod': 'DetGABAAB',
+                                        'Use': dfS6['use'][syntype]*cfg.use_frac['Inh'], # ± dfS6['useStd'][syntype]
+                                        'Dep': dfS6['dep'][syntype], # ± dfS6['depStd'][syntype]  
+                                        'Fac': dfS6['fac'][syntype], # ± dfS6['facStd'][syntype]
+                                        'tau_d_GABAA': dfS6['decay'][syntype], # ± dfS6['decayStd'][syntype]
+                                        'tau_r_GABAA': 0.2,   #rng.lognormal(0.2, 0.1) in synapses.hoc  
+                                        'tau_d_GABAB': 260.9,
+                                        'tau_r_GABAB': 3.5,
 #                                          'GABAB_ratio': 1.0,  #=0(1):The ratio of GABAB to GABAA   ?       
-                                            }
+                                        }
 
 # Th NEW
 #E2 -> syn 134
