@@ -542,6 +542,22 @@ if cfg.addConn:
                             prob = '%s*exp(-dist_2D/%s)*(dist_2D<%s) if dist_2D > %s else %f' % (a0e[pre][post],l0e[pre][post],dfinal[pre][post],d0e[pre][post],float(pmat[12.5][pre][post]))      
                     
                     else: # gaussian
+                        # find the KeyError
+                        if pre not in a0g.keys():
+                            print(pre, post, "not in a0g:", a0g.keys())
+                        if post not in a0g[pre].keys():
+                            print(pre, post, "not in a0g[pre]:", a0g[pre].keys())
+                        if pre not in x0g.keys():
+                            print(pre, post, "not in x0g:", x0g.keys())
+                        if post not in x0g[pre].keys():
+                            print(pre, post, "not in x0g[pre]:", x0g[pre].keys())
+                        if pre not in l0g.keys():
+                            print(pre, post, "not in l0g:", l0g.keys())
+                        if post not in l0g[pre].keys():
+                            print(pre, post, "not in l0g[pre]:", l0g[pre].keys())
+                        if pre not in dfinal.keys():
+                            print(pre, post, "not in dfinal:", dfinal.keys())
+                            
                         prob = '%s*exp(-(dist_2D-%s)**2/(2*%s**2))*(dist_2D<%s)' % (a0g[pre][post],x0g[pre][post],l0g[pre][post],dfinal[pre][post])             
                         
                 # ------------------------------------------------------------------------------    
