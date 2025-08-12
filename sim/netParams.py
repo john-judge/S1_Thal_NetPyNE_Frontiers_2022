@@ -350,8 +350,9 @@ def expand_parameters_syn_with_suffix(parameters_syn, barrel_suffixes=('_barrel0
     for (param_name, connID), value in parameters_syn.items():
         connID_str = str(connID)
         for suffix in barrel_suffixes:
-            new_connID = connID_str + suffix
-            expanded[(param_name, new_connID)] = value
+            for suffix2 in barrel_suffixes:
+                new_connID = connID_str + suffix + suffix2
+                expanded[(param_name, new_connID)] = value
 
     return expanded
 
