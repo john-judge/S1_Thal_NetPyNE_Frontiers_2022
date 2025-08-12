@@ -230,12 +230,13 @@ connIEtype = connData['connIEtype']
 connEItype = connData['connEItype']
 parameters_syn = connData['parameters_syn']
 
-print("connNumber", connNumber,
-      "ConnTypesNumber", ConnTypesNumber,
-      "synperconnNumber", synperconnNumber,
-      "decay", decay,
-      "gsyn", gsyn,
-      "use", use)
+print("connNumber", connNumber.keys()[0], connNumber[connNumber.keys()[0]]],
+      "ConnTypesNumber", ConnTypesNumber.keys()[0], ConnTypesNumber[ConnTypesNumber.keys()[0]],
+      "synperconnNumber", synperconnNumber.keys()[0], synperconnNumber[synperconnNumber.keys()[0]],
+      "decay", decay.keys()[0], decay[decay.keys()[0]],
+      "gsyn", gsyn.keys()[0], gsyn[gsyn.keys()[0]],
+      "use", use.keys()[0], use[use.keys()[0]],
+      "parameters_syn", parameters_syn.keys()[0], parameters_syn[parameters_syn.keys()[0]])
 raise Exception("connData loaded, check conn/conn.pkl for details")  # remove this line when done debugging
 
 # to match the barrel structure in cfg.S1pops,
