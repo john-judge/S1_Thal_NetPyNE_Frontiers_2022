@@ -541,7 +541,11 @@ if cfg.addConn:
                                 print("connEItype:", connEItype.keys(), "pre:", pre, "post:", post, "connID:", connID,
                                       "connEItype[postmtype]:", connEItype[postmtype].keys(),
                                         "postmtype:", postmtype, "postetype:", postetype)
-                                connID = connEItype[postmtype][postetype]                                
+                                if postetype not in connEItype[postmtype].keys():
+                                    connID = ConnTypes[pre][post][0]  # default connID
+                                else:
+                                    connID = connEItype[postmtype][postetype]              
+
                                 if connID == ConnTypes[pre][post][0]:
                                     cellpostList_A.append(cellpost)    
                                 elif connID == ConnTypes[pre][post][1]:
