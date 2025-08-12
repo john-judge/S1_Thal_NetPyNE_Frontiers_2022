@@ -91,7 +91,7 @@ for connName, conn in sim.net.params.connParams.items():
     if num_checks <= 0:
         break
 
-raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")
+#raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")
 
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
