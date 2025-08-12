@@ -119,7 +119,7 @@ for line in mtype_content.split('\n')[:-1]:
         cfg.cellLabel[metype] = cellname
 
         if mtype not in popParam:
-            popParam.append(metype)
+            popParam.append(mtype + '_barrel' + str(barrel))
             cfg.popLabelEl[metype] = [] 
         
         cfg.popLabelEl[metype].append(metype)
