@@ -59,7 +59,7 @@ Epops = ['L23_PC', 'L4_PC', 'L4_SS', 'L4_SP',
              'L6_TPC_L1', 'L6_TPC_L4', 'L6_BPC', 'L6_IPC', 'L6_UTPC']
 
 # expand Epops to include barrel numbers
-Epops = [f"{pop}_{barrel}" for pop in Epops for barrel in range(2)]
+Epops = [f"{pop}_barrel{barrel}" for pop in Epops for barrel in range(2)]
 
 Ipops = []
 for popName in cfg.S1pops:
@@ -476,10 +476,10 @@ if cfg.addConn:
     for pre in Ipops+Epops:
         for post in Ipops+Epops:
 
-            if pre not in connNumber.keys():
-                print(pre, post, "not in connNumber:", connNumber.keys())
-            if post not in connNumber[pre].keys():
-                print(pre, post, "not in connNumber[pre]:", connNumber[pre].keys())
+            #if pre not in connNumber.keys():
+            #    print(pre, post, "not in connNumber:", connNumber.keys())
+            #if post not in connNumber[pre].keys():
+            #    print(pre, post, "not in connNumber[pre]:", connNumber[pre].keys())
             
             if float(connNumber[pre][post]) > 0:           
                 # ------------------------------------------------------------------------------    
