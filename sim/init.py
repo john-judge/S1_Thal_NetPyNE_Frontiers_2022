@@ -71,7 +71,7 @@ print("\nDone checking synMechs.")
 
 
 
-print("Verify cell populations contain cells with correct cellType and tags...")
+'''print("Verify cell populations contain cells with correct cellType and tags...")
 num_checks = 50
 for popName, pop in sim.net.params.popParams.items():
     size = pop.get('numCells', 'unknown')
@@ -89,12 +89,17 @@ for connName, conn in sim.net.params.connParams.items():
     print(f"{connName}: prob={prob}")
     num_checks -= 1
     if num_checks <= 0:
-        break
+        break'''
 
 #raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")
 
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
+
+print("Sample cell tags:")
+for cell in sim.net.cells[:10]:
+    print(cell.gid, cell.tags)
+
 
 
 
