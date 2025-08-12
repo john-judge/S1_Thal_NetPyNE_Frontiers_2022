@@ -514,12 +514,7 @@ if cfg.addConn:
                 # ------------------------------------------------------------------------------    
                 #  2D distance prob rules
                 # ------------------------------------------------------------------------------ 
-                if pre not in d0.keys():
-                    print(pre, post, "not in d0:", d0.keys())
-                if pre not in d0.keys():
-                    print(pre, post, "not in d0:", d0.keys())
-            if post not in connNumber[pre].keys():
-                print(pre, post, "not in connNumber[pre]:", connNumber[pre].keys())
+
                 if int(float(d0[pre][post])) < 25:    # single fit
                     if 'exp' in connData['best_fit'][pre][post]:  # exponential            
                         prob = '%s*exp(-dist_2D/%s)*(dist_2D<%s)' % (a0mat[pre][post],lmat[pre][post],dfinal[pre][post])      
