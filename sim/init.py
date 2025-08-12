@@ -24,7 +24,7 @@ sim.initialize(
 # Collect all synapse mechanism names from connection rules
 all_conn_mechs = set()
 print(f"Number of connection rules in netParams.connParams: {len(sim.net.params.connParams)}")
-for key, val in list(sim.net.params.connParams.items())[:5]:
+for key, val in list(sim.net.params.connParams.items())[:500]:
     print(f"Conn rule: {key}, synMech: {val.get('synMech')}")
     all_conn_mechs.add(val.get('synMech'))
 
