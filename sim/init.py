@@ -34,6 +34,7 @@ for rule_name, rule in netParams.connParams.items():
     print("Preconds:", rule['preConds'])
     print("Postconds:", rule['postConds'])
 
+raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")  # Ensure all connection parameters are correctly defined
 
 sim.net.connectCells(debug=True)            			# create connections between cells based on params
 
