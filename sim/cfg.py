@@ -16,6 +16,7 @@ from recordTraceBatchSettings import record_trace_setting
 
 
 cfg = specs.SimConfig()  
+cfg.debug = False # used in modifications to netpyne
 
 #------------------------------------------------------------------------------
 #
