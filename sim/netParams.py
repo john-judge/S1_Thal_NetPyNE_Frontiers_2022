@@ -468,6 +468,8 @@ NGFSynMech_Th  = ['GABAA_Th', 'GABAB_Th']
 #------------------------------------------------------------------------------
 contA = 0
 
+print('cfg.popLabelEl:', cfg.popLabelEl)
+
 if cfg.addConn:    
     for pre in Ipops+Epops:
         for post in Ipops+Epops:
