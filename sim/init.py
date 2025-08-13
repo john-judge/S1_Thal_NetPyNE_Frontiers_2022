@@ -104,7 +104,7 @@ for cell in sim.net.cells[:10]:
 
 
 
-sim.net.connectCells()            			# create connections between cells based on params
+sim.net.connectCells(debug=True)            			# create connections between cells based on params
 
 
 
