@@ -724,16 +724,20 @@ if cfg.addConn:
                             # but it is the same as mtype_barrel0 -> mtype_barrel0, mtype_barrel1 -> mtype_barrel0, or mtype_barrel1 -> mtype_barrel1
                             # see if any of these are populated
                             if post in ConnTypes.keys() and pre in ConnTypes[post].keys():
-                                connIDlist.append(ConnTypes[post][pre][0])
+                                connID = ConnTypes[post][pre][0]
+                                connIDlist = ConnTypes[post][pre]
                             elif pre in ConnTypes.keys() and pre in ConnTypes[pre].keys():
-                                connIDlist.append(ConnTypes[pre][pre][0])
+                                connIDlist = ConnTypes[pre][pre]
+                                connID = ConnTypes[pre][pre][0]
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
-                                connIDlist.append(ConnTypes[post][post][0])
+                                connIDlist = ConnTypes[post][post]
+                                connID = ConnTypes[post][post][0]
                             else:
                                 # no recurrent connection within this population
                                 connID = None
                         else:
-                            connID = ConnTypes[pre][post][0] 
+                            connID = ConnTypes[pre][post][0]
+                            connIDlist = ConnTypes[pre][post]
                          
                         if connID is not None:
                             cellpostList_A = []
