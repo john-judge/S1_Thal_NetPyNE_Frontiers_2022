@@ -569,6 +569,11 @@ if cfg.addConn:
                                 # remove barrel number from cellpre
                                 premtype = pre.split("_barrel")[0][-3:] + "_barrel" + pre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> mtype_barrel0
                                 preetype = cellpre.split("_barrel")[0][-3:] + "_barrel" + cellpre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> etype_barrel0
+
+                                if premtype not in connIEtype.keys():
+                                    print(pre, post, "not in connIEtype:", connIEtype.keys())
+                                if preetype not in connIEtype[premtype].keys():
+                                    print(pre, post, "not in connIEtype[premtype]:", connIEtype[premtype].keys())
                                 connID = connIEtype[premtype][preetype]
                                 #print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
                                 #      "ConnTypes[pre][post]:", ConnTypes[pre][post])
