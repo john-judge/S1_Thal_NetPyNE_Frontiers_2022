@@ -718,17 +718,17 @@ if cfg.addConn:
                 #------------------------------------------------------------------------------   
                 if pre in Epops:
                     if post in Ipops:        
-
+                        connIDlist = []
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1 is not populated
                             # but it is the same as mtype_barrel0 -> mtype_barrel0, mtype_barrel1 -> mtype_barrel0, or mtype_barrel1 -> mtype_barrel1
                             # see if any of these are populated
                             if post in ConnTypes.keys() and pre in ConnTypes[post].keys():
-                                connID = ConnTypes[post][pre][0]
+                                connIDlist.append(ConnTypes[post][pre][0])
                             elif pre in ConnTypes.keys() and pre in ConnTypes[pre].keys():
-                                connID = ConnTypes[pre][pre][0]
+                                connIDlist.append(ConnTypes[pre][pre][0])
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
-                                connID = ConnTypes[post][post][0]
+                                connIDlist.append(ConnTypes[post][post][0])
                             else:
                                 # no recurrent connection within this population
                                 connID = None
@@ -745,8 +745,8 @@ if cfg.addConn:
                                 cellpre = cfg.popLabelEl[pre][0]
                                 for npost,cellpost in enumerate(cfg.popLabelEl[post]):                                
                                     # remove barrel number from cellpost
-                                    postmtype = post[-3:]
-                                    postetype = cellpost[-3:]
+                                    postmtype = post.split("_barrel")[0][-3:] + "_barrel" + post.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> mtype_barrel0
+                                    postetype = cellpost.split("_barrel")[0][-3:] + "_barrel" + cellpost.split("_barrel")[1][-1]
                                     if 'BP' in postmtype:
                                         postmtype = post[-2:]
                                     connID_div = connEItype[postmtype][postetype]       
@@ -754,11 +754,11 @@ if cfg.addConn:
                                     #      "connEItype[postmtype]:", connEItype[postmtype].keys(),
                                     #        "postmtype:", postmtype, "postetype:", postetype)           
 
-                                    if connID_div == ConnTypes[pre][post][0]:
+                                    if connID_div == connIDlist[0] or len(connIDlist) == 1:
                                         cellpostList_A.append(cellpost)    
-                                    elif connID_div == ConnTypes[pre][post][1]:
+                                    elif connID_div == connIDlist[1] or len(connIDlist) == 2:
                                         cellpostList_B.append(cellpost)
-                                        connID_B = ConnTypes[pre][post][1]
+                                        connID_B = connIDlist[1]
                                     else:
                                         print('ERROR')                                
                             else:                           
