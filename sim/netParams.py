@@ -563,21 +563,26 @@ if cfg.addConn:
                         cellpreList_C = []
                         connID_B = -1
                         connID_C = -1
+                        connIDlist = []
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1 is not populated
                             # but it is the same as mtype_barrel0 -> mtype_barrel0, mtype_barrel1 -> mtype_barrel0, or mtype_barrel1 -> mtype_barrel1
                             # see if any of these are populated
                             if post in ConnTypes.keys() and pre in ConnTypes[post].keys():
                                 connID = ConnTypes[post][pre][0]
+                                connIDlist = ConnTypes[post][pre]
                             elif pre in ConnTypes.keys() and pre in ConnTypes[post].keys():
                                 connID = ConnTypes[pre][pre][0]
+                                connIDlist = ConnTypes[pre][pre]
                             elif post in ConnTypes.keys() and post in ConnTypes[post].keys():
                                 connID = ConnTypes[post][post][0]
+                                connIDlist = ConnTypes[post][post]
                             else:
                                 # no recurrent connection within this population
                                 connID = None
                         else:
                             connID = ConnTypes[pre][post][0] 
+                            connIDlist = ConnTypes[pre][post]
                         if connID is not None:         
                             if 'SBC' in pre or 'LBC' in pre or 'NBC' in pre:
                                 cellpost = cfg.popLabelEl[post][0]
@@ -598,14 +603,14 @@ if cfg.addConn:
 
                                     #print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
                                     #      "ConnTypes[pre][post]:", ConnTypes[pre][post])
-                                    if connID_pre == ConnTypes[pre][post][0]:
+                                    if connID_pre == connIDlist[0]:
                                         cellpreList_A.append(cellpre)    
-                                    elif connID_pre == ConnTypes[pre][post][1]:
+                                    elif connID_pre == connIDlist[1]:
                                         cellpreList_B.append(cellpre)
-                                        connID_B = ConnTypes[pre][post][1]
-                                    elif connID_pre == ConnTypes[pre][post][2]:
+                                        connID_B = connIDlist[1]
+                                    elif connID_pre == connIDlist[2]:
                                         cellpreList_C.append(cellpre)
-                                        connID_C = ConnTypes[pre][post][2]
+                                        connID_C = connIDlist[2]
                                     else:
                                         print('ERROR')                                    
                             else:   
