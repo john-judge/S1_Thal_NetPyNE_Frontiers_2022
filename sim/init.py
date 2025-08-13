@@ -33,7 +33,7 @@ for rule_name, rule in netParams.connParams.items():
 
 #raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")  # Ensure all connection parameters are correctly defined
 
-sim.net.connectCells(debug=True)            			# create connections between cells based on params
+sim.net.connectCells(debug=False)            			# create connections between cells based on params
 
 
 
