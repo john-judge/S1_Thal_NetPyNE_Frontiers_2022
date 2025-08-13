@@ -603,12 +603,12 @@ if cfg.addConn:
 
                                     #print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
                                     #      "ConnTypes[pre][post]:", ConnTypes[pre][post])
-                                    if connID_pre == connIDlist[0]:
+                                    if connID_pre == connIDlist[0] or len(connIDlist) == 1:
                                         cellpreList_A.append(cellpre)    
-                                    elif connID_pre == connIDlist[1]:
+                                    elif connID_pre == connIDlist[1] or len(connIDlist) == 2:
                                         cellpreList_B.append(cellpre)
                                         connID_B = connIDlist[1]
-                                    elif connID_pre == connIDlist[2]:
+                                    elif connID_pre == connIDlist[2] or len(connIDlist) == 3:
                                         cellpreList_C.append(cellpre)
                                         connID_C = connIDlist[2]
                                     else:
