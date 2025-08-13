@@ -563,38 +563,6 @@ if cfg.addConn:
                         cellpreList_C = []
                         connID_B = -1
                         connID_C = -1
-                        if 'SBC' in pre or 'LBC' in pre or 'NBC' in pre:
-                            cellpost = cfg.popLabelEl[post][0]
-                            for npre,cellpre in enumerate(cfg.popLabelEl[pre]):
-                                # remove barrel number from cellpre
-                                premtype = pre.split("_barrel")[0][-3:] + "_barrel" + pre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> mtype_barrel0
-                                preetype = cellpre.split("_barrel")[0][-3:] + "_barrel" + cellpre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> etype_barrel0
-
-                                
-                                try:
-                                    connID = connIEtype[premtype][preetype]
-                                except KeyError as e:
-                                    if premtype not in connIEtype.keys():
-                                        print(pre, post, "not in connIEtype:", connIEtype.keys())
-                                    if preetype not in connIEtype[premtype].keys():
-                                        print(pre, post, "not in connIEtype[premtype]:", connIEtype[premtype].keys())
-                                    raise(e)
-
-                                #print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
-                                #      "ConnTypes[pre][post]:", ConnTypes[pre][post])
-                                if connID == ConnTypes[pre][post][0]:
-                                    cellpreList_A.append(cellpre)    
-                                elif connID == ConnTypes[pre][post][1]:
-                                    cellpreList_B.append(cellpre)
-                                    connID_B = ConnTypes[pre][post][1]
-                                elif connID == ConnTypes[pre][post][2]:
-                                    cellpreList_C.append(cellpre)
-                                    connID_C = ConnTypes[pre][post][2]
-                                else:
-                                    print('ERROR')                                    
-                        else:   
-                            cellpreList_A = cfg.popLabelEl[pre]                              
-                            
                         if post not in ConnTypes[pre].keys():
                             # then it could be mtype_barrel0 -> mtype_barrel1 is not populated
                             # but it is the same as mtype_barrel0 -> mtype_barrel0, mtype_barrel1 -> mtype_barrel0, or mtype_barrel1 -> mtype_barrel1
@@ -610,7 +578,40 @@ if cfg.addConn:
                                 connID = None
                         else:
                             connID = ConnTypes[pre][post][0] 
-                        if connID is not None:                           
+                        if connID is not None:         
+                            if 'SBC' in pre or 'LBC' in pre or 'NBC' in pre:
+                                cellpost = cfg.popLabelEl[post][0]
+                                for npre,cellpre in enumerate(cfg.popLabelEl[pre]):
+                                    # remove barrel number from cellpre
+                                    premtype = pre.split("_barrel")[0][-3:] + "_barrel" + pre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> mtype_barrel0
+                                    preetype = cellpre.split("_barrel")[0][-3:] + "_barrel" + cellpre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> etype_barrel0
+
+                                    
+                                    try:
+                                        connID_pre = connIEtype[premtype][preetype]
+                                    except KeyError as e:
+                                        if premtype not in connIEtype.keys():
+                                            print(pre, post, "not in connIEtype:", connIEtype.keys())
+                                        if preetype not in connIEtype[premtype].keys():
+                                            print(pre, post, "not in connIEtype[premtype]:", connIEtype[premtype].keys())
+                                        raise(e)
+
+                                    #print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
+                                    #      "ConnTypes[pre][post]:", ConnTypes[pre][post])
+                                    if connID_pre == ConnTypes[pre][post][0]:
+                                        cellpreList_A.append(cellpre)    
+                                    elif connID_pre == ConnTypes[pre][post][1]:
+                                        cellpreList_B.append(cellpre)
+                                        connID_B = ConnTypes[pre][post][1]
+                                    elif connID_pre == ConnTypes[pre][post][2]:
+                                        cellpreList_C.append(cellpre)
+                                        connID_C = ConnTypes[pre][post][2]
+                                    else:
+                                        print('ERROR')                                    
+                            else:   
+                                cellpreList_A = cfg.popLabelEl[pre]                              
+                            
+                  
                             synMechType = 'S1_IE_STP_Det_' + str(connID)
                             
                             contA+= 1          
