@@ -28,9 +28,6 @@ sim.net.createCells()              			# instantiate network cells based on defin
 
 print("\nChecking connection parameters preConds and postConds...")
 for rule_name, rule in netParams.connParams.items():
-    if not isinstance(rule.get('preConds'), dict) or not isinstance(rule.get('postConds'), dict):
-        print(f"Missing or invalid pre/postConds in rule: {rule_name}")
-        continue
     print("Preconds:", rule['preConds'])
     print("Postconds:", rule['postConds'])
 
