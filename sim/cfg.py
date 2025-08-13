@@ -16,6 +16,7 @@ from recordTraceBatchSettings import record_trace_setting
 
 
 cfg = specs.SimConfig()  
+cfg.debug = True # used in modifications to netpyne
 
 #------------------------------------------------------------------------------
 #
@@ -120,9 +121,9 @@ for line in mtype_content.split('\n')[:-1]:
 
         if mtype not in popParam:
             popParam.append(mtype + '_barrel' + str(barrel))
-            cfg.popLabelEl[metype] = [] 
+            cfg.popLabelEl[mtype + '_barrel' + str(barrel)] = [] 
         
-        cfg.popLabelEl[metype].append(metype)
+        cfg.popLabelEl[mtype + '_barrel' + str(barrel)].append(metype)
         
         cellParam.append(metype)
     
