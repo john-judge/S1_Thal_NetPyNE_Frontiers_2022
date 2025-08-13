@@ -20,89 +20,18 @@ sim.initialize(
     simConfig = cfg, 	
     netParams = netParams)  				# create network object and set cfg and net params
 
-all_conn_mechs = set()
-for connName, conn in sim.net.params.connParams.items():
-    synMech = conn.get('synMech')
-    if isinstance(synMech, list):
-        all_conn_mechs.update(synMech)
-    elif synMech:
-        all_conn_mechs.add(synMech)
-
-all_defined_mechs = set(sim.net.params.synMechParams.keys())
-
-print(f"Total synMechs referenced in connParams: {len(all_conn_mechs)}")
-print(f"Total synMechs defined in synMechParams: {len(all_defined_mechs)}")
-
-# Step 3: Missing synMechs
-missing_mechs = all_conn_mechs - all_defined_mechs
-if missing_mechs:
-    print(f"\nERROR: SynMechs referenced in connParams but missing in synMechParams ({len(missing_mechs)}):")
-    for mech in missing_mechs:
-        print(f"  - {mech}")
-else:
-    print("\nNo synMechs missing from synMechParams.")
-
-# Step 4: Check synMech conds cellType coverage
-all_cell_types = {pop['cellType'] for pop in sim.net.params.popParams.values()}
-
-print("\nChecking synMech conds against populations:")
-for mech in all_defined_mechs:
-    conds = sim.net.params.synMechParams[mech].get('conds', {})
-    cond_types = set()
-    if 'cellType' in conds:
-        if isinstance(conds['cellType'], list):
-            cond_types.update(conds['cellType'])
-        else:
-            cond_types.add(conds['cellType'])
-    else:
-        # No cellType condition means synMech applies to all cellTypes
-        continue
-
-    missing_targets = cond_types - all_cell_types
-    unused_targets = all_cell_types - cond_types
-    if cond_types.isdisjoint(all_cell_types):
-        print(f"WARNING: synMech '{mech}' conds cellType(s) {cond_types} do not match ANY populations' cellTypes!")
-    elif missing_targets:
-        print(f"WARNING: synMech '{mech}' conds include cellTypes not in populations: {missing_targets}")
-    elif unused_targets:
-        print(f"NOTE: synMech '{mech}' does not cover cellTypes: {unused_targets}")
-
-print("\nDone checking synMechs.")
-
-
-
-'''print("Verify cell populations contain cells with correct cellType and tags...")
-num_checks = 50
-for popName, pop in sim.net.params.popParams.items():
-    size = pop.get('numCells', 'unknown')
-    cellType = pop.get('cellType', 'unknown')
-    tags = pop.get('tags', {})
-    print(f"Pop {popName}: size={size}, cellType={cellType}, tags={tags}")
-    num_checks -= 1
-    if num_checks <= 0:
-        break
-
-print("Check connection probabilities")
-num_checks = 50
-for connName, conn in sim.net.params.connParams.items():
-    prob = conn.get('probability', None)
-    print(f"{connName}: prob={prob}")
-    num_checks -= 1
-    if num_checks <= 0:
-        break'''
-
-#raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")
+#
 
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
 
-print("Sample cell tags:")
-for cell in sim.net.cells[:10]:
-    print(cell.gid, cell.tags)
 
+print("\nChecking connection parameters preConds and postConds...")
+for rule_name, rule in netParams.connParams.items():
+    if not isinstance(rule.get('preConds'), dict) or not isinstance(rule.get('postConds'), dict):
+        print(f"Missing or invalid pre/postConds in rule: {rule_name}")
 
-
-
+raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")
 
 sim.net.connectCells(debug=True)            			# create connections between cells based on params
 
