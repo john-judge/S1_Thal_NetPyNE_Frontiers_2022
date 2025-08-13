@@ -31,7 +31,6 @@ for rule_name, rule in netParams.connParams.items():
     if not isinstance(rule.get('preConds'), dict) or not isinstance(rule.get('postConds'), dict):
         print(f"Missing or invalid pre/postConds in rule: {rule_name}")
 
-raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")
 
 sim.net.connectCells(debug=True)            			# create connections between cells based on params
 
