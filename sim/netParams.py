@@ -567,8 +567,8 @@ if cfg.addConn:
                             cellpost = cfg.popLabelEl[post][0]
                             for npre,cellpre in enumerate(cfg.popLabelEl[pre]):
                                 # remove barrel number from cellpre
-                                premtype = pre[-3:]
-                                preetype = cellpre[-3:]
+                                premtype = pre.split("_barrel")[0][-3:] + "_barrel" + pre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> mtype_barrel0
+                                preetype = cellpre.split("_barrel")[0][-3:] + "_barrel" + cellpre.split("_barrel")[1][-1]  # e.g. metype_barrel0 -> etype_barrel0
                                 connID = connIEtype[premtype][preetype]
                                 #print("ConnTypes:", ConnTypes.keys(), "pre:", pre, "post:", post, "connID:", connID,
                                 #      "ConnTypes[pre][post]:", ConnTypes[pre][post])
