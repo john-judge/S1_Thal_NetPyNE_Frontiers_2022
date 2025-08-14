@@ -33,7 +33,7 @@ sim.net.createCells()              			# instantiate network cells based on defin
 
 #raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")  # Ensure all connection parameters are correctly defined
 
-sim.net.connectCells(debug=False)            			# create connections between cells based on params
+sim.net.connectCells()            			# create connections between cells based on params
 
 
 
