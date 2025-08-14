@@ -259,15 +259,20 @@ compart_ids = target_cell_0.get_list_compartment_ids()
 for morph_key in me_type_morphology_map:
     for morph in me_type_morphology_map[morph_key]:
         for cell in target_population_cells:
-            if cell.get_me_type() == morph.me_type:
+            if cell.get_me_type().split("_barrel")[0] == morph.me_type:
 
                 if morph.does_cell_match_morphology(cell):
                     cell.set_morphology(morph)
 
-print("Any target cells missing structure data?:", 
-      any([cell.get_morphology() == None 
-           for cell in target_population_cells]))
-
+if any([cell.get_morphology() == None 
+           for cell in target_population_cells]):
+    print("Some target cells are missing structure data:")
+    # report which cells are missing morphology
+    for cell in target_population_cells:
+        if cell.get_morphology() is None:
+            print("Cell", cell.get_cell_id(), "is missing morphology for me_type", cell.get_me_type())
+            # set a default morphology to avoid errors
+            cell.set_morphology(Morphology(cell.get_me_type(), morphology_data_dir + 'default.cell.nml'))
 
 #######################################
 # Draw cells with PSF
