@@ -26,10 +26,10 @@ sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
 
 
-print("\nChecking connection parameters preConds and postConds...")
-for rule_name, rule in netParams.connParams.items():
-    print("Preconds:", rule['preConds'])
-    print("Postconds:", rule['postConds'])
+#print("\nChecking connection parameters preConds and postConds...")
+#for rule_name, rule in netParams.connParams.items():
+#    print("Preconds:", rule['preConds'])
+#    print("Postconds:", rule['postConds'])
 
 #raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")  # Ensure all connection parameters are correctly defined
 
