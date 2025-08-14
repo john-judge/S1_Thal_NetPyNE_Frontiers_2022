@@ -158,6 +158,7 @@ for cell_id in loaded_compart_data.hash_map.keys():
     z = cell_id_to_me_type_map[short_cell_id]['z']
     cells[cell_id] = Cell(cell_id, me_type, axons, apics, dends, soma, x, y, z, optical_filelabel=optical_type)
 
+    me_type = me_type.split("_barrel")[0]  # remove barrel suffix if present
     if me_type not in me_type_morphology_map:
         # load morphology
         # find files in morphology_data_dir with me_type in the name
