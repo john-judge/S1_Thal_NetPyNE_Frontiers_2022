@@ -86,7 +86,7 @@ class Morphology:
     
     def does_cell_match_morphology(self, cell):
         # Check if the cell morphology matches the morphology structure        
-        if cell.get_me_type() != self.me_type:
+        if cell.get_me_type().split("_barrel")[0] != self.me_type:
             return False
         
         # then check if the cell's morphology structure matches the
