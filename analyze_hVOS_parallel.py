@@ -100,7 +100,7 @@ loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl
 for cell_id in loaded_compart_data.hash_map:
     for comp in loaded_compart_data.hash_map[cell_id]:
         i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
-        print(' check get in loaded_compart_data', mmfp[i_data])
+        #print(' check get in loaded_compart_data', mmfp[i_data])
         break
     break
 print("Total nonzero:", np.sum(loaded_compart_data.mmap_fp != 0))
@@ -258,21 +258,23 @@ target_cell_0 = cells_to_draw[0]
 compart_ids = target_cell_0.get_list_compartment_ids()
 for morph_key in me_type_morphology_map:
     for morph in me_type_morphology_map[morph_key]:
+        print("Seeking match for morphology:", morph.me_type)
         for cell in target_population_cells:
+            print(" Checking cell of metype:", cell.get_me_type().split("_barrel")[0])
             if cell.get_me_type().split("_barrel")[0] == morph.me_type:
 
                 if morph.does_cell_match_morphology(cell):
                     cell.set_morphology(morph)
+        
 
 if any([cell.get_morphology() == None 
            for cell in target_population_cells]):
-    print("Some target cells are missing structure data:")
+    print(str(sum([cell.get_morphology() == None 
+           for cell in target_population_cells])) + " target cells are missing structure data:")
     # report which cells are missing morphology
     for cell in target_population_cells:
         if cell.get_morphology() is None:
-            print("Cell", cell.get_cell_id(), "is missing morphology for me_type", cell.get_me_type())
-            # set a default morphology to avoid errors
-            cell.set_morphology(Morphology(cell.get_me_type(), morphology_data_dir + 'default.cell.nml'))
+            raise("Cell", cell.get_cell_id(), "is missing morphology for me_type", cell.get_me_type())
 
 #######################################
 # Draw cells with PSF
