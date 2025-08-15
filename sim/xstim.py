@@ -68,17 +68,19 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
 
         # Compute extracellular potential with distance-based decay
         r_m = r * 1e-6 # convert to meters. Sigma is in mS/mm = S/m
+        sigma = field.get('sigma', 0.276) # default conductivity in mS/mm
         I_A = waveform['amp'] * 1e-3 # convert mA to A
         if decay == '1/r':
-            Vext = I_A / (4 * np.pi * field['sigma'] * r_m) * 1e3  # convert to mV
+            Vext = I_A / (4 * np.pi * sigma * r_m) * 1e3  # convert to mV
         elif decay == '1/r2':
-            Vext = I_A / (4 * np.pi * field['sigma'] * r_m**2) * 1e3 # convert to mV
+            Vext = I_A / (4 * np.pi * sigma * r_m**2) * 1e3 # convert to mV
         elif decay == '1/r3':
-            Vext = I_A / (4 * np.pi * field['sigma'] * r_m**3) * 1e3 # convert to mV
+            Vext = I_A / (4 * np.pi * sigma * r_m**3) * 1e3 # convert to mV
         else:
             raise ValueError("decay must be '1/r' or '1/r2'")
 
     elif field['type'] == 'uniform':
+        raise Exception("Uniform field not yet implemented: fix the units before using")
         direction = np.array(field['direction'])
         Vext = waveform['amp'] * np.dot(seg_positions, direction)
     else:
