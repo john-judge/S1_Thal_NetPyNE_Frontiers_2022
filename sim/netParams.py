@@ -1138,6 +1138,7 @@ if cfg.addExtracellularStim:
                                                        'field': {'class': 'pointSource',
                                                                  'location': [cfg.xStimLocation[0], cfg.xStimLocation[1], cfg.xStimLocation[2]],
                                                                   'sigma': cfg.xStimSigma,  # conductivity in mS/mm
+                                                                  
                                                                  },
                                                         'waveform': {'type': 'pulse',
                                                                      'amp': cfg.xStimAmp,  # amplitude in mA

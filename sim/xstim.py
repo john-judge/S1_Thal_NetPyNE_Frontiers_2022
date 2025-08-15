@@ -6,35 +6,36 @@
     when spatial bounding box is used."""
 
 from neuron import h
+import numpy as np
 
-def attach_xstim_to_segments(sim, stim_name, x0, y0, z0, stim_radius, stim_params):
+
+def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100):
     """
     Attach a single NetStim/XStim source to all segments within a cubic region.
 
-    Args:
-        sim: NetPyNE sim object (after sim.createSim())
-        stim_name: name of the stim (used for reference)
-        x0, y0, z0: center coordinates of the target cube
-        stim_radius: half-width of cube around center
-        stim_params: dict of stim parameters from netParams.stimSourceParams
+    This is equivalent to mod_based=False, and does not require
+         xtra.mod file compiled in NEURON.
+
+    Parameters
+    ----------
+    sim : NetPyNE Sim object
+    field : dict
+        type: 'pointSource' or 'uniform'
+        location: [x, y, z] for pointSource
+        direction: 3-vector for uniform field
+    stim_params : dict
+        {'delay':..., 'dur':...}
+    decay : str
+        '1/r' or '1/r2' distance-based decay
+    stim_radius : float or None
+        Maximum distance (microns) from electrode to apply stimulation. None = no cutoff.
     """
-    # Create the NetStim or XStim source
-    stim_type = stim_params.get('type', 'NetStim')
-    if stim_type == 'NetStim':
-        stim = h.NetStim()
-        for param, value in stim_params.items():
-            if param != 'type':
-                setattr(stim, param, value)
-    else:
-        # Replace with your custom XStim mechanism
-        stim = getattr(h, stim_type)()
 
-    target_segs = []
+    seg_coords = []     # (cell_gid, sec, seg) tuples
+    seg_positions = []  # corresponding x,y,z
 
-    # Collect all segments within bounds
+    # Collect all segment positions
     for gid, cell in sim.net.allCells.items():
-        if not hasattr(cell, 'secs'):
-            continue
         for sec_name, sec_dict in cell.secs.items():
             sec = sec_dict['hSec']
             for seg in sec:
@@ -42,21 +43,49 @@ def attach_xstim_to_segments(sim, stim_name, x0, y0, z0, stim_radius, stim_param
                     x = seg.x3d(seg.x)
                     y = seg.y3d(seg.x)
                     z = seg.z3d(seg.x)
-                    """if (x0 - stim_radius <= x <= x0 + stim_radius and
-                        y0 - stim_radius <= y <= y0 + stim_radius and
-                        z0 - stim_radius <= z <= z0 + stim_radius):"""
-                    # sphere of radius stim_radius
-                    if ((x - x0)**2 + (y - y0)**2 + (z - z0)**2) <= stim_radius**2:
-                        # This segment is within the target region
-                        target_segs.append(seg)
                 except Exception:
                     continue
+                seg_coords.append((gid, sec, seg))
+                seg_positions.append([x, y, z])
 
-    # Connect the stim to all target segments
-    for seg in target_segs:
-        nc = h.NetCon(stim, seg(0.5))  # midpoint
-        nc.weight[0] = 0.1  # adjust as needed
-        nc.delay = 0
+    seg_positions = np.array(seg_positions)  # shape (N,3)
 
-    print(f"[{stim_name}] Attached to {len(target_segs)} segments.")
+    # Compute distances for pointSource stim
+    if field['type'] == 'pointSource':
+        dx = seg_positions[:,0] - field['location'][0]
+        dy = seg_positions[:,1] - field['location'][1]
+        dz = seg_positions[:,2] - field['location'][2]
+        r = np.sqrt(dx**2 + dy**2 + dz**2)
+        r[r < 1e-9] = 1e-9  # avoid divide by zero
 
+        # Apply stim radius cutoff
+        if stim_radius is not None:
+            mask = r <= stim_radius
+            seg_coords = [c for c, m in zip(seg_coords, mask) if m]
+            seg_positions = seg_positions[mask]
+            r = r[mask]
+
+        # Compute extracellular potential with distance-based decay
+        if decay == '1/r':
+            Vext = waveform['amp'] / (4 * np.pi * r)
+        elif decay == '1/r2':
+            Vext = waveform['amp'] / (4 * np.pi * r**2)
+        elif decay == '1/r3':
+            Vext = waveform['amp'] / (4 * np.pi * r**3)
+        else:
+            raise ValueError("decay must be '1/r' or '1/r2'")
+
+    elif field['type'] == 'uniform':
+        direction = np.array(field['direction'])
+        Vext = waveform['amp'] * np.dot(seg_positions, direction)
+    else:
+        raise ValueError("Unsupported field type")
+
+    # Attach IClamp to segments and set amplitude
+    for (gid, sec, seg), v in zip(seg_coords, Vext):
+        stim = h.IClamp(seg(0.5))
+        stim.delay = waveform.get('delay', 0)
+        stim.dur = waveform.get('dur', 1e9)
+        stim.amp = v
+
+    print(f"Applied extracellular stimulation to {len(seg_coords)} segments.")

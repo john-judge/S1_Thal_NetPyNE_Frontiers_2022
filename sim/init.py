@@ -39,15 +39,11 @@ sim.net.connectCells()            			# create connections between cells based on
 # Get stim parameters from netParams
 stim_params = netParams.stimSourceParams['XStim1']
 
-# Attach XStim to segments in spatial cube
+# defaults: radius=100, decay='1/r2'
 attach_xstim_to_segments(
     sim,
-    stim_name='XStim1',
-    x0=cfg.xStimLocation[0],
-    y0=cfg.xStimLocation[1],
-    z0=cfg.xStimLocation[2],
-    stim_radius=cfg.xStimRadius,
-    stim_params=stim_params
+    field=stim_params['field'],
+    waveform=stim_params['waveform'],
 )
 
 
