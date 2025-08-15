@@ -14,6 +14,7 @@ Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
 
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim
+from xstim import attach_xstim_to_segments
 
 cfg, netParams = sim.readCmdLineArgs()
 sim.initialize(
@@ -35,10 +36,22 @@ sim.net.createCells()              			# instantiate network cells based on defin
 
 sim.net.connectCells()            			# create connections between cells based on params
 
+# Get stim parameters from netParams
+stim_params = netParams.stimSourceParams['XStim1']
+
+# Attach XStim to segments in spatial cube
+attach_xstim_to_segments(
+    sim,
+    stim_name='XStim1',
+    x0=cfg.xStimLocation[0],
+    y0=cfg.xStimLocation[1],
+    z0=cfg.xStimLocation[2],
+    stim_radius=cfg.xStimRadius,
+    stim_params=stim_params
+)
 
 
-
-sim.net.addStims() 							# add network stimulation
+#sim.net.addStims() 							# add network stimulation
 sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node

@@ -1146,18 +1146,26 @@ if cfg.addExtracellularStim:
                                                         }
     }
 
-    stim_radius = 100
+    # the following causes segfault at simulation runtime:
+    #stim_radius = 100
+    #netParams.stimTargetParams['XStim1->all'] = {
+    #    'source': 'XStim1',
+    #    'conds': {
+    #        'cellList': 'all', 
+    #        'x': [cfg.xStimLocation[0] - stim_radius, cfg.xStimLocation[0] + stim_radius],
+    #        'y': [cfg.xStimLocation[1] - stim_radius, cfg.xStimLocation[1] + stim_radius],
+    #        'z': [cfg.xStimLocation[2] - stim_radius, cfg.xStimLocation[2] + stim_radius]
+    #    },
+    #    'secList': 'all',  # sections are formatted apic_0, dend_12, etc
+    #    #'loc': 0.5                                    # omit to hit all segments
+    #}                              
+
+    # instead, define a placeholder and then attach x-stims explicitly after sim.createSim()
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
-        'conds': {
-            'cellList': 'all', 
-            'x': [cfg.xStimLocation[0] - stim_radius, cfg.xStimLocation[0] + stim_radius],
-            'y': [cfg.xStimLocation[1] - stim_radius, cfg.xStimLocation[1] + stim_radius],
-            'z': [cfg.xStimLocation[2] - stim_radius, cfg.xStimLocation[2] + stim_radius]
-        },
-        'secList': 'all',  # sections are formatted apic_0, dend_12, etc
-        #'loc': 0.5                                    # omit to hit all segments
-    }                              
+        'conds': {},   # no populations specified
+        'secList': [], # empty, nothing will be attached automatically
+    }
 
 #------------------------------------------------------------------------------
 # NetStim inputs - FROM CFG.PY

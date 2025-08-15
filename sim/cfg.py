@@ -133,6 +133,26 @@ for line in mtype_content.split('\n')[:-1]:
 cfg.S1pops = popParam
 cfg.S1cells = cellParam
 
+
+# diagnose unequal barrel density
+from collections import defaultdict
+
+# Nested dictionary: barrel -> population -> n
+breakdown = defaultdict(dict)
+
+for metype, n in cfg.cellNumber.items():
+    if '_barrel' in metype:
+        barrel_str = metype.split('_barrel')[-1]
+        barrel = int(barrel_str)
+        breakdown[barrel][metype] = n
+
+# Print results
+print("diagnose unequal barrel density:")
+for barrel, pops in breakdown.items():
+    print(f"\nBarrel {barrel}:")
+    for pop, n in pops.items():
+        print(f"  {pop}: n={n}, m={m}")
+
 #------------------------------------------------------------------------------  
 # Thalamic Cells
 
@@ -364,7 +384,8 @@ for popName in cfg.thalamocorticalconnections:
 #------------------------------------------------------------------------------
 cfg.addExtracellularStim = True
 
-cfg.xStimLocation = xStimLocation 
+cfg.xStimLocation = xStimLocation
+cfg.xStimRadius = 100  # microns (sphere)
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
 cfg.xStimAmp = 200  # amplitude in mA
 cfg.xStimDur = 4  # duration in ms
