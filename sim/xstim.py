@@ -23,6 +23,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
         type: 'pointSource' or 'uniform'
         location: [x, y, z] for pointSource
         direction: 3-vector for uniform field
+        sigma: conductivity in mS/mm (default 0.276)
     stim_params : dict
         {'delay':..., 'dur':...}
     decay : str
@@ -67,11 +68,11 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
 
         # Compute extracellular potential with distance-based decay
         if decay == '1/r':
-            Vext = waveform['amp'] / (4 * np.pi * r)
+            Vext = waveform['amp'] / (4 * np.pi * field['sigma'] * r)
         elif decay == '1/r2':
-            Vext = waveform['amp'] / (4 * np.pi * r**2)
+            Vext = waveform['amp'] / (4 * np.pi * field['sigma'] * r**2)
         elif decay == '1/r3':
-            Vext = waveform['amp'] / (4 * np.pi * r**3)
+            Vext = waveform['amp'] / (4 * np.pi * field['sigma'] * r**3)
         else:
             raise ValueError("decay must be '1/r' or '1/r2'")
 
