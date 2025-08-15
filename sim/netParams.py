@@ -1142,6 +1142,16 @@ if cfg.addExtracellularStim:
                                                                         'del': cfg.xStimDel,  # delay in ms
                                                         }
     }
+
+    # to avoid segfaulting, instead of enumerating all possible sections (as with recordings),
+    # look up all the secLists of each cell
+    all_secs = {}
+    for popName, pop in netParams.popParams.items():
+        all_secs[popName] = []
+        if 'cellModel' in pop and pop['cellModel'] != 'NetStim':
+            # Use a placeholder list; secLists get resolved per-cell later
+            all_secs[popName] = 'all'  # NetPyNE will use all sections if 'all'
+
     stim_radius = 100
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
@@ -1151,8 +1161,8 @@ if cfg.addExtracellularStim:
             'y': [cfg.xStimLocation[1] - stim_radius, cfg.xStimLocation[1] + stim_radius],
             'z': [cfg.xStimLocation[2] - stim_radius, cfg.xStimLocation[2] + stim_radius]
         },
-        'secList': ['apic', 'axon', 'soma', 'dend'],  # apply to all sections of interest
-        'loc': 0.5                                    # or omit to hit all segments
+        'secList': 'all',  # sections are formatted apic_0, dend_12, etc
+        #'loc': 0.5                                    # omit to hit all segments
     }                              
 
 #------------------------------------------------------------------------------
