@@ -468,8 +468,6 @@ NGFSynMech_Th  = ['GABAA_Th', 'GABAB_Th']
 #------------------------------------------------------------------------------
 contA = 0
 
-print('cfg.popLabelEl:', cfg.popLabelEl)
-
 if cfg.addConn:    
     for pre in Ipops+Epops:
         for post in Ipops+Epops:
@@ -1147,13 +1145,15 @@ if cfg.addExtracellularStim:
     stim_radius = 100
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
-        'conds': {'cellList': 'all', 
-                  'secLists': {'all': ['apic', 'axon', 'soma', 'dend']},
-                  'x': [cfg.xStimLocation[0]-stim_radius,cfg.xStimLocation[0]+stim_radius], 
-                  'y': [cfg.xStimLocation[1]-stim_radius,cfg.xStimLocation[1]+stim_radius], 
-                  'z': [cfg.xStimLocation[2]-stim_radius,cfg.xStimLocation[2]+stim_radius]},}
-
-                                                       
+        'conds': {
+            'cellList': 'all', 
+            'x': [cfg.xStimLocation[0] - stim_radius, cfg.xStimLocation[0] + stim_radius],
+            'y': [cfg.xStimLocation[1] - stim_radius, cfg.xStimLocation[1] + stim_radius],
+            'z': [cfg.xStimLocation[2] - stim_radius, cfg.xStimLocation[2] + stim_radius]
+        },
+        'secList': ['apic', 'axon', 'soma', 'dend'],  # apply to all sections of interest
+        'loc': 0.5                                    # or omit to hit all segments
+    }                              
 
 #------------------------------------------------------------------------------
 # NetStim inputs - FROM CFG.PY
