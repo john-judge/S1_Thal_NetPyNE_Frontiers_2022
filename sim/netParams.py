@@ -89,13 +89,16 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 
 for cellName in cfg.S1cells:
     barrel = int(cellName.split('_barrel')[-1])  # get barrel number from cellName
+
+    # ensure top range is not exactly 1.0
+    eps = 1e-6
     metype = cellName #.split('_barrel')[0]  # get metype from cellName
     septa_width = 70  # um
     septa_width_fractional = septa_width / cfg.sizeZ  # fractional width of the septa
     barrel_width = 120  # um
     barrel_width_fractional = barrel_width / cfg.sizeZ  # fractional width of the barrel
     z_range_barrel = [barrel * (barrel_width_fractional + septa_width_fractional), 
-                        barrel * (barrel_width_fractional + septa_width_fractional) + barrel_width_fractional]
+                        barrel * (barrel_width_fractional + septa_width_fractional) + barrel_width_fractional - eps]
     #print("z_range_barrel:", z_range_barrel)
     layernumber = cellName[1:2]
     if layernumber == '2':

@@ -108,15 +108,18 @@ cfg.cellLabel = {}
 for line in mtype_content.split('\n')[:-1]:
     for barrel in range(cfg.num_barrels):
         cellname, mtype, etype, n, m = line.split()
-        n = int(n) // cfg.num_barrels
-        if n < 1:
-            n = 1
+        n = int(n)
+        m = int(m)
+        # Divide n and m across barrels
+        n_per_barrel = max(n // cfg.num_barrels, 1)
+        m_per_barrel = max(m // cfg.num_barrels, 1)
+
         metype = mtype + '_' + etype[0:3]
         cellname += ('_barrel' + str(barrel))
         metype += ('_barrel' + str(barrel))
-        cfg.cellNumber[metype] = n
+        cfg.cellNumber[metype] = n_per_barrel
         cfg.popLabel[metype] = mtype
-        cfg.popNumber[metype] = int(m)
+        cfg.popNumber[metype] = m_per_barrel
         cfg.cellLabel[metype] = cellname
 
         if mtype not in popParam:
