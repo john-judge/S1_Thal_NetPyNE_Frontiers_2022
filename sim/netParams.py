@@ -1143,15 +1143,6 @@ if cfg.addExtracellularStim:
                                                         }
     }
 
-    # to avoid segfaulting, instead of enumerating all possible sections (as with recordings),
-    # look up all the secLists of each cell
-    all_secs = {}
-    for popName, pop in netParams.popParams.items():
-        all_secs[popName] = []
-        if 'cellModel' in pop and pop['cellModel'] != 'NetStim':
-            # Use a placeholder list; secLists get resolved per-cell later
-            all_secs[popName] = 'all'  # NetPyNE will use all sections if 'all'
-
     stim_radius = 100
     netParams.stimTargetParams['XStim1->all'] = {
         'source': 'XStim1',
