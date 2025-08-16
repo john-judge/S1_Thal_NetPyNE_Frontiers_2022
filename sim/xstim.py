@@ -40,7 +40,9 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
             sec = sec_dict['hObj']
+            print("sec (xstim)", sec)
             for seg in sec:
+                print("seg (xstim)", seg)
                 try:
                     if int(h.n3d()) > 0:
                         idx = int(seg.x * (h.n3d()-1))
