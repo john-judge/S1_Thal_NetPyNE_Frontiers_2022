@@ -20,9 +20,8 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
     ----------
     sim : NetPyNE Sim object
     field : dict
-        type: 'pointSource' or 'uniform'
+        class: 'pointSource' or 'uniform'
         location: [x, y, z] for pointSource
-        direction: 3-vector for uniform field
         sigma: conductivity in mS/mm (default 0.276)
     stim_params : dict
         {'delay':..., 'dur':...}
@@ -54,7 +53,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
     seg_positions = np.array(seg_positions)  # shape (N,3)
 
     # Compute distances for pointSource stim
-    if field['type'] == 'pointSource':
+    if field['class'] == 'pointSource':
         dx = seg_positions[:,0] - field['location'][0]
         dy = seg_positions[:,1] - field['location'][1]
         dz = seg_positions[:,2] - field['location'][2]
@@ -81,12 +80,12 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
         else:
             raise ValueError("decay must be '1/r' or '1/r2'")
 
-    elif field['type'] == 'uniform':
+    elif field['class'] == 'uniform':
         raise Exception("Uniform field not yet implemented: fix the units before using")
         direction = np.array(field['direction'])
         Vext = waveform['amp'] * np.dot(seg_positions, direction)
     else:
-        raise ValueError("Unsupported field type")
+        raise ValueError("Unsupported field class")
 
     # Attach IClamp to segments and set amplitude
     for (gid, sec, seg), v in zip(seg_coords, Vext):
