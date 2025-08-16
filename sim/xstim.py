@@ -39,6 +39,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
     for cell in sim.net.cells:  # local cells only, avoids MPI abort
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
+            print(sec_name, len(list(sec_dict.keys())))
             sec = sec_dict['hSec']
             for seg in sec:
                 try:
