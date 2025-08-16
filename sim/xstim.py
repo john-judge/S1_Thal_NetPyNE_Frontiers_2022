@@ -56,6 +56,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
                 seg_positions.append([x, y, z])
 
     seg_positions = np.array(seg_positions)  # shape (N,3)
+    print(seg_positions)
 
     # Compute distances for pointSource stim
     if field['class'] == 'pointSource':
@@ -63,7 +64,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
             dx = seg_positions[:,0] - field['location'][0]
             dy = seg_positions[:,1] - field['location'][1]
             dz = seg_positions[:,2] - field['location'][2]
-        except KeyError as e:
+        except IndexError as e:
             print("shape of seg_positions: ", seg_positions.shape)
             raise KeyError(f"Missing key in field: {e}. Ensure 'location' is provided for pointSource.")
         r = np.sqrt(dx**2 + dy**2 + dz**2)
