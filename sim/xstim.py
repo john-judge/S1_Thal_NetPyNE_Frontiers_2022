@@ -39,9 +39,9 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
     for cell in sim.net.cells:  # local cells only, avoids MPI abort
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
-            print(sec_name, len(list(sec_dict.keys())))
             sec = sec_dict['hSec']
             for seg in sec:
+                print("sec:", sec_name, "seg:", seg)
                 try:
                     if int(h.n3d()) > 0:
                         idx = int(seg.x * (h.n3d()-1))
@@ -66,8 +66,8 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
             dy = seg_positions[:,1] - field['location'][1]
             dz = seg_positions[:,2] - field['location'][2]
         except IndexError as e:
-            print("shape of seg_positions: ", seg_positions.shape)
-            raise KeyError(f"Missing key in field: {e}. Ensure 'location' is provided for pointSource.")
+            print("shape of seg_positions: ", )
+            raise KeyError(f"{seg_positions.shape}. Ensure 'location' is provided for pointSource.")
         r = np.sqrt(dx**2 + dy**2 + dz**2)
         r[r < 1e-9] = 1e-9  # avoid divide by zero
 
