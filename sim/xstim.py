@@ -38,25 +38,32 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
 
     for cell in sim.net.cells:  # local cells only, avoids MPI abort
         gid = cell.gid 
-        for sec_name, sec_dict in cell.secs.items():
-            sec = sec_dict['hSec']
-            for seg in sec:
-                try:
-                    x = seg.x3d(seg.x)
-                    y = seg.y3d(seg.x)
-                    z = seg.z3d(seg.x)
-                except Exception:
-                    continue
-                seg_coords.append((gid, sec, seg))
-                seg_positions.append([x, y, z])
+        for seg in sec:
+            try:
+                if int(h.n3d()) > 0:
+                    idx = int(seg.x * (h.n3d()-1))
+                    x = h.x3d(idx)
+                    y = h.y3d(idx)
+                    z = h.z3d(idx)
+                else:
+                    # fallback: no 3D points defined
+                    x, y, z = sec.x, sec.y, sec.z  # or use cell position if available
+            except Exception:
+                continue
+            seg_coords.append((gid, sec, seg))
+            seg_positions.append([x, y, z])
 
     seg_positions = np.array(seg_positions)  # shape (N,3)
 
     # Compute distances for pointSource stim
     if field['class'] == 'pointSource':
-        dx = seg_positions[:,0] - field['location'][0]
-        dy = seg_positions[:,1] - field['location'][1]
-        dz = seg_positions[:,2] - field['location'][2]
+        try:
+            dx = seg_positions[:,0] - field['location'][0]
+            dy = seg_positions[:,1] - field['location'][1]
+            dz = seg_positions[:,2] - field['location'][2]
+        except KeyError as e:
+            print("shape of seg_positions: ", seg_positions.shape)
+            raise KeyError(f"Missing key in field: {e}. Ensure 'location' is provided for pointSource.")
         r = np.sqrt(dx**2 + dy**2 + dz**2)
         r[r < 1e-9] = 1e-9  # avoid divide by zero
 
