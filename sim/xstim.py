@@ -40,6 +40,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
             sec = sec_dict['hSec']
+            print('sec:', sec, 'sec_dict keys:', sec_dict.keys())
             for seg in sec:
                 print("sec:", sec_name, "seg:", seg)
                 try:
