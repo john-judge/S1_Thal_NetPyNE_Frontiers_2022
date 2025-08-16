@@ -52,8 +52,8 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
                         x, y, z = sec.x, sec.y, sec.z  # or use cell position if available
                 except Exception:
                     continue
-            seg_coords.append((gid, sec, seg))
-            seg_positions.append([x, y, z])
+                seg_coords.append((gid, sec, seg))
+                seg_positions.append([x, y, z])
 
     seg_positions = np.array(seg_positions)  # shape (N,3)
 
