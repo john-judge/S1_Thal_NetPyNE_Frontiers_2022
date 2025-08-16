@@ -39,10 +39,8 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
     for cell in sim.net.cells:  # local cells only, avoids MPI abort
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
-            sec = sec_dict['hSec']
-            print('sec:', sec, 'sec_dict keys:', sec_dict.keys())
+            sec = sec_dict['hObj']
             for seg in sec:
-                print("sec:", sec_name, "seg:", seg)
                 try:
                     if int(h.n3d()) > 0:
                         idx = int(seg.x * (h.n3d()-1))
