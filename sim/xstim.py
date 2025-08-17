@@ -36,9 +36,9 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
 
     # Collect all segment positions
 
-    missing_3d = 0
-    not_missing_3d = 0
-    types_missing_3d = {}
+    #missing_3d = 0
+    #not_missing_3d = 0
+    #types_missing_3d = {}
     for cell in sim.net.cells:  # local cells only, avoids MPI abort
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
@@ -51,7 +51,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
                     x = h.x3d(idx)
                     y = h.y3d(idx)
                     z = h.z3d(idx)
-                    not_missing_3d += 1
+                    #not_missing_3d += 1
                     
                 else:
                     x = cell.tags.get('x', 0)
@@ -59,18 +59,21 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
                     z = cell.tags.get('z', 0) 
                     print("no 3d points for cell gid %d sec %s; " \
                         "using cell center" % (gid, sec_name))
-                    missing_3d += 1
-                    types_missing_3d[sec_name] = True
+                    #missing_3d += 1
+                    #types_missing_3d[sec_name] = True
 
                 seg_coords.append((gid, sec, seg))
                 seg_positions.append([x, y, z])
             h.pop_section()
 
     seg_positions = np.array(seg_positions)  # shape (N,3)
-    print("Number of segments approximated at cell centers:", missing_3d, 
-          "out of total", missing_3d + not_missing_3d)
-    if len(types_missing_3d) > 0:
-        print("  (types missing 3d points:", list(types_missing_3d.keys()), ")")
+
+    # only axon segments were missing 3d points. Ok to default to cell center
+    # just for those.
+    #print("Number of segments approximated at cell centers:", missing_3d, 
+    #      "out of total", missing_3d + not_missing_3d)
+    #if len(types_missing_3d) > 0:
+    #    print("  (types missing 3d points:", list(types_missing_3d.keys()), ")")
 
     # Compute distances for pointSource stim
     if field['class'] == 'pointSource':
@@ -113,7 +116,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
 
     # Attach IClamp to segments and set amplitude
     for (gid, sec, seg), v in zip(seg_coords, Vext):
-        stim = h.IClamp(seg(0.5))
+        stim = h.IClamp(seg)
         stim.delay = waveform.get('delay', 0)
         stim.dur = waveform.get('dur', 1e9)
         stim.amp = v
