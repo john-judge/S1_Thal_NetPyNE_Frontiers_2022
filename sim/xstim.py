@@ -41,18 +41,18 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
         for sec_name, sec_dict in cell.secs.items():
             sec = sec_dict['hObj']
             print("sec (xstim)", sec)
-            with sec:
-                for seg in sec:
-                    print("seg (xstim)", seg)
+            sec.push()
+            for seg in sec:
+                print("seg (xstim)", seg)
 
-                    if int(h.n3d()) > 0:
-                        idx = int(seg.x * (h.n3d()-1))
-                        x = h.x3d(idx)
-                        y = h.y3d(idx)
-                        z = h.z3d(idx)
-                    else:
-                        # fallback: no 3D points defined
-                        x, y, z = sec.x, sec.y, sec.z  # or use cell position if available
+                if int(h.n3d()) > 0:
+                    idx = int(seg.x * (h.n3d()-1))
+                    x = h.x3d(idx)
+                    y = h.y3d(idx)
+                    z = h.z3d(idx)
+                else:
+                    # fallback: no 3D points defined
+                    x, y, z = sec.x, sec.y, sec.z  # or use cell position if available
 
                 seg_coords.append((gid, sec, seg))
                 seg_positions.append([x, y, z])
