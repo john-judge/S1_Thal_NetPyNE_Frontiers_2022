@@ -49,7 +49,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
                     x = h.x3d(idx)
                     y = h.y3d(idx)
                     z = h.z3d(idx)
-                    h.pop_section()
+                    
                 else:
                     x = cell.tags.get('x', 0)
                     y = cell.tags.get('y', 0)
@@ -58,9 +58,9 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
                         "using cell center" % (gid, sec_name))
                     missing_3d += 1
 
-
                 seg_coords.append((gid, sec, seg))
                 seg_positions.append([x, y, z])
+            h.pop_section()
 
     seg_positions = np.array(seg_positions)  # shape (N,3)
     print("Number of segments approximated at cell centers:", missing_3d)
