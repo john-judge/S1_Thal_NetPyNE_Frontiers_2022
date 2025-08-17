@@ -9,7 +9,7 @@ from neuron import h
 import numpy as np
 
 
-def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100):
+def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100):
     """
     Attach a single NetStim/XStim source to all segments within a cubic region.
 
@@ -43,6 +43,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
             sec = sec_dict['hObj']
+            sec.insert('extracellular')   # make sure mechanism is present
             sec.push()
             for seg in sec:
 
@@ -95,7 +96,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
             r = r[mask]
 
         # Compute extracellular potential with distance-based decay
-        r_m = r * 1e-6 # convert to meters. Sigma is in mS/mm = S/m
+        r_m = np.maximum(1e-9, r * 1e-6) # convert to meters. Sigma is in mS/mm = S/m
         sigma = field.get('sigma', 0.276) # default conductivity in mS/mm
         I_A = waveform['amp'] * 1e-3 # convert mA to A
         if decay == '1/r':
@@ -114,11 +115,28 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
     else:
         raise ValueError("Unsupported field class")
 
-    # Attach IClamp to segments and set amplitude
-    for (gid, sec, seg), v in zip(seg_coords, Vext):
-        stim = h.IClamp(seg)
-        stim.delay = waveform.get('delay', 0)
-        stim.dur = waveform.get('dur', 1e9)
-        stim.amp = v
+    ## Attach IClamp to segments and set amplitude
+    #for (gid, sec, seg), v in zip(seg_coords, Vext):
+    #    stim = h.IClamp(seg)
+    #    stim.delay = waveform.get('delay', 0)
+    #    stim.dur = waveform.get('dur', 1e9)
+    #    stim.amp = v
+
+    tstop = sim.cfg.duration
+    dt = sim.cfg.dt
+
+    # Build time waveform (one template vector for all segments)
+    times = np.arange(0, tstop+dt, dt)
+    wave = np.zeros_like(times)
+    start_idx = int(waveform.get('delay',0)/dt)
+    end_idx   = int((waveform.get('delay',0)+waveform.get('dur',1e9))/dt)
+    wave[start_idx:end_idx] = 1.0  # normalized, scaled later
+
+    tvec = h.Vector(times)
+
+    # Apply to each segment, scaled by Vext_base, as the driving potential
+    for (gid, sec, seg), vscale in zip(seg_coords, Vext_base):
+        wvec = h.Vector(wave * vscale)
+        wvec.play(seg._ref_vext[0], tvec, 1)
 
     print(f"Applied extracellular stimulation to {len(seg_coords)} segments.")
