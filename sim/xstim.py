@@ -36,29 +36,34 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r2', stim_radius=100
 
     # Collect all segment positions
 
+    missing_3d = 0
     for cell in sim.net.cells:  # local cells only, avoids MPI abort
         gid = cell.gid 
         for sec_name, sec_dict in cell.secs.items():
             sec = sec_dict['hObj']
-            print("sec (xstim)", sec)
             sec.push()
             for seg in sec:
-                print("seg (xstim)", seg)
 
                 if int(h.n3d()) > 0:
                     idx = int(seg.x * (h.n3d()-1))
                     x = h.x3d(idx)
                     y = h.y3d(idx)
                     z = h.z3d(idx)
+                    h.pop_section()
                 else:
-                    # fallback: no 3D points defined
-                    x, y, z = sec.x, sec.y, sec.z  # or use cell position if available
+                    x = cell.tags.get('x', 0)
+                    y = cell.tags.get('y', 0)
+                    z = cell.tags.get('z', 0) 
+                    print("no 3d points for cell gid %d sec %s; " \
+                        "using cell center" % (gid, sec_name))
+                    missing_3d += 1
+
 
                 seg_coords.append((gid, sec, seg))
                 seg_positions.append([x, y, z])
 
     seg_positions = np.array(seg_positions)  # shape (N,3)
-    print(seg_positions)
+    print("Number of segments approximated at cell centers:", missing_3d)
 
     # Compute distances for pointSource stim
     if field['class'] == 'pointSource':
