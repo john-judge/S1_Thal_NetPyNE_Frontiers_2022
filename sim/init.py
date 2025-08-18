@@ -14,7 +14,7 @@ Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
 
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim
-from xstim import attach_xstim_to_segments, attach_xstim_to_segments_mpi_safe
+from xstim import attach_xstim_to_segments
 
 cfg, netParams = sim.readCmdLineArgs()
 sim.initialize(
@@ -40,7 +40,7 @@ sim.net.connectCells()            			# create connections between cells based on
 stim_params = netParams.stimSourceParams['XStim1']
 
 # defaults: radius=100, decay='1/r2'
-attach_xstim_to_segments_mpi_safe(
+attach_xstim_to_segments(
     sim,
     field=stim_params['field'],
     waveform=stim_params['waveform'],
