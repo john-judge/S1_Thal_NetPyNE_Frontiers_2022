@@ -30,7 +30,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100)
     stim_radius : float or None
         Maximum distance (microns) from electrode to apply stimulation. None = no cutoff.
     """
-
+    pc = h.ParallelContext()
     seg_coords = []     # (cell_gid, sec, seg) tuples
     seg_positions = []  # corresponding x,y,z
 
@@ -39,8 +39,10 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100)
     #missing_3d = 0
     #not_missing_3d = 0
     #types_missing_3d = {}
-    for cell in sim.net.cellsLocal:  # local cells only, avoids MPI abort
+    for cell in sim.net.cells:  # local cells only, avoids MPI abort
         gid = cell.gid 
+        if not pc.gid_exists(gid):
+            continue  # skip non-local cells
         for sec_name, sec_dict in cell.secs.items():
             sec = sec_dict['hObj']
             sec.insert('extracellular')   # make sure mechanism is present
