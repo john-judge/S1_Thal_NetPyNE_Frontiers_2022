@@ -8,6 +8,17 @@
 from neuron import h
 import numpy as np
 
+# default simple mapper
+def _default_type_map(sec_name):
+    s = sec_name.lower()
+    if 'soma' in s or 'cell' in s and 'soma' in s:
+        return 'soma'
+    if 'axon' in s:
+        return 'axon'
+    if 'apic' in s or 'apical' in s:
+        return 'apic'
+    return 'dend'
+
 def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_radius=100):
     """
     Attach a single NetStim/XStim source to all segments within a cubic region.
@@ -32,8 +43,6 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
 
     seg_coords = []     # (cell_gid, sec, seg) tuples
     seg_positions = []  # corresponding x,y,z
-
-    # Collect all segment positions
 
     #missing_3d = 0
     #not_missing_3d = 0
@@ -106,10 +115,9 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
         else:
             raise ValueError("decay must be '1/r' or '1/r2'")
         
-        coupling_resist_Mohm = 100.0
-        coupling = float(coupling_resist_Mohm)
-        # I_nA = V_mV / R_MOhm
-        Iamps_nA = (Vext / coupling).astype(float)
+        res = estimate_coupling_resistance_by_segt(sim, default_Rm_ohm_cm2=20000.0)
+        # res is a dict like {'soma': {...}, 'axon': {...}, ...}
+        coupling_by_type = {t: res[t]['median_MOhm_approx'] or res[t]['mean_MOhm'] for t in res}
 
     elif field['class'] == 'uniform':
         raise Exception("Uniform field not yet implemented: fix the units before using")
@@ -119,13 +127,176 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
         raise ValueError("Unsupported field class")
 
     # Attach IClamp to segments and set amplitude
-    for (gid, sec, seg), I_ in zip(seg_coords, Iamps_nA):
+    for (gid, sec, seg), V_ in zip(seg_coords, Vext):
+        # I_nA = V_mV / R_MOhm
+        sec_type = _default_type_map(sec.name())
+        print("mapped section type:", sec_type, "for gid", gid, "sec", sec.name())
+        Iamps_nA = (V_ / coupling_by_type[sec_type]).astype(float)
         stim = h.IClamp(seg)
         stim.delay = waveform.get('delay', 0)
         stim.dur = waveform.get('dur', 1e9)
-        stim.amp = I_
+        stim.amp = Iamps_nA
 
     print(f"Applied extracellular stimulation to {len(seg_coords)} segments.")
+
+
+def estimate_coupling_resistance_by_segt(sim,
+                                         default_Rm_ohm_cm2=20000.0,
+                                         type_map=None,
+                                         return_per_segment=False):
+    """
+    Estimate effective input/coupling resistance (MΩ) per segment-type (soma, axon, dend, apic).
+
+    Parameters
+    ----------
+    sim : NetPyNE sim object
+    default_Rm_ohm_cm2 : float
+        Fallback specific membrane resistance (Ohm * cm^2) when g_pas not present.
+        Typical order: 1e4 - 1e5 Ohm*cm^2 (tune for your model).
+    type_map : callable(sec_name: str) -> str
+        Optional function to map a section name to a type string in {'soma','axon','dend','apic'}.
+        If None a heuristic is used: 'soma' in name -> soma; 'axon' -> axon; 'apic'/'apical' -> apic;
+        otherwise 'dend'.
+    return_per_segment : bool
+        If True, returns per-segment list of (key, area_cm2, Rm_ohm_cm2, R_input_Mohm).
+    Returns
+    -------
+    type_stats : dict
+        keys are segment types; values are dicts with keys:
+           'count', 'mean_MOhm', 'median_MOhm', 'values_MOhm' (if return_per_segment True)
+    """
+    pc = h.ParallelContext()
+    rank = int(pc.id())
+    nhost = int(pc.nhost())
+
+    map_fn = type_map or _default_type_map
+
+    # iterate only over local sections (h.allsec())
+    local_secs = list(h.allsec())
+
+    seg_records = []  # list of (type, gid, sec_name, seg_index, area_cm2, Rm_ohm_cm2, R_input_MOhm)
+
+    for sec in local_secs:
+        sec_name = sec.name() if hasattr(sec, 'name') else str(sec)
+        # try to find any associated cell gid via sim.net.cells (cheap-ish mapping)
+        # build reverse map once
+    # Build a mapping from sec object id to gid/section name as reported in sim.net.cells
+    sec_to_gidname = {}
+    for cell in sim.net.cells:
+        gid = int(cell.gid)
+        for sname, sdict in cell.secs.items():
+            sobj = sdict.get('hObj')
+            if sobj is not None:
+                sec_to_gidname[id(sobj)] = (gid, sname)
+
+    for sec in local_secs:
+        sec_name = sec.name() if hasattr(sec, 'name') else str(sec)
+        gid, reported_secname = sec_to_gidname.get(id(sec), (None, sec_name))
+        # geometry
+        nseg = max(1, int(getattr(sec, 'nseg', 1)))
+        L = float(getattr(sec, 'L', 0.0))   # µm
+        # segment length = L / nseg
+        seg_len_um = max(1e-12, L / float(nseg))
+        # section diameter: try seg.diam if available, else sec.diam
+        # we'll compute for each segment individually below
+        sec_diam_um = float(getattr(sec, 'diam', 0.0))
+
+        sec.push()
+        for seg in sec:
+            try:
+                seg_diam_um = float(getattr(seg, 'diam', sec_diam_um))
+            except Exception:
+                seg_diam_um = sec_diam_um
+            # fallback for zero diam sections: skip (area 0)
+            if seg_diam_um <= 0 or seg_len_um <= 0:
+                area_cm2 = 1e-20  # tiny non-zero to avoid div-by-zero (will produce very large R)
+            else:
+                # cylindrical lateral surface area for small segment approx:
+                # area_um2 = pi * diam_um * seg_len_um   (approx, neglecting end caps)
+                area_um2 = np.pi * seg_diam_um * seg_len_um
+                area_cm2 = float(area_um2) * 1e-8  # convert µm^2 -> cm^2
+
+            # Determine specific membrane resistance Rm (Ohm * cm^2)
+            # prefer using g_pas if present on the section (units S/cm^2)
+            Rm_ohm_cm2 = None
+            # attempt to read sec.g_pas (works if pas inserted)
+            try:
+                g_pas = getattr(sec, 'g_pas', None)
+                if g_pas is not None and float(g_pas) > 0.0:
+                    Rm_ohm_cm2 = 1.0 / float(g_pas)
+            except Exception:
+                Rm_ohm_cm2 = None
+
+            # fallback to default
+            if Rm_ohm_cm2 is None or not np.isfinite(Rm_ohm_cm2):
+                Rm_ohm_cm2 = float(default_Rm_ohm_cm2)
+
+            # estimate input resistance of this segment (Ohm)
+            R_input_ohm = Rm_ohm_cm2 / area_cm2  # Ohm
+            R_input_MOhm = R_input_ohm / 1e6
+
+            # determine type from section name (user-supplied map_fn can override)
+            sec_type = map_fn(reported_secname if reported_secname is not None else sec_name)
+
+            seg_index = int(round(seg.x * (nseg - 1)))
+            seg_key = (gid, reported_secname, seg_index)
+
+            seg_records.append((sec_type, seg_key, area_cm2, Rm_ohm_cm2, R_input_MOhm))
+        h.pop_section()
+
+    # Gather records across ranks to rank 0
+    # We'll serialize minimal tuples to Python objects via pickle-friendly lists and use allreduce/bcast.
+    # Simpler: collect per-rank stats and then use pc.allreduce to gather counts and means.
+    # But to get full per-seg lists, we will use a simple approach: send lengths and then each rank writes to a temp file.
+    # For simplicity and robustness here we'll aggregate only numeric statistics globally using allreduce.
+
+    # local aggregation by type
+    stats_local = {}
+    for rec in seg_records:
+        sec_type, seg_key, area_cm2, Rm_ohm_cm2, R_input_MOhm = rec
+        if sec_type not in stats_local:
+            stats_local[sec_type] = {'vals': []}
+        stats_local[sec_type]['vals'].append(R_input_MOhm)
+
+    # Compute local counts and sums for all types encountered across ranks
+    all_types = list(stats_local.keys())
+    # Prepare vectors for reduction: for simplicity, consider canonical types
+    canonical_types = ['soma', 'axon', 'dend', 'apic']
+    local_counts = [len(stats_local.get(t, {'vals': []})['vals']) for t in canonical_types]
+    local_sums = [float(np.sum(stats_local.get(t, {'vals': []})['vals'])) for t in canonical_types]
+
+    # reduce to global
+    global_counts = [int(pc.allreduce(c, 1)) for c in local_counts]
+    global_sums = [float(pc.allreduce(s, 1.0)) for s in local_sums]
+
+    # For medians, we'll collect per-rank medians and approximate global median by pooling small lists:
+    # Here we gather per-rank value arrays using a simple rank-0 gather via pc.py_alltoall? To keep dependency-free,
+    # we will gather medians per rank and compute weighted median approx. For strict correctness, user can run with rank 0 collecting lists.
+
+    # compute local medians
+    local_medians = [float(np.median(stats_local.get(t, {'vals': [np.nan]})['vals'])) if len(stats_local.get(t, {'vals': []})['vals'])>0 else float('nan') for t in canonical_types]
+    # reduce medians by averaging medians (approx)
+    global_medians_approx = [float(pc.allreduce(m, 1.0) / float(nhost)) for m in local_medians]
+
+    # Build result dict (rank 0 will print)
+    result = {}
+    for i, t in enumerate(canonical_types):
+        cnt = global_counts[i]
+        s = global_sums[i]
+        mean = (s / cnt) if cnt > 0 else float('nan')
+        median_approx = global_medians_approx[i]
+        result[t] = {'count': int(cnt), 'mean_MOhm': float(mean), 'median_MOhm_approx': float(median_approx)}
+
+    if rank == 0:
+        print("Estimated coupling/input resistance per segment type (MΩ) — APPROXIMATE")
+        for t in canonical_types:
+            r = result[t]
+            print(f"  {t:5s}: count={r['count']:4d}, mean={r['mean_MOhm']:.3g} MΩ, median_approx={r['median_MOhm_approx']:.3g} MΩ")
+
+    # optionally return per-segment list (local only) if requested
+    if return_per_segment:
+        return seg_records  # local-only list of tuples
+    return result
 
 
 def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100,
