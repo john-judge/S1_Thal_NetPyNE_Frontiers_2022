@@ -193,6 +193,7 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100,
                 continue
     elif stim_mech == 'IClamp':
         # Convert Vext (mV) -> Iamp (nA) using coupling resistance (MΩ)
+        coupling_resist_Mohm = 100.0
         coupling = float(coupling_resist_Mohm)
         # I_nA = V_mV / R_MOhm
         Iamps_nA = (Vext_base / coupling).astype(float)
