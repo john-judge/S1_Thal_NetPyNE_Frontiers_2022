@@ -9,7 +9,8 @@ from neuron import h
 import numpy as np
 
 
-def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100):
+def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100,
+                             stim_mech='IClamp'):
     """
     Attach a single NetStim/XStim source to all segments within a cubic region.
 
@@ -29,6 +30,8 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100)
         '1/r' or '1/r2' distance-based decay
     stim_radius : float or None
         Maximum distance (microns) from electrode to apply stimulation. None = no cutoff.
+    stim_mech : str
+        Mechanism to use for stimulation ('IClamp' or 'Vext').
     """
 
     pc = h.ParallelContext()
@@ -48,12 +51,13 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100)
     # Ensure every LOCAL section on each rank has extracellular inserted ---
     # iterate h.allsec() (these are the sections instantiated on this rank)
     local_secs = list(h.allsec())
-    for sec in local_secs:
-        try:
-            sec.insert('extracellular')
-        except Exception:
-            # ignore if already present or insertion fails, but keep going
-            pass
+    if stim_mech == 'Vext':
+        for sec in local_secs:
+            try:
+                sec.insert('extracellular')
+            except Exception:
+                # ignore if already present or insertion fails, but keep going
+                pass
 
     # collect only segments that are local to THIS rank
     for cell in sim.net.cells:
@@ -137,54 +141,84 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100)
         Vext_base = (I_A / (4.0 * np.pi * sigma * (r_m**3))) * 1e3
     else:
         raise ValueError("decay must be '1/r','1/r2','1/r3'")
+    
+    if stim_mech == 'Vext':
 
-    # Build single time vector per rank and normalized template
-    tstop = float(sim.cfg.duration)
-    dt = float(sim.cfg.dt)
-    times = np.arange(0.0, tstop + dt, dt)
-    wave_template = np.zeros_like(times)
-    start_idx = int(round(float(waveform.get('delay',0.0)) / dt))
-    end_idx   = int(round((float(waveform.get('delay',0.0)) + float(waveform.get('dur', 1e9))) / dt))
-    start_idx = max(0, min(start_idx, len(wave_template)-1))
-    end_idx = max(0, min(end_idx, len(wave_template)))
-    wave_template[start_idx:end_idx] = 1.0
-    tvec = h.Vector(list(times))
+        # Build single time vector per rank and normalized template
+        tstop = float(sim.cfg.duration)
+        dt = float(sim.cfg.dt)
+        times = np.arange(0.0, tstop + dt, dt)
+        wave_template = np.zeros_like(times)
+        start_idx = int(round(float(waveform.get('delay',0.0)) / dt))
+        end_idx   = int(round((float(waveform.get('delay',0.0)) + float(waveform.get('dur', 1e9))) / dt))
+        start_idx = max(0, min(start_idx, len(wave_template)-1))
+        end_idx = max(0, min(end_idx, len(wave_template)))
+        wave_template[start_idx:end_idx] = 1.0
+        tvec = h.Vector(list(times))
 
-    # store wvecs to avoid GC if requested
-    if not hasattr(sim.net, '_xstim_wvecs'):
-        sim.net._xstim_wvecs = []
+        # store wvecs to avoid GC if requested
+        if not hasattr(sim.net, '_xstim_wvecs'):
+            sim.net._xstim_wvecs = []
 
-    attached = 0
-    failed = 0
+        attached = 0
+        failed = 0
 
-    # Attach local wvecs only — wrap play in try/except to skip any runtime oddities
-    for (gid, sec, seg), vscale in zip(seg_coords, Vext_base):
-        try:
-            # Double-check segment still local via comparing to allsec (defensive)
-            found_local = False
-            for s in h.allsec():
-                if s == sec:
-                    found_local = True
-                    break
-            if not found_local:
-                # section lost from local list for whatever reason — skip
+        # Attach local wvecs only — wrap play in try/except to skip any runtime oddities
+        for (gid, sec, seg), vscale in zip(seg_coords, Vext_base):
+            try:
+                # Double-check segment still local via comparing to allsec (defensive)
+                found_local = False
+                for s in h.allsec():
+                    if s == sec:
+                        found_local = True
+                        break
+                if not found_local:
+                    # section lost from local list for whatever reason — skip
+                    failed += 1
+                    continue
+
+                # dereference seg._ref_vext now (safe because sec is local)
+                ref = seg._ref_vext[0]  # this should not segfault for truly-local seg
+                wvec = h.Vector((wave_template * float(vscale)).tolist())
+                wvec.play(seg._ref_vext[0], tvec, 1)
+
+                sim.net._xstim_wvecs.append(wvec)
+                attached += 1
+            except Exception as e:
+                # log and continue
                 failed += 1
+                # Optionally print debug for first few failures
+                if failed <= 5:
+                    print(f"[Rank {rank}] Failed to attach to gid {gid} sec {sec.name()} seg.x={seg.x}: {e}")
                 continue
+    elif stim_mech == 'IClamp':
+        # Convert Vext (mV) -> Iamp (nA) using coupling resistance (MΩ)
+        coupling = float(coupling_resist_Mohm)
+        # I_nA = V_mV / R_MOhm
+        Iamps_nA = (Vext_base / coupling).astype(float)
 
-            # dereference seg._ref_vext now (safe because sec is local)
-            ref = seg._ref_vext[0]  # this should not segfault for truly-local seg
-            wvec = h.Vector((wave_template * float(vscale)).tolist())
-            wvec.play(seg._ref_vext[0], tvec, 1)
+        # Prepare storage to keep references if requested
+        if not hasattr(sim.net, '_xstim_iclamps'):
+            sim.net._xstim_iclamps = []
 
-            sim.net._xstim_wvecs.append(wvec)
-            attached += 1
-        except Exception as e:
-            # log and continue
-            failed += 1
-            # Optionally print debug for first few failures
-            if failed <= 5:
-                print(f"[Rank {rank}] Failed to attach to gid {gid} sec {sec.name()} seg.x={seg.x}: {e}")
-            continue
+        attached = 0
+        failed = 0
+
+        # Attach IClamp to each local segment with computed amplitude (nA)
+        for (gid, sec, seg), iamp in zip(seg_coords, Iamps_nA):
+            try:
+                # attach IClamp. IClamp accepts a segment object argument.
+                stim = h.IClamp(seg)
+                stim.delay = float(waveform.get('delay', 0.0))  # delay in ms
+                stim.dur = float(waveform.get('dur', 1e9))  # duration in ms
+                stim.amp = float(iamp)  # NEURON expects nA
+                sim.net._xstim_iclamps.append(stim)
+                attached += 1
+            except Exception as e:
+                failed += 1
+                if failed <= 5:
+                    print(f"[Rank {rank}] Failed attaching IClamp to gid {gid} sec {sec.name()} seg.x={seg.x}: {e}")
+                continue
 
     print(f"[Rank {rank}/{nhost}] Attached {attached} local segments (failed {failed}).")
     return attached
