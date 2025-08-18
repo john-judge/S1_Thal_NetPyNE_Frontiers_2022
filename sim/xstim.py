@@ -45,6 +45,15 @@ def attach_xstim_to_segments(sim, field, waveform, decay='1/r', stim_radius=100)
             if s == sec:
                 return True
         return False
+    # Ensure every LOCAL section on each rank has extracellular inserted ---
+    # iterate h.allsec() (these are the sections instantiated on this rank)
+    local_secs = list(h.allsec())
+    for sec in local_secs:
+        try:
+            sec.insert('extracellular')
+        except Exception:
+            # ignore if already present or insertion fails, but keep going
+            pass
 
     # collect only segments that are local to THIS rank
     for cell in sim.net.cells:
