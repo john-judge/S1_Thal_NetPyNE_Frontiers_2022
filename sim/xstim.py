@@ -7,6 +7,8 @@
 
 from neuron import h
 import numpy as np
+from collections import defaultdict
+
 
 # default simple mapper
 def _default_type_map(sec_name):
@@ -126,18 +128,43 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
     else:
         raise ValueError("Unsupported field class")
 
+    
+
+    # ======= Diagnostics by section type ==========
+
+    amps_by_type = defaultdict(list)
+    counts_by_type = defaultdict(int)
+
+    for (gid, sec, seg), V_ in zip(seg_coords, Vext):
+        sec_type = _default_type_map(sec.name())
+        I_nA = float(V_ / coupling_by_type[sec_type])
+        amps_by_type[sec_type].append(I_nA)
+        counts_by_type[sec_type] += 1
+
+    print("=== XStim diagnostics ===")
+    print(f"Electrode @ {field['location']} stim_radius={stim_radius} µm")
+    for t in ['soma','dend','apic','axon']:
+        if counts_by_type[t]:
+            arr = np.array(amps_by_type[t])
+            print(f"{t:5s}: n={counts_by_type[t]:4d}, "
+                f"median={np.median(arr):.3g} nA, "
+                f"min={arr.min():.3g}, max={arr.max():.3g}")
+        else:
+            print(f"{t:5s}: n=0")
+
+
     # Attach IClamp to segments and set amplitude
     for (gid, sec, seg), V_ in zip(seg_coords, Vext):
         # I_nA = V_mV / R_MOhm
         sec_type = _default_type_map(sec.name())
-        print("mapped section type:", sec_type, "for gid", gid, "sec", sec.name())
+        #print("mapped section type:", sec_type, "for gid", gid, "sec", sec.name())
         Iamps_nA = (V_ / coupling_by_type[sec_type]).astype(float)
         stim = h.IClamp(seg)
         stim.delay = waveform.get('delay', 0)
         stim.dur = waveform.get('dur', 1e9)
         stim.amp = float(Iamps_nA)
-        print(f"Attached IClamp to gid {gid}, sec {sec.name()}, "
-              f"amp={Iamps_nA} nA")
+        #print(f"Attached IClamp to gid {gid}, sec {sec.name()}, "
+        #      f"amp={Iamps_nA} nA")
 
     print(f"Applied extracellular stimulation to {len(seg_coords)} segments.")
 
