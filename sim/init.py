@@ -37,7 +37,7 @@ sim.net.createCells()              			# instantiate network cells based on defin
 sim.net.connectCells()            			# create connections between cells based on params
 
 # Get stim parameters from netParams
-stim_params = netParams.stimSourceParams['XStim1']
+stim_params = netParams.stimSourceParamsManual['XStim1']
 
 # defaults: radius=100, decay='1/r2'
 attach_xstim_to_segments_mpi_safe(

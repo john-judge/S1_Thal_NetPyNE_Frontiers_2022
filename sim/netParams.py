@@ -1134,7 +1134,7 @@ if cfg.addIClamp:
 # Extracellular stimulation 
 # ------------------------------------------------------------------------------
 if cfg.addExtracellularStim:
-    netParams.stimSourceParams['XStim1'] = {'type': 'XStim', 
+    netParams.stimSourceParamsManual['XStim1'] = {'type': 'XStim', 
                                                        'field': {'class': 'pointSource',
                                                                  'location': [cfg.xStimLocation[0], cfg.xStimLocation[1], cfg.xStimLocation[2]],
                                                                   'sigma': cfg.xStimSigma,  # conductivity in mS/mm
@@ -1162,11 +1162,11 @@ if cfg.addExtracellularStim:
     #}                              
 
     # instead, define a placeholder and then attach x-stims explicitly after sim.createSim()
-    netParams.stimTargetParams['XStim1->all'] = {
-        'source': 'XStim1',
-        'conds': {},   # no populations specified
-        'secList': [], # empty, nothing will be attached automatically
-    }
+    #netParams.stimTargetParams['XStim1->all'] = {
+    #    'source': 'XStim1',
+    #    'conds': {},   # no populations specified
+    #    'secList': [], # empty, nothing will be attached automatically
+    #}
 
 #------------------------------------------------------------------------------
 # NetStim inputs - FROM CFG.PY
