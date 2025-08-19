@@ -1134,7 +1134,7 @@ if cfg.addIClamp:
 # Extracellular stimulation 
 # ------------------------------------------------------------------------------
 if cfg.addExtracellularStim:
-    netParams.stimSourceParamsManual['XStim1'] = {'type': 'XStim', 
+    netParams.stimSourceParams['XStim1'] = {'type': 'XStim', 
                                                        'field': {'class': 'pointSource',
                                                                  'location': [cfg.xStimLocation[0], cfg.xStimLocation[1], cfg.xStimLocation[2]],
                                                                   'sigma': cfg.xStimSigma,  # conductivity in mS/mm
