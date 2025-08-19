@@ -142,7 +142,8 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
         counts_by_type[sec_type] += 1
 
     print("=== XStim diagnostics ===")
-    print(f"Electrode @ {field['location']} stim_radius={stim_radius} µm")
+    print(f"Electrode @ {field['location']} stim_radius={stim_radius} µm, "
+          f"delay={waveform.get('delay', 0)} ms, dur={waveform.get('dur', 1e9)} ms")
     for t in ['soma','dend','apic','axon']:
         if counts_by_type[t]:
             arr = np.array(amps_by_type[t])
