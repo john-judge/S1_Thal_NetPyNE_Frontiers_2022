@@ -11,7 +11,7 @@ import numpy as np
 # default simple mapper
 def _default_type_map(sec_name):
     s = sec_name.lower()
-    if 'soma' in s or 'cell' in s and 'soma' in s:
+    if 'soma' in s:
         return 'soma'
     if 'axon' in s:
         return 'axon'
@@ -135,7 +135,9 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
         stim = h.IClamp(seg)
         stim.delay = waveform.get('delay', 0)
         stim.dur = waveform.get('dur', 1e9)
-        stim.amp = Iamps_nA
+        stim.amp = float(Iamps_nA)
+        print(f"Attached IClamp to gid {gid}, sec {sec.name()}, "
+              f"amp={Iamps_nA} nA")
 
     print(f"Applied extracellular stimulation to {len(seg_coords)} segments.")
 
@@ -158,7 +160,8 @@ def estimate_coupling_resistance_by_segt(sim,
         If None a heuristic is used: 'soma' in name -> soma; 'axon' -> axon; 'apic'/'apical' -> apic;
         otherwise 'dend'.
     return_per_segment : bool
-        If True, returns per-segment list of (key, area_cm2, Rm_ohm_cm2, R_input_Mohm).
+        If True, returns per-segment list of 
+        (key, area_cm2, Rm_ohm_cm2, R_input_Mohm).
     Returns
     -------
     type_stats : dict
