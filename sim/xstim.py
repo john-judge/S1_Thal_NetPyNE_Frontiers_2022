@@ -19,7 +19,7 @@ def _default_type_map(sec_name):
         return 'apic'
     return 'dend'
 
-def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_radius=100):
+def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_radius=1000):
     """
     Attach a single NetStim/XStim source to all segments within a cubic region.
 

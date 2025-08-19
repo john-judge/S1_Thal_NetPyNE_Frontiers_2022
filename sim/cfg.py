@@ -385,11 +385,11 @@ for popName in cfg.thalamocorticalconnections:
 cfg.addExtracellularStim = True
 
 cfg.xStimLocation = xStimLocation
-cfg.xStimRadius = 100  # microns (sphere)
+cfg.xStimRadius = 1000  # microns (sphere)
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
 cfg.xStimAmp = 200  # amplitude in mA
 cfg.xStimDur = 4  # duration in ms
-cfg.xStimDel = 25  # delay in ms
+cfg.xStimDel = 75  # delay in ms
 
 #------------------------------------------------------------------------------
 # NetStim inputs 
