@@ -161,7 +161,7 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
         #print("mapped section type:", sec_type, "for gid", gid, "sec", sec.name())
         Iamps_nA = (V_ / coupling_by_type[sec_type]).astype(float)
         stim = h.IClamp(seg)
-        stim.delay = waveform.get('delay', 0)
+        stim.delay = waveform.get('del', 0)
         stim.dur = waveform.get('dur', 1e9)
         stim.amp = float(Iamps_nA)
         #print(f"Attached IClamp to gid {gid}, sec {sec.name()}, "
