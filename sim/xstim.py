@@ -8,7 +8,67 @@
 from neuron import h
 import numpy as np
 from collections import defaultdict
+import json
+import csv
+import os
 
+
+def export_stim_targets(sim, electrode_pos, stim_radius=1000, out_file='stim_targets.json', fmt='json'):
+    """
+    Collect (gid, sec, seg.x, Vext) for all segments within stim_radius of electrode_pos,
+    and save to JSON or CSV.
+
+    Parameters
+    ----------
+    sim : NetPyNE sim object (after sim.createSimulateAnalyze() discovery run)
+    electrode_pos : list [x, y, z] of electrode coordinates
+    stim_radius : float, um, selection radius
+    out_file : str, output filename
+    fmt : 'json' or 'csv'
+    """
+
+    results = []
+    ex, ey, ez = electrode_pos
+
+    for cell in sim.net.cells:
+        gid = cell.gid
+        if not hasattr(cell, 'secs'): 
+            continue
+
+        for sec_name, sec in cell.secs.items():
+            for seg in sec['hSec']:
+                # segment 3D coords
+                x = seg.x3d(0)
+                y = seg.y3d(0)
+                z = seg.z3d(0)
+
+                # distance to electrode
+                dist = ((x-ex)**2 + (y-ey)**2 + (z-ez)**2)**0.5
+                if dist <= stim_radius:
+                    # example: simple inverse distance scaling for Vext
+                    vext = 1.0 / (dist+1e-9)
+
+                    results.append({
+                        'gid': gid,
+                        'sec': sec_name,
+                        'segx': seg.x,      # normalized location 0-1
+                        'x': x, 'y': y, 'z': z,
+                        'dist': dist,
+                        'Vext': vext
+                    })
+
+    # write output
+    if fmt == 'json':
+        with open(out_file, 'w') as f:
+            json.dump(results, f, indent=2)
+    elif fmt == 'csv':
+        with open(out_file, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=results[0].keys())
+            writer.writeheader()
+            writer.writerows(results)
+
+    print(f"Exported {len(results)} stim target segments to {out_file}")
+    return results
 
 # default simple mapper
 def _default_type_map(sec_name):
@@ -143,7 +203,7 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
 
     print("=== XStim diagnostics ===")
     print(f"Electrode @ {field['location']} stim_radius={stim_radius} µm, "
-          f"delay={waveform.get('delay', 0)} ms, dur={waveform.get('dur', 1e9)} ms")
+          f"delay={waveform.get('del', 50)} ms, dur={waveform.get('dur', 1e9)} ms")
     for t in ['soma','dend','apic','axon']:
         if counts_by_type[t]:
             arr = np.array(amps_by_type[t])
@@ -161,7 +221,7 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
         #print("mapped section type:", sec_type, "for gid", gid, "sec", sec.name())
         Iamps_nA = (V_ / coupling_by_type[sec_type]).astype(float)
         stim = h.IClamp(seg)
-        stim.delay = waveform.get('del', 0)
+        stim.delay = waveform.get('del', 50)
         stim.dur = waveform.get('dur', 1e9)
         stim.amp = float(Iamps_nA)
         #print(f"Attached IClamp to gid {gid}, sec {sec.name()}, "

@@ -14,7 +14,7 @@ Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
 
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim
-from xstim import attach_xstim_to_segments, attach_xstim_to_segments_mpi_safe
+from xstim import export_xstim_targets, attach_xstim_to_segments_mpi_safe
 
 cfg, netParams = sim.readCmdLineArgs()
 sim.initialize(
@@ -39,15 +39,20 @@ sim.net.connectCells()            			# create connections between cells based on
 # Get stim parameters from netParams
 stim_params = netParams.stimSourceParams['XStim1']
 
+if cfg.export_xstim_targets:
+    export_xstim_targets(sim, cfg.xStimLocation, stim_radius=cfg.xStimRadius,
+                         out_file='../data/_xstim_targets.json')
+    raise Exception("Exported xstim targets to ../data/_xstim_targets.json. " \
+                    "Check and upload data then re-run without cfg.export_xstim_targets.")
 # defaults: radius=100, decay='1/r2'
-attach_xstim_to_segments_mpi_safe(
-    sim,
-    field=stim_params['field'],
-    waveform=stim_params['waveform'],
-)
+#attach_xstim_to_segments_mpi_safe(
+#    sim,
+#    field=stim_params['field'],
+#    waveform=stim_params['waveform'],
+#)
 
 
-#sim.net.addStims() 							# add network stimulation
+sim.net.addStims() 							# add network stimulation
 sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
