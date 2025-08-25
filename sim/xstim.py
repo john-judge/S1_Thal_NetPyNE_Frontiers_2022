@@ -13,7 +13,7 @@ import csv
 import os
 
 
-def export_stim_targets(sim, electrode_pos, stim_radius=1000, out_file='stim_targets.json', fmt='json'):
+def export_xstim_targets(sim, electrode_pos, stim_radius=1000, out_file='stim_targets.json', fmt='json'):
     """
     Collect (gid, sec, seg.x, Vext) for all segments within stim_radius of electrode_pos,
     and save to JSON or CSV.
