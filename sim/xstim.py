@@ -103,17 +103,35 @@ def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
         Vext = (I_A / (4*np.pi*sigma*r_m**3)) * 1e3
     else:
         raise ValueError("decay must be '1/r','1/r2','1/r3'")
+    
+    
+    res = estimate_coupling_resistance_by_segt(sim, default_Rm_ohm_cm2=20000.0)
+    # res is a dict like {'soma': {...}, 'axon': {...}, ...}
+    coupling_by_type = {t: res[t]['median_MOhm_approx'] or res[t]['mean_MOhm'] for t in res}
+    
 
     # build records
     results = []
     for (gid, sec_name, seg_index), (x,y,z), v in zip(seg_coords, seg_positions, Vext):
+        sec_type = _default_type_map(sec.name())
+        I_nA = float(v / coupling_by_type[sec_type])
+
+        # get pop + cellIndex
+        # NetPyNE puts pop in cell.tags['pop'], index in cell.gid - sim.net.gidStart[pop]
+        cell = sim.net.cells[sim.net.gid2lid[gid]]
+        pop = cell.tags.get('pop', None)
+        cellIndex = cell.tags.get('cellIndex', None)  # safer, NetPyNE sets this
+
         results.append(dict(
             gid=int(gid),
+            pop=pop,
+            cellIndex=int(cellIndex),
             sec=sec_name,
             seg_index=int(seg_index),
             x=float(x), y=float(y), z=float(z),
-            Vext=float(v)
+            I_nA=float(I_nA)
         ))
+
 
     # write file
     with open(out_file,'w') as f:
@@ -162,7 +180,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         gid = tgt['gid']
         sec = tgt['sec']
         seg_index = tgt['seg_index']
-        Vext = tgt['Vext']  # in mV
+        I_nA = tgt['I_nA']  # in nA
 
         # convert seg_index into NEURON loc ∈ [0,1]
         loc = seg_index / max(1, (seg_index+1))
@@ -174,7 +192,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
             'type': 'IClamp',
             'delay': stim_delay,
             'dur': stim_dur,
-            'amp': Vext * stim_amp_factor
+            'amp': I_nA * stim_amp_factor
         }
 
         # Attach stim source to target
@@ -301,7 +319,7 @@ def attach_xstim_to_segments_mpi_safe(sim, field, waveform, decay='1/r', stim_ra
         res = estimate_coupling_resistance_by_segt(sim, default_Rm_ohm_cm2=20000.0)
         # res is a dict like {'soma': {...}, 'axon': {...}, ...}
         coupling_by_type = {t: res[t]['median_MOhm_approx'] or res[t]['mean_MOhm'] for t in res}
-
+        
     elif field['class'] == 'uniform':
         raise Exception("Uniform field not yet implemented: fix the units before using")
         direction = np.array(field['direction'])
