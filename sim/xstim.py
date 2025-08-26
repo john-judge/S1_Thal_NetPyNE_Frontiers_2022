@@ -123,7 +123,8 @@ def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
     return results
 
 
-def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/', stim_pattern='xstim_targets_rank*.json',
+def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/', 
+                                     stim_pattern='rank*_xstim_targets.json',
                                      stim_delay=75, stim_dur=4, stim_amp_factor=1.0):
     """
     Load extracellular target files from multiple MPI ranks and add IClamp stims in netParams.
