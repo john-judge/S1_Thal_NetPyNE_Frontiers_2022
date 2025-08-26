@@ -11,63 +11,115 @@ from collections import defaultdict
 import json
 import csv
 import os
-
-
-def export_xstim_targets(sim, electrode_pos, stim_radius=1000, out_file='stim_targets.json', fmt='json'):
+def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
+                         out_file='xstim_targets_rank.json'):
     """
-    Collect (gid, sec, seg.x, Vext) for all segments within stim_radius of electrode_pos,
-    and save to JSON or CSV.
+    Discover and export extracellular stimulation targets (local to this MPI rank).
+
+    Each rank writes its own JSON file with tuples of:
+        gid, sec_name, seg_index, x, y, z, Vext_mV
 
     Parameters
     ----------
-    sim : NetPyNE sim object (after sim.createSimulateAnalyze() discovery run)
-    electrode_pos : list [x, y, z] of electrode coordinates
-    stim_radius : float, um, selection radius
-    out_file : str, output filename
-    fmt : 'json' or 'csv'
+    sim : NetPyNE Sim object (after sim.createSim())
+    field : dict, must include {'class': 'pointSource', 'location': [x,y,z], 'sigma': ...}
+    waveform : dict, must include {'amp': ...} (mA injected current)
+    decay : '1/r','1/r2','1/r3'
+    stim_radius : cutoff radius in µm
+    out_file : str, filename template; 'rank' will be replaced with rank ID
     """
 
-    results = []
-    ex, ey, ez = electrode_pos
+    pc = h.ParallelContext()
+    rank = int(pc.id())
+    nhost = int(pc.nhost())
 
+    out_file = out_file.replace('rank', f"rank{rank}")
+
+    seg_coords = []     # (gid, sec, seg)
+    seg_positions = []  # [[x,y,z],...]
+
+    # collect local segments like attach_xstim_to_segments_mpi_safe
     for cell in sim.net.cells:
         gid = cell.gid
-        if not hasattr(cell, 'secs'): 
+        if not pc.gid_exists(gid):
             continue
+        for sec_name, sec_dict in cell.secs.items():
+            sec = sec_dict['hObj']
+            # local only
+            is_local = any(sec == s for s in h.allsec())
+            if not is_local:
+                continue
 
-        for sec_name, sec in cell.secs.items():
-            for seg in sec['hSec']:
-                # segment 3D coords
-                x = seg.x3d(0)
-                y = seg.y3d(0)
-                z = seg.z3d(0)
+            sec.push()
+            nseg = max(1, int(getattr(sec, 'nseg', 1)))
+            for seg in sec:
+                seg_index = int(round(seg.x * (nseg - 1)))
+                if int(h.n3d()) > 0:
+                    idx = int(seg.x * (h.n3d()-1))
+                    try:
+                        x = float(h.x3d(idx)); y = float(h.y3d(idx)); z = float(h.z3d(idx))
+                    except Exception:
+                        x = float(cell.tags.get('x',0.0)); y = float(cell.tags.get('y',0.0)); z = float(cell.tags.get('z',0.0))
+                else:
+                    x = float(cell.tags.get('x',0.0)); y = float(cell.tags.get('y',0.0)); z = float(cell.tags.get('z',0.0))
 
-                # distance to electrode
-                dist = ((x-ex)**2 + (y-ey)**2 + (z-ez)**2)**0.5
-                if dist <= stim_radius:
-                    # example: simple inverse distance scaling for Vext
-                    vext = 1.0 / (dist+1e-9)
+                seg_coords.append((gid, sec_name, seg_index))
+                seg_positions.append([x,y,z])
+            h.pop_section()
 
-                    results.append({
-                        'gid': gid,
-                        'sec': sec_name,
-                        'segx': seg.x,      # normalized location 0-1
-                        'x': x, 'y': y, 'z': z,
-                        'dist': dist,
-                        'Vext': vext
-                    })
+    seg_positions = np.array(seg_positions) if len(seg_positions) > 0 else np.zeros((0,3))
 
-    # write output
-    if fmt == 'json':
-        with open(out_file, 'w') as f:
-            json.dump(results, f, indent=2)
-    elif fmt == 'csv':
-        with open(out_file, 'w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=results[0].keys())
-            writer.writeheader()
-            writer.writerows(results)
+    if seg_positions.shape[0] == 0:
+        print(f"[Rank {rank}/{nhost}] No local segs for export")
+        return []
 
-    print(f"Exported {len(results)} stim target segments to {out_file}")
+    # distance to electrode
+    ex, ey, ez = field['location']
+    dx = seg_positions[:,0] - ex
+    dy = seg_positions[:,1] - ey
+    dz = seg_positions[:,2] - ez
+    r = np.sqrt(dx*dx + dy*dy + dz*dz)
+    r[r < 1e-9] = 1e-9
+
+    mask = (r <= stim_radius)
+    seg_coords = [c for c,m in zip(seg_coords,mask) if m]
+    seg_positions = seg_positions[mask]
+    r = r[mask]
+
+    if len(r) == 0:
+        print(f"[Rank {rank}/{nhost}] No local segs within stim_radius")
+        return []
+
+    # extracellular potential calc
+    r_m = r * 1e-6
+    sigma = field.get('sigma',0.276)
+    I_A = float(waveform.get('amp',0.0)) * 1e-3
+
+    if decay == '1/r':
+        Vext = (I_A / (4*np.pi*sigma*r_m)) * 1e3
+    elif decay == '1/r2':
+        Vext = (I_A / (4*np.pi*sigma*r_m**2)) * 1e3
+    elif decay == '1/r3':
+        Vext = (I_A / (4*np.pi*sigma*r_m**3)) * 1e3
+    else:
+        raise ValueError("decay must be '1/r','1/r2','1/r3'")
+
+    # build records
+    results = []
+    for (gid, sec_name, seg_index), (x,y,z), v in zip(seg_coords, seg_positions, Vext):
+        results.append(dict(
+            gid=int(gid),
+            sec=sec_name,
+            seg_index=int(seg_index),
+            x=float(x), y=float(y), z=float(z),
+            Vext=float(v)
+        ))
+
+    # write file
+    with open(out_file,'w') as f:
+        json.dump(results,f,indent=2)
+
+    print(f"[Rank {rank}/{nhost}] Exported {len(results)} targets -> {out_file}")
     return results
 
 # default simple mapper

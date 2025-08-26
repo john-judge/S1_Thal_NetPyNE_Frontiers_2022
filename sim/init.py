@@ -40,8 +40,10 @@ sim.net.connectCells()            			# create connections between cells based on
 stim_params = netParams.stimSourceParams['XStim1']
 
 if cfg.export_xstim_targets:
-    export_xstim_targets(sim, cfg.xStimLocation, stim_radius=cfg.xStimRadius,
-                         out_file='../data/_xstim_targets.json')
+    export_xstim_targets(sim, stim_params['field'], 
+                         stim_params['waveform'],
+                         stim_radius=cfg.xStimRadius,
+                         out_file='../data/rank_xstim_targets.json')
     raise Exception("Exported xstim targets to ../data/_xstim_targets.json. " \
                     "Check and upload data then re-run without cfg.export_xstim_targets.")
 # defaults: radius=100, decay='1/r2'
