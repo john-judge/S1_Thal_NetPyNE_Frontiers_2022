@@ -140,7 +140,6 @@ def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
     print(f"[Rank {rank}/{nhost}] Exported {len(results)} targets -> {out_file}")
     return results
 
-
 def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/', 
                                      stim_pattern='rank*_xstim_targets.json',
                                      stim_delay=75, stim_dur=4, stim_amp_factor=1.0):
@@ -155,11 +154,11 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
     stim_pattern : str, filename glob pattern
     stim_delay : float, ms
     stim_dur : float, ms
-    stim_amp_factor : scaling factor to convert Vext (mV) into IClamp.amp (nA)
+    stim_amp_factor : scaling factor to convert I_nA into IClamp.amp (nA)
 
     Returns
     -------
-    all_targets : list of dicts with gid, sec, seg_index, Vext, etc.
+    all_targets : list of dicts with gid, sec, seg_index, I_nA, etc.
     """
 
     all_targets = []
@@ -176,38 +175,51 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         print(f"[Loader] Loaded {len(data)} targets from {os.path.basename(fpath)}")
 
     stim_count = 0
+    amps = []
+    secs = []
+    gids = []
     for tgt in all_targets:
-        gid = tgt['gid']
+        gid = int(tgt['gid'])
         sec = tgt['sec']
-        seg_index = tgt['seg_index']
-        I_nA = tgt['I_nA']  # in nA
+        seg_index = int(tgt['seg_index'])
+        I_nA = float(tgt['I_nA'])  # in nA
 
-        # convert seg_index into NEURON loc ∈ [0,1]
-        loc = seg_index / max(1, (seg_index+1))
+        # Map seg_index → loc ∈ [0,1]
+        if seg_index <= 0:
+            loc = 0.0
+        else:
+            loc = seg_index / (seg_index + 1.0)
 
         stim_name = f"xstim{stim_count}"
 
         # Add stim source
         netParams.stimSourceParams[stim_name] = {
             'type': 'IClamp',
-            'delay': stim_delay,
+            'del': stim_delay,   # NetPyNE uses 'del' not 'delay'
             'dur': stim_dur,
             'amp': I_nA * stim_amp_factor
         }
 
-        # Attach stim source to target
+        # Attach stim source to specific gid/sec/loc
         netParams.stimTargetParams[stim_name+'_target'] = {
             'source': stim_name,
-            'conds': {'cellList': [gid]},  # direct by gid
+            'conds': {'cellList': [gid]},  # restrict by gid
             'sec': sec,
             'loc': loc
         }
 
         stim_count += 1
-
-    print(f"[XStim Loader] Added {stim_count} IClamp stims into netParams")
+        amps.append(I_nA * stim_amp_factor)
+        secs.append(sec)
+        gids.append(gid)
+        
+    if stim_count > 0:
+        print(f"[XStim Loader] Added {stim_count} IClamp stims into netParams")
+        print(f"  - GIDs targeted: {len(set(gids))} unique (first 5: {gids[:5]})")
+        print(f"  - Sections: {len(set(secs))} unique (examples: {list(set(secs))[:5]})")
+        print(f"  - Amp range: {min(amps):.4f} to {max(amps):.4f} nA "
+              f"(mean {sum(amps)/len(amps):.4f} nA)")
     return all_targets
-
 
 # default simple mapper
 def _default_type_map(sec_name):
