@@ -127,7 +127,8 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
                                      stim_pattern='rank*_xstim_targets.json',
                                      stim_delay=75, stim_dur=4, stim_amp_factor=1.0):
     """
-    Load extracellular target files from multiple MPI ranks and add IClamp stims in netParams.
+    Load extracellular stimulation target files (from export_xstim_targets)
+    and add IClamp sources + targets into netParams.
 
     Parameters
     ----------
@@ -156,30 +157,37 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         all_targets.extend(data)
         print(f"[Loader] Loaded {len(data)} targets from {os.path.basename(fpath)}")
 
-    # Add stims to netParams
     stim_count = 0
     for tgt in all_targets:
         gid = tgt['gid']
         sec = tgt['sec']
         seg_index = tgt['seg_index']
-        Vext = tgt['Vext']  # mV
+        Vext = tgt['Vext']  # in mV
 
-        stim_name = f"xstim_{gid}_{sec}_{seg_index}_{stim_count}"
-        stim_dict = {
-            'source': 'IClamp',
-            'sec': sec,
-            'loc': seg_index,  # segment index treated as loc (approx mapping)
+        # convert seg_index into NEURON loc ∈ [0,1]
+        loc = seg_index / max(1, (seg_index+1))
+
+        stim_name = f"xstim{stim_count}"
+
+        # Add stim source
+        netParams.stimSourceParams[stim_name] = {
+            'type': 'IClamp',
             'delay': stim_delay,
             'dur': stim_dur,
-            # convert Vext -> current; factor allows tuning
             'amp': Vext * stim_amp_factor
         }
 
-        # attach stim to correct population via gid
-        netParams.stims[stim_name] = stim_dict
+        # Attach stim source to target
+        netParams.stimTargetParams[stim_name+'_target'] = {
+            'source': stim_name,
+            'conds': {'cellList': [gid]},  # direct by gid
+            'sec': sec,
+            'loc': loc
+        }
+
         stim_count += 1
 
-    print(f"[Loader] Added {stim_count} IClamp stims into netParams")
+    print(f"[XStim Loader] Added {stim_count} IClamp stims into netParams")
     return all_targets
 
 
