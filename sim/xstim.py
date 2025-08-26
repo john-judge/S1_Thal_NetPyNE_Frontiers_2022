@@ -125,7 +125,7 @@ def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
         results.append(dict(
             gid=int(gid),
             pop=pop,
-            cellIndex=int(cellIndex),
+            cellIndex=cellIndex,
             sec=sec_name,
             seg_index=int(seg_index),
             x=float(x), y=float(y), z=float(z),
@@ -183,6 +183,13 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         sec = tgt['sec']
         seg_index = int(tgt['seg_index'])
         I_nA = float(tgt['I_nA'])  # in nA
+        cellIndex = tgt.get('cellIndex', None)
+        pop = tgt.get('pop', None)
+
+        if cellIndex is not None and pop is not None:
+            conds = {'pop': pop, 'cellList': [cellIndex]}
+        else:
+            conds = {'gid': gid} 
 
         # Map seg_index → loc ∈ [0,1]
         if seg_index <= 0:
@@ -212,7 +219,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         amps.append(I_nA * stim_amp_factor)
         secs.append(sec)
         gids.append(gid)
-        
+
     if stim_count > 0:
         print(f"[XStim Loader] Added {stim_count} IClamp stims into netParams")
         print(f"  - GIDs targeted: {len(set(gids))} unique (first 5: {gids[:5]})")
