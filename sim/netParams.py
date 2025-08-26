@@ -91,16 +91,24 @@ netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS t
 for cellName in cfg.S1cells:
     barrel = int(cellName.split('_barrel')[-1])  # get barrel number from cellName
 
+    barrel_axis = 'z'
+
+    barrel_axis_len = None
+    if barrel_axis == 'z':
+        barrel_axis_len = cfg.sizeZ
+    elif barrel_axis == 'x':
+        barrel_axis_len = cfg.sizeX
+
     # ensure top range is not exactly 1.0
     eps = 1e-6
     metype = cellName #.split('_barrel')[0]  # get metype from cellName
     septa_width = 70  # um
-    septa_width_fractional = septa_width / cfg.sizeZ  # fractional width of the septa
+    septa_width_fractional = septa_width / barrel_axis_len  # fractional width of the septa
     barrel_width = 120  # um
-    barrel_width_fractional = barrel_width / cfg.sizeZ  # fractional width of the barrel
-    z_range_barrel = [barrel * (barrel_width_fractional + septa_width_fractional), 
+    barrel_width_fractional = barrel_width / barrel_axis_len  # fractional width of the barrel
+    x_or_z_range_barrel = [barrel * (barrel_width_fractional + septa_width_fractional), 
                         barrel * (barrel_width_fractional + septa_width_fractional) + barrel_width_fractional - eps]
-    #print("z_range_barrel:", z_range_barrel)
+    #print("x_or_z_range_barrel:", x_or_z_range_barrel)
     layernumber = cellName[1:2]
     if layernumber == '2':
         netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
@@ -108,14 +116,14 @@ for cellName in cfg.S1cells:
                                         'ynormRange': layer['23'], 
                                         'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[metype])),
                                         'diversity': True,
-                                        'znormRange': z_range_barrel}
+                                        barrel_axis + 'normRange': x_or_z_range_barrel}
     else:
         netParams.popParams[cellName] = {'cellType': cellName, 'cellModel': 'HH_full', 
                                          'tags': {'pop': cellName},
                                         'ynormRange': layer[layernumber], 
                                         'numCells': int(np.ceil(cfg.scaleDensity*cfg.cellNumber[metype])), 
                                         'diversity': True,
-                                        'znormRange': z_range_barrel}
+                                        barrel_axis + 'normRange': x_or_z_range_barrel}
 
 ## THALAMIC POPULATIONS (from prev model)
 for popName in cfg.thalamicpops:
@@ -1122,7 +1130,10 @@ if cfg.addIClamp:
         [pop,sec,loc,start,dur,amp] = [params[s] for s in ['pop','sec','loc','start','dur','amp']]
 
         # add stim source
-        netParams.stimSourceParams[key] = {'type': 'IClamp', 'delay': start, 'dur': dur, 'amp': amp}
+        netParams.stimSourceParams[key] = {'type': 'IClamp', 
+                                           'delay': start, 
+                                           'dur': dur, 
+                                           'amp': amp}
         
         # connect stim source to target
         netParams.stimTargetParams[key+'_'+pop] =  {

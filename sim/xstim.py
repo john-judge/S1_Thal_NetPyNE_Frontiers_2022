@@ -202,7 +202,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         # Add stim source
         netParams.stimSourceParams[stim_name] = {
             'type': 'IClamp',
-            'del': stim_delay,   # NetPyNE uses 'del' not 'delay'
+            'delay': stim_delay,  
             'dur': stim_dur,
             'amp': I_nA * stim_amp_factor
         }
@@ -210,7 +210,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         # Attach stim source to specific gid/sec/loc
         netParams.stimTargetParams[stim_name+'_target'] = {
             'source': stim_name,
-            'conds': {'cellList': [gid]},  # restrict by gid
+            'conds': conds,  # restrict by gid
             'sec': sec,
             'loc': loc
         }
