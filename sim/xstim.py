@@ -8,9 +8,9 @@
 from neuron import h
 import numpy as np
 from collections import defaultdict
-import json
-import csv
-import os
+import os, json, glob
+
+
 def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
                          out_file='xstim_targets_rank.json'):
     """
@@ -121,6 +121,66 @@ def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
 
     print(f"[Rank {rank}/{nhost}] Exported {len(results)} targets -> {out_file}")
     return results
+
+
+def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/', stim_pattern='xstim_targets_rank*.json',
+                                     stim_delay=75, stim_dur=4, stim_amp_factor=1.0):
+    """
+    Load extracellular target files from multiple MPI ranks and add IClamp stims in netParams.
+
+    Parameters
+    ----------
+    netParams : NetParams object (NetPyNE)
+    stim_dir : str, directory containing the exported JSON files
+    stim_pattern : str, filename glob pattern
+    stim_delay : float, ms
+    stim_dur : float, ms
+    stim_amp_factor : scaling factor to convert Vext (mV) into IClamp.amp (nA)
+
+    Returns
+    -------
+    all_targets : list of dicts with gid, sec, seg_index, Vext, etc.
+    """
+
+    all_targets = []
+
+    files = glob.glob(os.path.join(stim_dir, stim_pattern))
+    if len(files) == 0:
+        print(f"[Loader] No stim files found in {stim_dir} matching {stim_pattern}")
+        return []
+
+    for fpath in files:
+        with open(fpath, 'r') as f:
+            data = json.load(f)
+        all_targets.extend(data)
+        print(f"[Loader] Loaded {len(data)} targets from {os.path.basename(fpath)}")
+
+    # Add stims to netParams
+    stim_count = 0
+    for tgt in all_targets:
+        gid = tgt['gid']
+        sec = tgt['sec']
+        seg_index = tgt['seg_index']
+        Vext = tgt['Vext']  # mV
+
+        stim_name = f"xstim_{gid}_{sec}_{seg_index}_{stim_count}"
+        stim_dict = {
+            'source': 'IClamp',
+            'sec': sec,
+            'loc': seg_index,  # segment index treated as loc (approx mapping)
+            'delay': stim_delay,
+            'dur': stim_dur,
+            # convert Vext -> current; factor allows tuning
+            'amp': Vext * stim_amp_factor
+        }
+
+        # attach stim to correct population via gid
+        netParams.stims[stim_name] = stim_dict
+        stim_count += 1
+
+    print(f"[Loader] Added {stim_count} IClamp stims into netParams")
+    return all_targets
+
 
 # default simple mapper
 def _default_type_map(sec_name):
