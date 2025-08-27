@@ -120,7 +120,13 @@ def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
         # NetPyNE puts pop in cell.tags['pop'], index in cell.gid - sim.net.gidStart[pop]
         cell = sim.net.cells[sim.net.gid2lid[gid]]
         pop = cell.tags.get('pop', None)
-        cellIndex = cell.tags.get('cellIndex', None)  # safer, NetPyNE sets this
+        cellIndex = None
+        if pop is not None and pop in sim.net.pops:
+            try:
+                cellIndex = sim.net.pops[pop].cellGids.index(gid)
+            except ValueError:
+                cellIndex = None
+
 
         results.append(dict(
             gid=int(gid),
@@ -202,7 +208,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         # Add stim source
         netParams.stimSourceParams[stim_name] = {
             'type': 'IClamp',
-            'del': stim_delay,  # del for IClamp, delay for NetStim
+            'del': stim_delay,  # del for IClamp
             'dur': stim_dur,
             'amp': I_nA * stim_amp_factor
         }
@@ -222,7 +228,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
 
     if stim_count > 0:
         print(f"[XStim Loader] Added {stim_count} IClamp stims into netParams")
-        print(f"  - GIDs targeted: {len(set(gids))} unique (first 5: {gids[:5]})")
+        print(f"  - GIDs targeted: {len(set(gids))} ")
         print(f"  - Sections: {len(set(secs))} unique (examples: {list(set(secs))[:5]})")
         print(f"  - Amp range: {min(amps):.4f} to {max(amps):.4f} nA "
               f"(mean {sum(amps)/len(amps):.4f} nA)")
