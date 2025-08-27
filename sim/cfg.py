@@ -62,7 +62,7 @@ cfg.printRunTime = 0.1
 cfg.includeParamsLabel = True
 cfg.printPopAvgRates = True
 cfg.checkErrors = False
-cfg.num_barrels = 2 # number of barrels in S1, along the x-axis (2 barrels, 1 barrel = 210 um)
+cfg.num_barrels = 2 # number of barrels in S1
 
 #------------------------------------------------------------------------------
 # Cells

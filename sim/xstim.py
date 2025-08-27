@@ -202,7 +202,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
         # Add stim source
         netParams.stimSourceParams[stim_name] = {
             'type': 'IClamp',
-            'delay': stim_delay,  
+            'del': stim_delay,  # del for IClamp, delay for NetStim
             'dur': stim_dur,
             'amp': I_nA * stim_amp_factor
         }
