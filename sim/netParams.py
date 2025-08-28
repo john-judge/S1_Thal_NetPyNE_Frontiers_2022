@@ -102,10 +102,8 @@ for cellName in cfg.S1cells:
     # ensure top range is not exactly 1.0
     eps = 1e-6
     metype = cellName #.split('_barrel')[0]  # get metype from cellName
-    septa_width = 70  # um
-    septa_width_fractional = septa_width / barrel_axis_len  # fractional width of the septa
-    barrel_width = 120  # um
-    barrel_width_fractional = barrel_width / barrel_axis_len  # fractional width of the barrel
+    septa_width_fractional = cfg.septa_width / barrel_axis_len  # fractional width of the septa
+    barrel_width_fractional = cfg.barrel_width / barrel_axis_len  # fractional width of the barrel
     x_or_z_range_barrel = [barrel * (barrel_width_fractional + septa_width_fractional), 
                         barrel * (barrel_width_fractional + septa_width_fractional) + barrel_width_fractional - eps]
     #print("x_or_z_range_barrel:", x_or_z_range_barrel)
