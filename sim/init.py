@@ -40,6 +40,7 @@ sim.net.connectCells()            			# create connections between cells based on
 
 
 if cfg.export_xstim_targets:
+    print("Exporting stim targets...")
     stim_params = netParams.stimSourceParams['XStim1']
     export_xstim_targets(sim, stim_params['field'], 
                          stim_params['waveform'],
