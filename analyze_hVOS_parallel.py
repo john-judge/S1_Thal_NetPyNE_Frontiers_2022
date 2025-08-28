@@ -181,7 +181,7 @@ for cell_id in loaded_compart_data.hash_map.keys():
 me_types_all = [c.get_me_type().split("_barrel")[0] for c in cells.values()]
 pop_counts = Counter(me_types_all)
 
-print("=== Diagnostic: hVOS target population counts ===")
+print("=== Diagnostic Count 1: hVOS target population counts ===")
 total = 0
 for pop in target_hVOS_populations:
     count = pop_counts.get(pop, 0)
@@ -208,9 +208,24 @@ while i_t < len(target_population_cells):
     i_t += total_jobs
 print("Job id:", job_id, "of", total_jobs, "processing cells:", i_target_cells)
 
+
+print("=== Diagnostic Count 2: target_population_cells BEFORE sparsity ===")
+print(f"  Total: {len(target_population_cells)}")
+pop_counts_before = Counter([c.get_me_type().split("_barrel")[0] for c in target_population_cells])
+for pop in target_hVOS_populations:
+    print(f"  {pop}: {pop_counts_before.get(pop, 0)} cells")
+print()
+
  # sparsity sampling implemented here
 target_population_cells = [cell for cell in target_population_cells
                                 if random.random() < target_sparsity]
+
+print("=== Diagnostic Count 3: target_population_cells AFTER sparsity ===")
+print(f"  Total: {len(target_population_cells)}")
+pop_counts_after = Counter([c.get_me_type().split("_barrel")[0] for c in target_population_cells])
+for pop in target_hVOS_populations:
+    print(f"  {pop}: {pop_counts_after.get(pop, 0)} cells")
+print()
 
 # choose cells for this job to draw
 cells_to_draw = None
