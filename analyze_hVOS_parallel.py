@@ -49,6 +49,8 @@ if len(sys.argv) > 2:
     except ValueError:
         total_jobs = 50
 
+random.seed(4322)
+
 no_psf_only = False
 psf_only = False
 if 'psf_only' in sys.argv:
