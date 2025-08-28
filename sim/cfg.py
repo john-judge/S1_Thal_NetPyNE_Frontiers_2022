@@ -40,9 +40,9 @@ cfg.coreneuron = False
 #run 10: no stim
 #run 8: baseline stim
 #run 11: NBQX + no stim
-cfg.experiment_NBQX_global = True
+cfg.experiment_NBQX_global = False
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
-cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
+cfg.export_xstim_targets = True  # used in init.py to export xstim targets based on structure
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -389,7 +389,7 @@ for popName in cfg.thalamocorticalconnections:
 cfg.addExtracellularStim = True
 
 cfg.xStimLocation = xStimLocation
-cfg.xStimRadius = 100  # microns (sphere)
+cfg.xStimRadius = 50  # microns (sphere)
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
 cfg.xStimAmp = 200  # amplitude in mA
 cfg.xStimDur = 4  # duration in ms
