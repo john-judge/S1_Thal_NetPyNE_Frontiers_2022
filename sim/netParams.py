@@ -61,7 +61,7 @@ Epops = ['L23_PC', 'L4_PC', 'L4_SS', 'L4_SP',
              'L6_TPC_L1', 'L6_TPC_L4', 'L6_BPC', 'L6_IPC', 'L6_UTPC']
 
 # expand Epops to include barrel numbers
-Epops = [f"{pop}_barrel{barrel}" for pop in Epops for barrel in range(2)]
+Epops = [f"{pop}_barrel{barrel}" for pop in Epops for barrel in range(cfg.num_barrels)]
 
 Ipops = []
 for popName in cfg.S1pops:
@@ -213,7 +213,7 @@ with open('conn/conn.pkl', 'rb') as fileObj: connData = pickle.load(fileObj)
 
 connIEtype = connData['connIEtype']  
 connEItype = connData['connEItype']
-
+barrel_suffixes = tuple([f"_barrel{b}" for b in range(cfg.num_barrels)])
 def expand_conn_data_dict(data_dict, barrel_suffixes=('_barrel0', '_barrel1')):
     expanded = {}
     for src_base, tgt_dict in data_dict.items():
@@ -242,7 +242,7 @@ keys_to_expand = [
 
 for key in keys_to_expand:
     if key in connData:
-        connData[key] = expand_conn_data_dict(connData[key])
+        connData[key] = expand_conn_data_dict(connData[key], barrel_suffixes=barrel_suffixes)
 
 
 lmat = connData['lmat']
@@ -273,7 +273,7 @@ pmat[200] = connData['pmat200um'] #max value for d0=200
 
 # expand each dict in pmat
 for dist_key in pmat:
-    pmat[dist_key] = expand_conn_data_dict(pmat[dist_key])
+    pmat[dist_key] = expand_conn_data_dict(pmat[dist_key], barrel_suffixes=barrel_suffixes)
 
 synperconnNumber = connData['synperconnNumber']
 connNumber = connData['connNumber']
@@ -357,14 +357,14 @@ def expand_parameters_syn_with_suffix(parameters_syn, barrel_suffixes=('_barrel0
 
     return expanded
 
-ConnTypes = expand_connTypes_with_new_ids(ConnTypes)
-connIEtype = expand_connType_single_id(connIEtype)
-connEItype = expand_connType_single_id(connEItype)
+ConnTypes = expand_connTypes_with_new_ids(ConnTypes, barrel_suffixes=barrel_suffixes)
+connIEtype = expand_connType_single_id(connIEtype, barrel_suffixes=barrel_suffixes)
+connEItype = expand_connType_single_id(connEItype, barrel_suffixes=barrel_suffixes)
 
 # expand parameters_syn to expanded set of syntypes
 # syntypes match connIDs
 # Now parameters_syn keys are like ('gsyn', '114_barrel0'), ('gsyn', '114_barrel1'), etc.
-parameters_syn = expand_parameters_syn_with_suffix(parameters_syn)
+parameters_syn = expand_parameters_syn_with_suffix(parameters_syn, barrel_suffixes=barrel_suffixes)
 
 physColumnNames = []
 syntypes = []
