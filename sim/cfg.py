@@ -62,9 +62,10 @@ cfg.printRunTime = 0.1
 cfg.includeParamsLabel = True
 cfg.printPopAvgRates = True
 cfg.checkErrors = False
-cfg.num_barrels = 3 # number of barrels in S1
+cfg.num_barrels = 2 # number of barrels in S1
 cfg.septa_width = 70  # um
 cfg.barrel_width = 120  # um
+extra_spaceZ = 20  # um
 
 #------------------------------------------------------------------------------
 # Network 
@@ -74,7 +75,7 @@ cfg.barrel_width = 120  # um
 cfg.scale = 0.25 # reduce size (per barrel)
 cfg.sizeY = 2082.0
 cfg.sizeX = 310.0 # r = 210 um and hexagonal side length = 230.9 um
-cfg.sizeZ = cfg.barrel_width * cfg.num_barrels + cfg.septa_width * (cfg.num_barrels - 1)  # n barrels + (n-1) septa
+cfg.sizeZ = cfg.barrel_width * cfg.num_barrels + cfg.septa_width * (cfg.num_barrels - 1) + extra_spaceZ # n barrels + (n-1) septa
 cfg.scaleDensity = 1.0 # run 8.1: increase density of cells by 2x
 
 
