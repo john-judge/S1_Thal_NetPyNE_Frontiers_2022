@@ -173,6 +173,23 @@ for cell_id in loaded_compart_data.hash_map.keys():
         # load all morphology file matches
         me_type_morphology_map[me_type] = [Morphology(me_type, morphology_data_dir + me_type_file) for me_type_file in me_type_files]
 
+
+#######################################
+# Diagnostic: count cells in hVOS target populations
+#######################################
+# count by ME-type
+me_types_all = [c.get_me_type().split("_barrel")[0] for c in cells.values()]
+pop_counts = Counter(me_types_all)
+
+print("=== Diagnostic Count 1: hVOS target population counts ===")
+total = 0
+for pop in target_hVOS_populations:
+    count = pop_counts.get(pop, 0)
+    print(f"  {pop}: {count} cells")
+    total += count
+print(f"  TOTAL across targets: {total}\n")
+
+
 # cells dict maps cell_id to Cell object
 # me_type_morphology_map maps me_type to list of Morphology objects
 # target populations is a list of me_types to compute signal for
@@ -192,7 +209,7 @@ while i_t < len(target_population_cells):
 print("Job id:", job_id, "of", total_jobs, "processing cells:", i_target_cells)
 
 
-print("=== Diagnostic Count 1: target_population_cells BEFORE sparsity ===")
+print("=== Diagnostic Count 2: target_population_cells BEFORE sparsity ===")
 print(f"  Total: {len(target_population_cells)}")
 pop_counts_before = Counter([c.get_me_type().split("_barrel")[0] for c in target_population_cells])
 for pop in target_hVOS_populations:
@@ -203,7 +220,7 @@ print()
 target_population_cells = [cell for cell in target_population_cells
                                 if random.random() < target_sparsity]
 
-print("=== Diagnostic Count 2: target_population_cells AFTER sparsity ===")
+print("=== Diagnostic Count 3: target_population_cells AFTER sparsity ===")
 print(f"  Total: {len(target_population_cells)}")
 pop_counts_after = Counter([c.get_me_type().split("_barrel")[0] for c in target_population_cells])
 for pop in target_hVOS_populations:
