@@ -248,15 +248,11 @@ print('Recording cells:', cfg.recordCells)
 if record_trace_setting['compartment'] == 'soma' and ((record_trace_setting['cell_num_start'] is None) or (record_trace_setting['cell_num_end'] is None)):
     cfg.recordTraces['V' + record_trace_setting['compartment']] = {'sec': record_trace_setting['compartment'],'loc':0.5,
                                                                    'var':'v'
-                                                                   #'conds': {'z': [xStimLocation[2]-z_recording_radius, 
-                                                                    #               xStimLocation[2]+z_recording_radius]}
                                                                     }
 else:
     for i in range(record_trace_setting['cell_num_start'], record_trace_setting['cell_num_end']):
         cfg.recordTraces['V' + record_trace_setting['compartment'] + '_'+str(i)] = {'sec':record_trace_setting['compartment'] + '_'+str(i),'loc':0.5,
-                                                                                    'var':'v',
-                                                                                    #'conds': {'z': [xStimLocation[2]-z_recording_radius, 
-                                                                                    #                xStimLocation[2]+z_recording_radius]}
+                                                                                    'var':'v'
                                                                                                     }
         #cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
         #cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
@@ -392,7 +388,7 @@ cfg.addExtracellularStim = True
 cfg.xStimLocation = xStimLocation
 cfg.xStimRadius = 50  # microns (sphere)
 cfg.xStimSigma = 0.276  # conductivity in mS/mm
-cfg.xStimAmp = 200  # amplitude in mA
+cfg.xStimAmp = 20  # amplitude in mA
 cfg.xStimDur = 4  # duration in ms
 cfg.xStimDel = 50  # delay in ms
 
