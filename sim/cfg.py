@@ -310,6 +310,8 @@ cfg.synWeightFractionII = [1.0, 1.0]  # I -> I GABAA to GABAB ratio
 cfg.synWeightFractionIE = [1.0, 1.0]  # I -> E GABAA to GABAB ratio
 cfg.EEGain = 1.0
 cfg.EIGain = 0.7  # run 8.1: 0.7
+cfg.IIGain = 1.0
+cfg.IEGain = 0.7  # run 8.1: 0.7
 if cfg.experiment_NBQX_global:
     cfg.synWeightFractionEE = [0.0, 1.0] # E -> E AMPA to NMDA ratio
     cfg.synWeightFractionEI = [0.0, 1.0] # E -> I AMPA to NMDA ratio
