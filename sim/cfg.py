@@ -42,7 +42,7 @@ cfg.coreneuron = False
 #run 11: NBQX + no stim
 cfg.experiment_NBQX_global = True
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
-cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
+cfg.export_xstim_targets = True  # used in init.py to export xstim targets based on structure
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -63,8 +63,8 @@ cfg.includeParamsLabel = True
 cfg.printPopAvgRates = True
 cfg.checkErrors = False
 cfg.num_barrels = 2 # number of barrels in S1
-cfg.septa_width = 70  # um
-cfg.barrel_width = 120  # um
+cfg.septa_width = 80  # um
+cfg.barrel_width = 150  # um
 extra_spaceZ = 20  # um
 
 #------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ extra_spaceZ = 20  # um
 #------------------------------------------------------------------------------
 
  # Number of cells at full scale = 31346 
-cfg.scale = 0.25 # reduce size (per barrel)
+cfg.scale = 0.4 # reduce size (per barrel)
 cfg.sizeY = 2082.0
 cfg.sizeX = 310.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = cfg.barrel_width * cfg.num_barrels + cfg.septa_width * (cfg.num_barrels - 1) + extra_spaceZ # n barrels + (n-1) septa
