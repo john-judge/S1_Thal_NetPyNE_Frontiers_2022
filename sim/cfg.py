@@ -42,7 +42,7 @@ cfg.coreneuron = False
 #run 11: NBQX + no stim
 cfg.experiment_NBQX_global = True
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
-cfg.export_xstim_targets = True  # used in init.py to export xstim targets based on structure
+cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -294,7 +294,7 @@ cfg.analysis['plotShape'] = {'includePre': [8008, 8239],
 #------------------------------------------------------------------------------
 # Spontaneous synapses + background - data from Rat
 #------------------------------------------------------------------------------
-cfg.addStimSynS1 = False
+cfg.addStimSynS1 = True
 cfg.rateStimE = 9.0
 cfg.rateStimI = 9.0
 
