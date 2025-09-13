@@ -283,7 +283,10 @@ use = connData['use']
 
 ConnTypesNumber = connData['ConnTypesNumber'] 
 ConnTypes = connData['ConnTypes']   
-
+synperNeuronStimI = connData['synperNeuronStimI']
+synperNeuronStimE = connData['synperNeuronStimE']
+GsynStimI = connData['GsynStimI']
+GsynStimE = connData['GsynStimE']
 
 # to match the barrel structure in cfg.S1pops,
 # need to expand connTypes, connIEtype, connEItype
@@ -822,21 +825,19 @@ if cfg.addConn:
 # NetStim inputs to simulate Spontaneous synapses + background in S1 neurons - data from Rat
 #------------------------------------------------------------------------------
 SourcesNumber = 5 # for each post Mtype - sec distribution
-synperNeuronStimI = connData['synperNeuronStimI']
-synperNeuronStimE = connData['synperNeuronStimE']
-GsynStimI = connData['GsynStimI']
-GsynStimE = connData['GsynStimE']
    
 if cfg.addStimSynS1:      
     for post in Ipops + Epops:
 
-        synperNeuron = synperNeuronStimI[post]
+        post_trimmed = post.split("_barrel")[0]  # remove barrel number if present
+
+        synperNeuron = synperNeuronStimI[post_trimmed]
         ratespontaneous = cfg.rateStimI
         for qSnum in range(SourcesNumber):
             ratesdifferentiation = (0.8 + 0.4*qSnum/(SourcesNumber-1)) * (synperNeuron*ratespontaneous)/SourcesNumber
             netParams.stimSourceParams['StimSynS1_S_all_INH->' + post + '_' + str(qSnum)] = {'type': 'NetStim', 'rate': ratesdifferentiation, 'noise': 1.0}
 
-        synperNeuron = synperNeuronStimE[post]
+        synperNeuron = synperNeuronStimE[post_trimmed]
         ratespontaneous = cfg.rateStimE
         for qSnum in range(SourcesNumber):
             ratesdifferentiation = (0.8 + 0.4*qSnum/(SourcesNumber-1)) * (synperNeuron*ratespontaneous)/SourcesNumber
@@ -850,7 +851,7 @@ if cfg.addStimSynS1:
                 'conds': {'cellType': cfg.popLabelEl[post]}, 
                 'synMech': 'AMPA', 
                 'sec': 'spinyEE', 
-                'weight': GsynStimE[post],
+                'weight': GsynStimE[post_trimmed],
                 'delay': 0.1}
 
     for post in Ipops:
@@ -860,7 +861,7 @@ if cfg.addStimSynS1:
                 'synMech': 'AMPA', 
                 'conds': {'cellType': cfg.popLabelEl[post]}, 
                 'sec': 'spiny', 
-                'weight': GsynStimE[post],
+                'weight': GsynStimE[post_trimmed],
                 'delay': 0.1}
 
     for post in Epops+Ipops:
@@ -870,7 +871,7 @@ if cfg.addStimSynS1:
                 'conds': {'cellType': cfg.popLabelEl[post]}, 
                 'synMech': 'GABAA', 
                 'sec': 'spiny', 
-                'weight': GsynStimI[post],
+                'weight': GsynStimI[post_trimmed],
                 'delay': 0.1}
 
 #------------------------------------------------------------------------------
