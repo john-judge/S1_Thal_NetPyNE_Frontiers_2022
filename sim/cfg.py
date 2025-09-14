@@ -40,9 +40,9 @@ cfg.coreneuron = False
 #run 10: no stim
 #run 8: baseline stim
 #run 11: NBQX + no stim
-cfg.experiment_NBQX_global = True
+cfg.experiment_NBQX_global = False
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
-cfg.export_xstim_targets = True  # used in init.py to export xstim targets based on structure
+cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -309,9 +309,9 @@ cfg.synWeightFractionEI = [1.0, 1.0] # E -> I AMPA to NMDA ratio
 cfg.synWeightFractionII = [1.0, 1.0]  # I -> I GABAA to GABAB ratio
 cfg.synWeightFractionIE = [1.0, 1.0]  # I -> E GABAA to GABAB ratio
 cfg.EEGain = 1.0
-cfg.EIGain = 0.7  # run 8.1: 0.7
+cfg.EIGain = 1.0  # run 8.1: 0.7, run 12.2: 1
 cfg.IIGain = 1.0
-cfg.IEGain = 0.7  # run 8.1: 0.7
+cfg.IEGain = 1.0  # run 8.1: 0.7, run 12.2: 1
 if cfg.experiment_NBQX_global:
     cfg.synWeightFractionEE = [0.0, 1.0] # E -> E AMPA to NMDA ratio
     cfg.synWeightFractionEI = [0.0, 1.0] # E -> I AMPA to NMDA ratio
