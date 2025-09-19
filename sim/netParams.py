@@ -139,7 +139,7 @@ if cfg.enable_neighbor_barrel_model:
     # --------------------------------------------------
     # Virtual presynaptic axons from right-hand neighbor barrel
     # --------------------------------------------------
-    num_axons = 100  # choose how many presynaptic fibers
+    num_axons = 10000  # choose how many presynaptic fibers
     axon_zloc = cfg.sizeZ  # put them just outside the right edge (if barrel axis = z)
 
     netParams.popParams['NeighborAxons'] = {
@@ -147,7 +147,7 @@ if cfg.enable_neighbor_barrel_model:
         'cellModel': 'VecStim',   # can also be 'NetStim'
         'numCells': num_axons,
         # Position them along the right edge of barrel0
-        'ynormRange': [0, 1],  # span all layers
+        'ynormRange': layer['4'],  # in L4
         'zRange': [axon_zloc+10, axon_zloc+20],  # just outside the barrel
     }
 
@@ -155,7 +155,7 @@ if cfg.enable_neighbor_barrel_model:
         netParams.stimSourceParams[f'NeighborStim{i}'] = {
             'type': 'NetStim',
             'start': 50,  # volley at ~50 ms
-            'interval': 2,  # single pulse
+            'interval': 1,  # single pulse
             'number': 1,
             'noise': 0
         }
@@ -170,7 +170,7 @@ if cfg.enable_neighbor_barrel_model:
             'preConds': {'pop': 'NeighborAxons'},
             'postConds': {'pop': 'L4_PC_barrel0'},
             'synMech': ['AMPA','NMDA'],   # use existing mechanisms
-            'weight': 0.001,              # tune
+            'weight': 0.01,              # tune
             'delay': 'dist_3D/propVelocity + 1.0',
             'sec': 'spiny',
             'probability': '0.2*exp(-dist_2D/100)'  #
