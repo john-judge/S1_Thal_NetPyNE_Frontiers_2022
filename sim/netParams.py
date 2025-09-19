@@ -132,6 +132,55 @@ for popName in cfg.thalamicpops:
     netParams.popParams[popName] = {'cellType': ThcellType, 'cellModel': 'HH_full', 'yRange': [ymin[popName], ymax[popName]],
                                         'numCells':  int(np.ceil(cfg.popNumber[popName])), 'diversity': False}
 
+# ------------------------------------------------------------------------------
+# Neighbor barrel virtual presynaptic stimulation
+# ------------------------------------------------------------------------------
+if cfg.enable_neighbor_barrel_model:
+    # --------------------------------------------------
+    # Virtual presynaptic axons from right-hand neighbor barrel
+    # --------------------------------------------------
+    num_axons = 100  # choose how many presynaptic fibers
+    axon_zloc = cfg.sizeZ  # put them just outside the right edge (if barrel axis = z)
+
+    netParams.popParams['NeighborAxons'] = {
+        'cellType': 'VirtualAxon',
+        'cellModel': 'VecStim',   # can also be 'NetStim'
+        'numCells': num_axons,
+        # Position them along the right edge of barrel0
+        'ynormRange': [0, 1],  # span all layers
+        'zRange': [axon_zloc+10, axon_zloc+20],  # just outside the barrel
+    }
+
+    for i in range(num_axons):
+        netParams.stimSourceParams[f'NeighborStim{i}'] = {
+            'type': 'NetStim',
+            'start': 50 + np.random.normal(0, 2),  # volley at ~50 ms with jitter
+            'interval': 1e9,  # single pulse
+            'number': 1,
+            'noise': 0
+        }
+        netParams.stimTargetParams[f'NeighborStim{i}_target'] = {
+            'source': f'NeighborStim{i}',
+            'conds': {'pop': 'NeighborAxons', 'cellList': [i]},
+            'sec': 'soma', 'loc': 0.5
+        }
+
+        # Connect NeighborAxons → L4 PCs of barrel0
+        netParams.connParams['NeighborAxons->L4_PC_barrel0'] = {
+            'preConds': {'pop': 'NeighborAxons'},
+            'postConds': {'pop': 'L4_PC_barrel0'},
+            'synMech': ['AMPA','NMDA'],   # use existing mechanisms
+            'weight': 0.001,              # tune
+            'delay': 'dist_3D/propVelocity + 1.0',
+            'sec': 'spiny',
+            'probability': '0.2*exp(-dist_2D/100)'  # example distance rule
+        }
+
+        # Optionally, also connect to L23 or inhibitory pops
+
+
+
+
 #------------------------------------------------------------------------------
 # Cell parameters  # L1 70  L23 215  L4 230 L5 260  L6 260  = 1035
 #------------------------------------------------------------------------------

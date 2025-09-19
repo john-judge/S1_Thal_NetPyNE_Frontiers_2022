@@ -32,6 +32,15 @@ xStimLocation =[185.,800.,164.]
 cfg.simType='S1_TH_coreneuron'
 cfg.coreneuron = False
 
+#------------------------------------------------------------------------------
+#
+# VIRTUAL PRESYNAPTIC STIMULATION
+#
+#------------------------------------------------------------------------------
+# If True, the model becomes a single-barrel model,
+# xstim is disabled, and replaced with a population of 
+# virtual presynaptic fibers (NetStim) that synapse onto L4
+cfg.enable_neighbor_barrel_model = True
 
 #------------------------------------------------------------------------------
 # Experiments
@@ -67,12 +76,18 @@ cfg.septa_width = 70  # um
 cfg.barrel_width = 150  # um
 extra_spaceZ = 20  # um
 
+if cfg.enable_neighbor_barrel_model:
+    cfg.num_barrels = 1 # single barrel model
+    cfg.septa_width = 0
+    cfg.barrel_width = 250  # um
+    extra_spaceZ = 0  # um
+
 #------------------------------------------------------------------------------
 # Network 
 #------------------------------------------------------------------------------
 
  # Number of cells at full scale = 31346 
-cfg.scale = 0.5 # reduce size (per barrel)
+cfg.scale = 0.25 # reduce size (per barrel)
 cfg.sizeY = 2082.0
 cfg.sizeX = 310.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = cfg.barrel_width * cfg.num_barrels + cfg.septa_width * (cfg.num_barrels - 1) + extra_spaceZ # n barrels + (n-1) septa
@@ -378,6 +393,8 @@ for popName in cfg.thalamocorticalconnections:
 # Extracellular stim
 #------------------------------------------------------------------------------
 cfg.addExtracellularStim = True
+if cfg.enable_neighbor_barrel_model:
+    cfg.addExtracellularStim = False  
 
 cfg.xStimLocation = xStimLocation
 cfg.xStimRadius = 100  # microns (sphere)
