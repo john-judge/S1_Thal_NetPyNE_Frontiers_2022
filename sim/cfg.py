@@ -49,7 +49,7 @@ cfg.enable_neighbor_barrel_model = True
 #run 10: no stim
 #run 8: baseline stim
 #run 11: NBQX + no stim
-cfg.experiment_NBQX_global = True
+cfg.experiment_NBQX_global = False
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
 cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
 
