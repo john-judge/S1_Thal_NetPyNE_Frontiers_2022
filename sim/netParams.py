@@ -139,16 +139,20 @@ if cfg.enable_neighbor_barrel_model:
     # --------------------------------------------------
     # Virtual presynaptic axons from right-hand neighbor barrel
     # --------------------------------------------------
-    num_axons = 10000  # choose how many presynaptic fibers
-    axon_zloc = cfg.sizeZ  # put them just outside the right edge (if barrel axis = z)
-
+    num_axons = 100  # choose how many presynaptic fibers
+    rightmost_z_um = cfg.sizeZ  # barrel right edge in µm
+    # choose positions 10..30 µm inside the right edge
+    z_start_um = max(0.0, rightmost_z_um - 20.0)
+    z_end_um   = max(0.0, rightmost_z_um - 10.0)
+    zstart_norm = z_start_um / float(cfg.sizeZ)
+    zend_norm   = z_end_um   / float(cfg.sizeZ)
     netParams.popParams['NeighborAxons'] = {
         'cellType': 'VirtualAxon',
         'cellModel': 'NetStim',   # can also be 'NetStim'
         'numCells': num_axons,
         # Position them along the right edge of barrel0
         'ynormRange': layer['4'],  # in L4
-        'zRange': [axon_zloc+10, axon_zloc+20],  # just outside the barrel
+        'znormRange': [zstart_norm, zend_norm],
         'rate': 0,
         'start': 50,
         'interval': 1e9,

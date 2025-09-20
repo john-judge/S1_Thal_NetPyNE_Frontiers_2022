@@ -79,8 +79,8 @@ extra_spaceZ = 20  # um
 if cfg.enable_neighbor_barrel_model:
     cfg.num_barrels = 1 # single barrel model
     cfg.septa_width = 0
-    cfg.barrel_width = 250  # um
-    extra_spaceZ = 0  # um
+    cfg.barrel_width = 200  # um
+    extra_spaceZ = 20  # um
 
 #------------------------------------------------------------------------------
 # Network 
