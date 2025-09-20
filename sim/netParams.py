@@ -144,14 +144,22 @@ if cfg.enable_neighbor_barrel_model:
 
     netParams.popParams['NeighborAxons'] = {
         'cellType': 'VirtualAxon',
-        'cellModel': 'VecStim',   # can also be 'NetStim'
+        'cellModel': 'NetStim',   # can also be 'NetStim'
         'numCells': num_axons,
         # Position them along the right edge of barrel0
         'ynormRange': layer['4'],  # in L4
         'zRange': [axon_zloc+10, axon_zloc+20],  # just outside the barrel
+        'rate': 0,
+        'start': 50,
+        'interval': 1e9,
+        'number': 1,
+        'noise': 0,
     }
 
-    for i in range(num_axons):
+    # if we wanted to play with timing to create
+    # propagating volley, we could define axon stims with
+    # different start times based on y location here:
+    '''for i in range(num_axons):
         netParams.stimSourceParams[f'NeighborStim{i}'] = {
             'type': 'NetStim',
             'start': 50,  # volley at ~50 ms
@@ -163,20 +171,19 @@ if cfg.enable_neighbor_barrel_model:
             'source': f'NeighborStim{i}',
             'conds': {'pop': 'NeighborAxons'},
             'sec': 'soma', 'loc': 0.5
-        }
+        }'''
 
-        # Connect NeighborAxons → L4 PCs of barrel0
-        netParams.connParams['NeighborAxons->L4_PC_barrel0'] = {
-            'preConds': {'pop': 'NeighborAxons'},
-            'postConds': {'pop': 'L4_PC_barrel0'},
-            'synMech': ['AMPA','NMDA'],   # use existing mechanisms
-            'weight': 0.01,              # tune
-            'delay': 'dist_3D/propVelocity + 1.0',
-            'sec': 'spiny',
-            'probability': '0.2*exp(-dist_2D/100)'  #
-        }
+    # Connect NeighborAxons → L4 PCs of barrel0
+    netParams.connParams['NeighborAxons->L4_PC_barrel0'] = {
+        'preConds': {'pop': 'NeighborAxons'},
+        'postConds': {'pop': 'L4_PC_barrel0'},
+        'synMech': ['AMPA','NMDA'],   # use existing mechanisms
+        'weight': 0.001,              # tune
+        'delay': 'dist_3D/propVelocity + 1.0',
+        'sec': 'spiny',
+        'probability': '0.2*exp(-dist_2D/100)'  #
+    }
 
-        # Optionally, also connect to L23 or inhibitory pops
 
 
 
