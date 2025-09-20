@@ -140,53 +140,37 @@ if cfg.enable_neighbor_barrel_model:
     # Virtual presynaptic axons from right-hand neighbor barrel
     # --------------------------------------------------
     num_axons = 100  # choose how many presynaptic fibers
+    
     rightmost_z_um = cfg.sizeZ  # barrel right edge in µm
     # choose positions 10..30 µm inside the right edge
     z_start_um = max(0.0, rightmost_z_um - 20.0)
     z_end_um   = max(0.0, rightmost_z_um - 10.0)
     zstart_norm = z_start_um / float(cfg.sizeZ)
     zend_norm   = z_end_um   / float(cfg.sizeZ)
+    # Virtual axons as NetStim pop
     netParams.popParams['NeighborAxons'] = {
         'cellType': 'VirtualAxon',
-        'cellModel': 'NetStim',   # can also be 'NetStim'
-        'numCells': num_axons,
-        # Position them along the right edge of barrel0
-        'ynormRange': layer['4'],  # in L4
+        'cellModel': 'NetStim',
+        'numCells': 100,
+        'ynormRange': layer['4'],
         'znormRange': [zstart_norm, zend_norm],
-        'rate': 0,
         'start': 50,
-        'interval': 1e9,
+        'interval': 1e9,   # effectively single spike
         'number': 1,
         'noise': 0,
     }
 
-    # if we wanted to play with timing to create
-    # propagating volley, we could define axon stims with
-    # different start times based on y location here:
-    '''for i in range(num_axons):
-        netParams.stimSourceParams[f'NeighborStim{i}'] = {
-            'type': 'NetStim',
-            'start': 50,  # volley at ~50 ms
-            'interval': 1,  # single pulse
-            'number': 1,
-            'noise': 0
-        }
-        netParams.stimTargetParams[f'NeighborStim{i}_target'] = {
-            'source': f'NeighborStim{i}',
-            'conds': {'pop': 'NeighborAxons'},
-            'sec': 'soma', 'loc': 0.5
-        }'''
-
-    # Connect NeighborAxons → L4 PCs of barrel0
+    # Connection rule with AMPA and NMDA
     netParams.connParams['NeighborAxons->L4_PC_barrel0'] = {
         'preConds': {'pop': 'NeighborAxons'},
         'postConds': {'pop': 'L4_PC_barrel0'},
-        'synMech': ['AMPA','NMDA'],   # use existing mechanisms
-        'weight': 0.001,              # tune
+        'synMech': ['AMPA', 'NMDA'], 
+        'weight': 0.005,  # uS
         'delay': 'dist_3D/propVelocity + 1.0',
         'sec': 'spiny',
-        'probability': '0.2*exp(-dist_2D/100)'  #
+        'probability': '0.2*exp(-dist_2D/100)'
     }
+
 
 
 
