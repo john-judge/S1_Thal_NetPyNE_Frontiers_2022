@@ -168,7 +168,7 @@ if cfg.enable_neighbor_barrel_model:
         'weight': 0.005,  # uS
         'delay': 'dist_3D/propVelocity + 1.0',
         'sec': 'spiny',
-        'probability': '0.2*exp(-dist_2D/100)'
+        'probability': 1.0 #'0.2*exp(-dist_2D/100)'
     }
 
 
