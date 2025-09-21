@@ -148,28 +148,42 @@ if cfg.enable_neighbor_barrel_model:
     zstart_norm = z_start_um / float(cfg.sizeZ)
     zend_norm   = z_end_um   / float(cfg.sizeZ)
     # Virtual axons as NetStim pop
+    # Virtual axon placeholders (VecStim "cells")
     netParams.popParams['NeighborAxons'] = {
         'cellType': 'VirtualAxon',
-        'cellModel': 'NetStim',
+        'cellModel': 'VecStim',
         'numCells': 100,
         'ynormRange': layer['4'],
         'znormRange': [zstart_norm, zend_norm],
-        'start': 50,
-        'interval': 1e9,   # effectively single spike
-        'number': 1,
-        'noise': 0,
     }
 
-    # Connection rule with AMPA and NMDA
+    # NetStim source to provide spikes
+    netParams.stimSourceParams['NeighborVolley'] = {
+        'type': 'NetStim',
+        'start': 50,
+        'interval': 1e9,
+        'number': 1,
+        'noise': 0
+    }
+
+    # Connect NetStim → VecStim placeholders (so they get events)
+    netParams.stimTargetParams['NeighborVolley->NeighborAxons'] = {
+        'source': 'NeighborVolley',
+        'conds': {'pop': 'NeighborAxons'},
+        'sec': 'soma', 'loc': 0.5
+    }
+
+    # Finally, connect VecStim cells to postsynaptic L4 PCs
     netParams.connParams['NeighborAxons->L4_PC_cAD_barrel0'] = {
         'preConds': {'pop': 'NeighborAxons'},
         'postConds': {'pop': 'L4_PC_cAD_barrel0'},
-        'synMech': ['AMPA', 'NMDA'], 
-        'weight': 0.005,  # uS
+        'synMech': ['AMPA','NMDA'],
+        'weight': [0.005, 0.0015],   # tune
         'delay': 'dist_3D/propVelocity + 1.0',
         'sec': 'spiny',
-        'probability': 1.0 #'0.2*exp(-dist_2D/100)'
+        'probability': 1.0
     }
+
 
 
 
