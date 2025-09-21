@@ -161,9 +161,9 @@ if cfg.enable_neighbor_barrel_model:
     }
 
     # Connection rule with AMPA and NMDA
-    netParams.connParams['NeighborAxons->L4_PC_barrel0'] = {
+    netParams.connParams['NeighborAxons->L4_PC_cAD_barrel0'] = {
         'preConds': {'pop': 'NeighborAxons'},
-        'postConds': {'pop': 'L4_PC_barrel0'},
+        'postConds': {'pop': 'L4_PC_cAD_barrel0'},
         'synMech': ['AMPA', 'NMDA'], 
         'weight': 0.005,  # uS
         'delay': 'dist_3D/propVelocity + 1.0',
