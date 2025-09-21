@@ -161,7 +161,7 @@ if cfg.enable_neighbor_barrel_model:
     # Attach to postsynaptic L4 cells with synMechs
     netParams.stimTargetParams['NeighborVolley->L4PCs'] = {
         'source': 'NeighborVolley',
-        'conds': {'cellType': 'L4_PC_cAD'},
+        'conds': {'cellType': 'L4_PC_cAD_barrel0'},
         'sec': 'soma',
         'loc': 0.5,
         'synMech': ['AMPA','NMDA'],
