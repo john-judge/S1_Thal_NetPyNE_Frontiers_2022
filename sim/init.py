@@ -63,6 +63,25 @@ print("All populations in sim.net.pops:")
 for name in sim.net.pops.keys():
     print("  ", name)
 
+# verify pop exists and where its gids live
+print('NeighborAxons in sim.net.pops?', 'NeighborAxons' in sim.net.pops)
+if 'NeighborAxons' in sim.net.pops:
+    pop = sim.net.pops['NeighborAxons']
+    print('num NeighborAxons gids:', len(pop.cellGids))
+    print('example neighbor gids (first 10):', pop.cellGids[:10])
+    # count local gids on this process
+    local = [gid for gid in pop.cellGids if sim.net.gid2lid.get(gid) is not None]
+    print('local gids on this rank:', len(local))
+
+# count connections from NeighborAxons in sim.net.conns (NetPyNE stores connection list)
+conns_from_neighbor = [c for c in getattr(sim.net, 'conns', []) if c.get('prePop') == 'NeighborAxons']
+print('Total NeighborAxons -> any conn entries:', len(conns_from_neighbor))
+# sample a few
+print('sample conns (first 10):', conns_from_neighbor[:10])
+# count per post-pop
+from collections import Counter
+print('posts count:', Counter([c.get('postPop') for c in conns_from_neighbor]))
+
 
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
