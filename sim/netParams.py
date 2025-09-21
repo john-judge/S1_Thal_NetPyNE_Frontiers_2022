@@ -176,11 +176,11 @@ if cfg.enable_neighbor_barrel_model:
     # Finally, connect VecStim cells to postsynaptic L4 PCs
     netParams.connParams['NeighborAxons->L4_PC_cAD_barrel0'] = {
         'preConds': {'pop': 'NeighborAxons'},
-        'postConds': {'pop': 'L4_PC_cAD_barrel0'},
+        'postConds': {'cellType': 'L4_PC_cAD'},
         'synMech': ['AMPA','NMDA'],
         'weight': [0.005, 0.0015],   # tune
         'delay': 'dist_3D/propVelocity + 1.0',
-        'sec': 'spiny',
+        'sec': 'soma',
         'probability': 1.0
     }
 
