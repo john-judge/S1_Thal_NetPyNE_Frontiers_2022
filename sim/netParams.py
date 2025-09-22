@@ -162,10 +162,10 @@ if cfg.enable_neighbor_barrel_model:
     netParams.stimTargetParams['NeighborVolley->L4PCs'] = {
         'source': 'NeighborVolley',
         'conds': {'cellType': 'L4_PC_cAD_barrel0'},
-        'sec': 'soma',
+        'sec': 'all',
         'loc': 0.5,
         'synMech': ['AMPA','NMDA'],
-        'weight': [0.005, 0.0015],
+        'weight': [0.5, 0.05],
         'delay': 1.0
     }
 
