@@ -165,7 +165,7 @@ if cfg.enable_neighbor_barrel_model:
         'sec': 'all',
         'loc': 0.5,
         'synMech': ['AMPA','NMDA'],
-        'weight': [0.5, 0.05],
+        'weight': [50, 5],
         'delay': 1.0
     }
 
