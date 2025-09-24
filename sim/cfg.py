@@ -40,7 +40,7 @@ cfg.coreneuron = False
 # If True, the model becomes a single-barrel model,
 # xstim is disabled, and replaced with a population of 
 # virtual presynaptic fibers (NetStim) that synapse onto L4
-cfg.enable_neighbor_barrel_model = True
+cfg.enable_neighbor_barrel_model = False
 
 #------------------------------------------------------------------------------
 # Experiments
@@ -50,6 +50,7 @@ cfg.enable_neighbor_barrel_model = True
 #run 8: baseline stim
 #run 11: NBQX + no stim
 cfg.experiment_NBQX_global = True
+cfg.partial_blockade_fraction = 0.05  # fraction of AMPA synaptic weight to keep (0=full blockade, 1=no blockade)
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
 cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
 
@@ -73,7 +74,7 @@ cfg.printPopAvgRates = True
 cfg.checkErrors = False
 cfg.num_barrels = 2 # number of barrels in S1
 cfg.septa_width = 70  # um
-cfg.barrel_width = 150  # um
+cfg.barrel_width = 120  # um
 extra_spaceZ = 20  # um
 
 if cfg.enable_neighbor_barrel_model:
@@ -328,8 +329,8 @@ cfg.EIGain = 1.0  # run 8.1: 0.7, run 12.2: 1
 cfg.IIGain = 1.0
 cfg.IEGain = 1.0  # run 8.1: 0.7, run 12.2: 1
 if cfg.experiment_NBQX_global:
-    cfg.synWeightFractionEE = [0.0, 1.0] # E -> E AMPA to NMDA ratio
-    cfg.synWeightFractionEI = [0.0, 1.0] # E -> I AMPA to NMDA ratio
+    cfg.synWeightFractionEE = [cfg.partial_blockade_fraction, 1.0] # E -> E AMPA to NMDA ratio
+    cfg.synWeightFractionEI = [cfg.partial_blockade_fraction, 1.0] # E -> I AMPA to NMDA ratio
     #cfg.EEGain = 0.05
     #cfg.EIGain = 0.05
 
