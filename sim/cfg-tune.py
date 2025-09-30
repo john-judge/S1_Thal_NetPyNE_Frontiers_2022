@@ -8,11 +8,10 @@ Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
 """
 
 from netpyne import specs
-import pickle
+import random
 import os
 import numpy as np
-
-from recordTraceBatchSettings import record_trace_setting
+from tune_objective import myObjective
 
 
 cfg = specs.SimConfig()  
@@ -259,19 +258,28 @@ elif cfg.cellsrec == 3:  # record all cells of target ME types
 print('Recording cells:', cfg.recordCells)
 #------------------------------------------------------------------------------                    
 
+# random seed for selecting cells to record
+random.seed(4322)
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
-if record_trace_setting['compartment'] == 'soma' and ((record_trace_setting['cell_num_start'] is None) or (record_trace_setting['cell_num_end'] is None)):
-    cfg.recordTraces['V' + record_trace_setting['compartment']] = {'sec': record_trace_setting['compartment'],'loc':0.5,
-                                                                   'var':'v'
-                                                                    }
-else:
-    for i in range(record_trace_setting['cell_num_start'], record_trace_setting['cell_num_end']):
-        cfg.recordTraces['V' + record_trace_setting['compartment'] + '_'+str(i)] = {'sec':record_trace_setting['compartment'] + '_'+str(i),'loc':0.5,
-                                                                                    'var':'v'
-                                                                                                    }
-        #cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
-        #cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
+
+# record 1% of all compartments + all soma
+percent_to_record = 0.01
+cfg.recordTraces['Vsoma'] = {'sec': 'soma','loc':0.5,
+                                'var':'v'
+                                }
+
+for i in range(10):
+    if random.random() <= percent_to_record:
+        cfg.recordTraces['Vaxon_'+str(i)] = {'sec':'axon_'+str(i),'loc':0.5,'var':'v'}
+
+for i in range(0, 180):
+    if random.random() <= percent_to_record:
+        cfg.recordTraces['Vapic_'+str(i)] = {'sec':'apic_'+str(i),'loc':0.5,'var':'v'}
+
+for i in range(0, 220):
+    if random.random() <= percent_to_record:
+        cfg.recordTraces['Vdend_'+str(i)] = {'sec':'dend_'+str(i),'loc':0.5,'var':'v'}
 
 cfg.recordStim = False			
 cfg.recordTime = True  		

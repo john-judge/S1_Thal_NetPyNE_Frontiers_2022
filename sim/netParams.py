@@ -80,7 +80,7 @@ ymax={'ss_RTN_o': 1000+1766, 'ss_RTN_m': 1000+1844, 'ss_RTN_i': 1000+2000, 'VPL_
 #------------------------------------------------------------------------------
 netParams.defaultThreshold = -10.0 # spike threshold, 10 mV is NetCon default, lower it for all cells
 netParams.defaultDelay = 0.1 # default conn delay (ms)
-netParams.propVelocity = 300.0 #  300 μm/ms (Stuart et al., 1997)
+netParams.propVelocity = cfg.propVelocity #  300 μm/ms (Stuart et al., 1997)
 netParams.scaleConnWeightNetStims = 0.001  # weight conversion factor (from nS to uS)
 
 #------------------------------------------------------------------------------
