@@ -1,0 +1,31 @@
+# HTC Submit File
+
+# Provide HTCondor with the name of the Docker container
+#container_image = docker://jjudge3/neuron-matlab:May2024
+#universe = container
+
+executable = myExecutableParallel.sh
+
+# require staging and transfer input files
+requirements = (Target.HasCHTCStaging == True)
+transfer_input_files = file:///staging/jjudge3/NMC_model.tar.gz
+# The first line specifies the path and name of the output file
+# relative to the main directory of the working machine. 
+# The second line defines where that file should go, 
+# and can be used to rename the file as well.
+#transfer_output_files = Test_sim_Svoboda-judge_data.tar.gz
+#transfer_output_remaps = "Test_sim_Svoboda-judge_data.tar.gz = file:///staging/jjudge3/Test_sim_Svoboda-judge_data.tar.gz"
+
+# Specify the name of the log, standard error, and standard output (or "screen output") files. Wherever you see $(Cluster), HTCondor will insert the 
+#  queue number assigned to this set of jobs at the time of submission.
+log = $(Cluster)_$(Process).log
+error = $(Cluster)_$(Process).err
+output = $(Cluster)_$(Process).out
+   
+# This line *would* be used if there were any other files
+# needed for the executable to use.
+request_cpus = 8
+request_memory = 10GB
+request_disk = 20GB
+
+queue
