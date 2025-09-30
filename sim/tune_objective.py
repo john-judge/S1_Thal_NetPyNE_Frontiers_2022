@@ -1,46 +1,91 @@
 import numpy as np
 import gc
+from copy import deepcopy
+from measure_properties import TraceProperties
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
+
 exp_data = {
-    'nbqx_halfwidth': 4.3623,
-    'nbqx_latency': 3.5624,
-    'nbqx_amplitude': 0.0672,
-    'acsf_amplitude': 0.0547,
-    'nbqx_acsf_ratio': 1.2354
+    'nbqx_halfwidth_mean': 4.3623,
+    'nbqx_latency_mean': 3.5624,
+    'nbqx_amplitude_mean': 0.0672,
+    'acsf_amplitude_mean': 0.0547,
+    'nbqx_acsf_ratio_mean': 1.2354,
+    'nbqx_halfwidth_std': 0.7185,
+    'nbqx_latency_std': 0.3275,
+    'nbqx_amplitude_std': 0.0128,
+    'acsf_amplitude_std': 0.0102,
+    'nbqx_acsf_ratio_std': 0.1335
+}
+
+mse_weights = {
+    'halfwidth': 1.0,
+    'latency': 1.0,
+    'ratio': 1.0,
 }
 
 def extract_traces(simData):
     # return a dict populated by traces[cell_id][compartment] = trace
     traces = {}
+    num_prints = 5
     for k in simData:
         for compart in ['soma', 'dend', 'apic', 'axon']:
             if compart in k:
-                traces[k] = {}
                 for cell_id in simData[k]:
+                    if cell_id not in traces:
+                        traces[cell_id] = {}
                     traces[cell_id][k] = np.array(simData[k][cell_id])
-                    print(f"Extracted trace for cell {cell_id} compartment {compart} with shape {traces[k][cell_id].shape}")
-    
-    return traces
+                    if num_prints > 0:
+                        num_prints -= 1
+                        print(f"Extracted trace for cell {cell_id} compartment {compart} with shape {traces[cell_id][k].shape}")
 
-def extract_features(trace, tvec):
+    # Average over each cell and call it a pixel
+    # this at least roughly preserves the soma:neurite ratio
+    avg_traces = {}
+    for cell_id in traces:
+        avg_traces[cell_id] = np.average(np.array([
+            traces[cell_id][k] for k in traces[cell_id]
+        ]), axis=0)
+
+    # gc cleanup traces to save memory
+    del traces
+    gc.collect()
+
+    return avg_traces
+
+def extract_features(traces, tvec):
     """Return amplitude, latency, half-width."""
-    baseline = np.mean(trace[:int(0.05*len(trace))])
-    peak_val = np.min(trace)  # assuming downward deflection
-    peak_idx = np.argmin(trace)
-    amp = baseline - peak_val
-    latency = tvec[peak_idx]
-    
-    half_amp = baseline - amp/2
-    # indices where trace crosses half amplitude
-    crossings = np.where(trace < half_amp)[0]
-    if len(crossings) >= 2:
-        hw = (crossings[-1] - crossings[0]) * (tvec[1]-tvec[0])
-    else:
-        hw = np.nan
-    return amp, latency, hw
+    int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
+    features = []
+    for tr in traces:
+        tp = TraceProperties(tr, start=490, width=400, int_pts=int_pts)
+        tp.measure_properties()
+        features.append([tp.get_max_amp(), tp.get_half_amp_latency(), tp.get_half_width()])
+    return np.array(features)
 
-def myObjective(simData, cfg, netParams):
+def run_acsf_comparison(cfg_base, netParams):
+    cfg_acsf = deepcopy(cfg_base)
+    cfg_acsf.experiment_NBQX_global = False  # ACSF run
+
+    from netpyne import sim
+    sim.createSimulateAnalyze(netParams, cfg_acsf)
+    trace_acsf = extract_traces(sim.simData)
+    tvec = sim.simData['t']
+    return extract_features(trace_acsf, tvec)
+
+def run_nbqx_comparison(cfg_base, netParams):
+    cfg_nbqx = deepcopy(cfg_base)
+    cfg_nbqx.experiment_NBQX_global = True  # NBQX run
+
+    from netpyne import sim
+    sim.createSimulateAnalyze(netParams, cfg_nbqx)
+    trace_nbqx = extract_traces(sim.simData)
+    tvec = sim.simData['t']
+    return extract_features(trace_nbqx, tvec)
+
+def myObjective(params, cfg_base, netParams):
+    # params[0] -> propVelocity
+    # params[1] -> partial_blockade_fraction
     """
     Custom objective for NetPyNE Batch optimization.
     Called automatically after each simulation.
@@ -49,52 +94,38 @@ def myObjective(simData, cfg, netParams):
     cfg: simulation configuration object
     netParams: network parameters
     """
+    cfg = deepcopy(cfg_base)
+    cfg.propVelocity = params[0]
+    cfg.partial_blockade_fraction = params[1]
 
-    traces = extract_traces(simData)
+    nbqx_features = run_nbqx_comparison(cfg, netParams)
 
-    # Average over each cell and call it a pixel
-    # this at least roughly preserves the soma:neurite ratio
-    avg_traces = {}
-    for cell_id in traces:
-        traces = np.average(np.array([
-            traces[cell_id][k] for k in traces[cell_id]
-        ]), axis=0)
-        avg_traces[cell_id] = traces
+    # Compare ACSF vs NBQX
+    acsf_features = run_acsf_comparison(cfg, netParams)
 
-    # gc cleanup traces to save memory
-    del traces
-    gc.collect()
-    
-    tvec = simData['t']  # ms
-    features = [extract_features(tr, tvec) for tr in avg_traces.values()]
+    nbqx_features[:, 0] = nbqx_features[:, 0] / acsf_features[:, 0]  # first col is ratios
 
-    # Average features across pixels
-    amps, lats, hws = zip(*features)
-    amp_mean = np.nanmean(amps)
-    lat_mean = np.nanmean(lats)
-    hw_mean  = np.nanmean(hws)
+    # now we have 3 features: ratio, latency, half-width stored in 3 columns
+    # of nbqx_features
+    # let's generate a Gaussian distribution of experimental values
+    # with the same number of samples as we have simulated cells
+    # Then we compute the mean squared error between simulated and experimental
+    num_cells = nbqx_features.shape[0]
+    # random seed 
+    np.random.seed(4322)
+    exp_ratio = np.random.normal(loc=exp_data['nbqx_acsf_ratio_mean'], scale=exp_data['nbqx_acsf_ratio_std'], size=num_cells)
+    exp_latency = np.random.normal(loc=exp_data['nbqx_latency_mean'], scale=exp_data['nbqx_latency_std'], size=num_cells)
+    exp_hw = np.random.normal(loc=exp_data['nbqx_halfwidth_mean'], scale=exp_data['nbqx_halfwidth_std'], size=num_cells)
 
-    # --------------------------
-    # 3. Compare ACSF vs NBQX
-    # --------------------------
-    # This depends on whether we’re in ACSF or NBQX run
-    if cfg.experiment_NBQX_global:  # ACSF run
-        # store NBQX results
-        result = {'amp': amp_mean, 'lat': lat_mean, 'hw': hw_mean}
-        np.save('nbqx_results.npy', result)
-        return None
-    else:  # NBQX run
-        # load NBQX results (assumes NBQX run already done)
-        nbqx = np.load('nbqx_results.npy', allow_pickle=True).item()
-        acsf = {'amp': amp_mean, 'lat': lat_mean, 'hw': hw_mean}
+    sim_ratio = nbqx_features[:, 0]
+    sim_latency = nbqx_features[:, 1]
+    sim_hw = nbqx_features[:, 2]
 
-        sim_ratio   = nbqx['amp'] / acsf['amp'] if acsf['amp']>0 else np.nan
-        sim_latency = nbqx['lat']
-        sim_hw      = nbqx['hw']
+    # return mean squared error cost
+    err = mse_weights['ratio'] * (sim_ratio-exp_ratio)**2 + \
+          mse_weights['latency'] * (sim_latency-exp_latency)**2 + \
+          mse_weights['halfwidth'] * (sim_hw-exp_hw)**2
+    err = np.sum(err)
+    print(f"Objective error: {err} for params: propVelocity={params[0]}, partial_blockade_fraction={params[1]}")
 
-        # squared error cost
-        err = (sim_ratio-exp_data['nbqx_acsf_ratio'])**2 + \
-              (sim_latency-exp_data['nbqx_latency'])**2 + \
-              (sim_hw-exp_data['nbqx_halfwidth'])**2
-
-        return err
+    return err
