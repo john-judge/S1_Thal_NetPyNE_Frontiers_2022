@@ -1,9 +1,9 @@
 from netpyne.batch import Batch
 import numpy as np
+from netpyne import specs
 
 
 def tune_optuna():
-    from netpyne import specs
     params = specs.ODict()
     params[('propVelocity')] = [200.0, 400.0]  # range (min, max)
     params[('partial_blockade_fraction')] = [0.0, 1.0]

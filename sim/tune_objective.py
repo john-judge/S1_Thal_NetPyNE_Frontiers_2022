@@ -4,7 +4,7 @@ from copy import deepcopy
 from measure_properties import TraceProperties
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
-
+start_time = 500
 exp_data = {
     'nbqx_halfwidth_mean': 4.3623,
     'nbqx_latency_mean': 3.5624,
@@ -58,7 +58,17 @@ def extract_features(traces, tvec):
     int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
     features = []
     for tr in traces:
-        tp = TraceProperties(tr, start=490, width=400, int_pts=int_pts)
+        # flatten the trace from start_time to end
+        # i.e. draw a line from the value at start_time to the value at end_time
+        # and subtract that line from the trace
+        x_ = np.array([start_time, tr.shape[0]-1])
+        y = np.array([tr[start_time], tr[-1]])
+        m, b = np.polyfit(x_, y, 1)
+        trend = np.polyval([m, b], np.arange(tr.shape[0]))
+        tr = tr - trend
+        tr = -tr[start_time:]  # only analyze from start_time onward, and invert
+        tr -= np.min(tr)  # baseline to 0
+        tp = TraceProperties(tr, start=0, width=400, int_pts=int_pts)
         tp.measure_properties()
         features.append([tp.get_max_amp(), tp.get_half_amp_latency(), tp.get_half_width()])
     return np.array(features)
