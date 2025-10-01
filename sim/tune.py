@@ -27,10 +27,10 @@ if __name__ == '__main__':
         'fitnessFunc': 'myObjective',
         'fitnessFuncArgs': {                # The custom arguments for the fitness function
         },
-        'maxiters': 1000,
+        'maxiters': 10000,
         'maxtime': 10000,
-        'maxiter_wait': 50,
-        'time_sleep': 5,
+        'maxiter_wait': 500,
+        'time_sleep': 25,
 
     }
 
