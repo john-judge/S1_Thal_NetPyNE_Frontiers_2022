@@ -29,7 +29,7 @@ if __name__ == '__main__':
         'fitnessFunc': myObjective,
         'fitnessFuncArgs': {    
         },
-        'maxiters': 10000,
+        'maxiters': 30,
         'maxtime': 10000,
         'maxiter_wait': 500,
         'time_sleep': 25,

@@ -99,6 +99,15 @@ def run_nbqx_comparison(cfg_base, netParams):
     return extract_features(trace_nbqx, tvec)
 
 def myObjective(params):
+    try:
+        return myObjectiveInner(params)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()   # will print full traceback to your terminal
+        raise
+
+
+def myObjectiveInner(params):
     # params[0] -> propVelocity
     # params[1] -> partial_blockade_fraction
     """
