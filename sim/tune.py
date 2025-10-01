@@ -1,5 +1,5 @@
-from netpyne.batch import Batch
 import numpy as np
+from netpyne.batch import Batch
 from netpyne import specs
 
 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     b.optimCfg = {
         'max_evals': 40,
         'num_workers': 16,
-        'objective': 'myObjective'  # function defined in your cfg.py
+        'fitnessFunc': 'myObjective'  # function defined in your cfg.py
     }
 
     b.run()
