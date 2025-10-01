@@ -23,8 +23,7 @@ if __name__ == '__main__':
             'skip': True}
 
     # Load config and netParams from the files you already have
-    cfg_base = sim.loadSimCfg('cfg-tune.py')
-    netParams = sim.loadNetParams('netParams.py')
+    cfg_base, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
 
     # Optuna-specific configs
     b.optimCfg = {
