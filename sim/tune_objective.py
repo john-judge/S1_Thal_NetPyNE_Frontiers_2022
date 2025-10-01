@@ -2,6 +2,7 @@ import numpy as np
 import gc
 from copy import deepcopy
 from measure_properties import TraceProperties
+from netpyne import sim 
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
 start_time = 500
@@ -97,7 +98,7 @@ def run_nbqx_comparison(cfg_base, netParams):
     tvec = sim.simData['t']
     return extract_features(trace_nbqx, tvec)
 
-def myObjective(params, cfg_base, netParams):
+def myObjective(params):
     # params[0] -> propVelocity
     # params[1] -> partial_blockade_fraction
     """
@@ -109,6 +110,8 @@ def myObjective(params, cfg_base, netParams):
     netParams: network parameters
     """
     print("first arg to myObjective:", params)
+    cfg_base, netParams = cfg_base, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
+
     cfg = deepcopy(cfg_base)
     cfg.propVelocity = params[0]
     cfg.partial_blockade_fraction = params[1]
