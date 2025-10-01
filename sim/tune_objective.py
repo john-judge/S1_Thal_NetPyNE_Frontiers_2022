@@ -5,6 +5,10 @@ from measure_properties import TraceProperties
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
 start_time = 500
+
+# --- cache dict, keyed by propVelocity ---
+_acsf_cache = {}
+
 exp_data = {
     'nbqx_halfwidth_mean': 4.3623,
     'nbqx_latency_mean': 3.5624,
@@ -104,11 +108,20 @@ def myObjective(params, cfg_base, netParams):
     cfg: simulation configuration object
     netParams: network parameters
     """
+    print("first arg to myObjective:", params)
     cfg = deepcopy(cfg_base)
     cfg.propVelocity = params[0]
     cfg.partial_blockade_fraction = params[1]
 
     nbqx_features = run_nbqx_comparison(cfg, netParams)
+
+    # --- fetch ACSF from cache or simulate once ---
+    if params[0] not in _acsf_cache:
+        print(f"Running ACSF baseline for propVelocity={params[0]}")
+        acsf_features = run_acsf_comparison(cfg, netParams)
+        _acsf_cache[params[0]] = acsf_features
+    else:
+        acsf_features = _acsf_cache[params[0]]
 
     # Compare ACSF vs NBQX
     acsf_features = run_acsf_comparison(cfg, netParams)
