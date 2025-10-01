@@ -24,7 +24,10 @@ if __name__ == '__main__':
     b.optimCfg = {
         'max_evals': 40,
         'num_workers': 16,
-        'fitnessFunc': 'myObjective'  # function defined in your cfg.py
+        'fitnessFunc': 'myObjective',
+        'fitnessFuncArgs': {                # The custom arguments for the fitness function
+        },
+
     }
 
     b.run()
