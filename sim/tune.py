@@ -2,6 +2,7 @@ import numpy as np
 from netpyne.batch import Batch
 from netpyne import specs
 from tune_objective import myObjective
+from netpyne import sim
 
 
 def tune_optuna():
@@ -21,12 +22,18 @@ if __name__ == '__main__':
             'mpiCommand': 'mpiexec -n 8 nrniv -python -mpi init.py', 
             'skip': True}
 
+    # Load config and netParams from the files you already have
+    cfg_base, _ = sim.readCfg('cfg-tune.py')
+    netParams = sim.readNetParams('netParams.py')
+
     # Optuna-specific configs
     b.optimCfg = {
         'max_evals': 40,
         'num_workers': 16,
         'fitnessFunc': myObjective,
-        'fitnessFuncArgs': {                # The custom arguments for the fitness function
+        'fitnessFuncArgs': {    
+            'cfg_base': cfg_base,
+            'netParams': netParams  
         },
         'maxiters': 10000,
         'maxtime': 10000,
