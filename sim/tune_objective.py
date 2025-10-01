@@ -122,8 +122,8 @@ def myObjectiveInner(params):
     cfg_base, netParams = cfg_base, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
 
     cfg = deepcopy(cfg_base)
-    cfg.propVelocity = params[0]
-    cfg.partial_blockade_fraction = params[1]
+    cfg.propVelocity = params['propVelocity']
+    cfg.partial_blockade_fraction = params['partial_blockade_fraction']
 
     nbqx_features = run_nbqx_comparison(cfg, netParams)
 
