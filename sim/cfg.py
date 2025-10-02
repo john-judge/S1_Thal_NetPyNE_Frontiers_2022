@@ -52,7 +52,7 @@ cfg.enable_neighbor_barrel_model = False
 cfg.experiment_NBQX_global = True
 cfg.partial_blockade_fraction = 0.01  # fraction of AMPA synaptic weight to keep (0=full blockade, 1=no blockade)
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
-cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
+cfg.export_xstim_targets = True  # used in init.py to export xstim targets based on structure
 
 #------------------------------------------------------------------------------
 # Run parameters
@@ -88,7 +88,7 @@ if cfg.enable_neighbor_barrel_model:
 #------------------------------------------------------------------------------
 
  # Number of cells at full scale = 31346 
-cfg.scale = 0.25 # reduce size (per barrel)
+cfg.scale = 0.05 # reduce size (per barrel)
 cfg.sizeY = 2082.0
 cfg.sizeX = 310.0 # r = 210 um and hexagonal side length = 230.9 um
 cfg.sizeZ = cfg.barrel_width * cfg.num_barrels + cfg.septa_width * (cfg.num_barrels - 1) + extra_spaceZ # n barrels + (n-1) septa
