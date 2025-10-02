@@ -165,7 +165,7 @@ cfg.S1pops = popParam
 cfg.S1cells = cellParam
 
 
-# diagnose unequal barrel density
+'''# diagnose unequal barrel density
 from collections import defaultdict
 
 # Nested dictionary: barrel -> population -> n
@@ -182,7 +182,7 @@ print("diagnose unequal barrel density:")
 for barrel, pops in breakdown.items():
     print(f"\nBarrel {barrel}:")
     for pop, n in pops.items():
-        print(f"  {pop}: n={n}, m={m}")
+        print(f"  {pop}: n={n}, m={m}")'''
 
 #------------------------------------------------------------------------------  
 # Thalamic Cells
