@@ -1,70 +1,56 @@
+from copy import deepcopy
 """
 init.py
 
-Starting script to run NetPyNE-based S1-thalamus model.
-
-Usage:
-    python init.py # Run simulation, optionally plot a raster
-
-MPI usage:
-    mpiexec -n 4 nrniv -python -mpi init.py
-
-Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
+Starting script to tune ACSF and NBQX simulations of NetPyNE-based S1 model.
 """
 
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim
-from xstim import export_xstim_targets
+
+def set_syn_blockade(fraction):
+    """
+    Scale AMPA connection weights by `fraction`.
+    fraction = 0.0 -> NBQX (block AMPA)
+    fraction = 1.0 -> ACSF (normal)
+    """
+    modification_params = {
+        'conds': {
+            # target only AMPA synapses
+            'synMech': ['AMPA']
+        },
+        'set': {
+            'weight': lambda w: w * fraction  # scale relative to current weight
+        }
+    }
+    sim.net.modifyConns(modification_params)
+
+
 
 cfg, netParams = sim.readCmdLineArgs()
 sim.initialize(
     simConfig = cfg, 	
     netParams = netParams)  				# create network object and set cfg and net params
 
-#
+fraction_blockade = cfg.partial_blockade_fraction 
 
 sim.net.createPops()               			# instantiate network populations
 sim.net.createCells()              			# instantiate network cells based on defined populations
-
-
-#print("\nChecking connection parameters preConds and postConds...")
-#for rule_name, rule in netParams.connParams.items():
-#    print("Preconds:", rule['preConds'])
-#    print("Postconds:", rule['postConds'])
-
-#raise Exception("Check the console output for any warnings or errors related to synMechs, cellTypes, and connection probabilities.")  # Ensure all connection parameters are correctly defined
-
-sim.net.connectCells()            			# create connections between cells based on params
-
-# Get stim parameters from netParams
-
-
-if cfg.export_xstim_targets:
-    print("Exporting stim targets...")
-    stim_params = netParams.stimSourceParams['XStim1']
-    export_xstim_targets(sim, stim_params['field'], 
-                         stim_params['waveform'],
-                         stim_radius=cfg.xStimRadius,
-                         out_file='../data/rank_xstim_targets.json')
-    raise Exception("Exported xstim targets to ../data/_xstim_targets.json. " \
-                    "Check and upload data then re-run without cfg.export_xstim_targets.")
-# defaults: radius=100, decay='1/r2'
-#attach_xstim_to_segments_mpi_safe(
-#    sim,
-#    field=stim_params['field'],
-#    waveform=stim_params['waveform'],
-#)
-
-
+sim.net.connectCells()  
 sim.net.addStims() 							# add network stimulation
 sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 
-for name,pop in sim.net.pops.items():
-    print(name, "cellType=", pop.tags.get('cellType'))
-
-
+# ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
+acsf_data = deepcopy(sim.allSimData)  # save ACSF data
+
+# now run NBQX trial
+set_syn_blockade(fraction=fraction_blockade)
+sim.setupAndRun()
+nbqx_data = deepcopy(sim.allSimData)  # save NBQX data
+sim.allSimData = {'nbqx': nbqx_data, 'acsf': acsf_data}
+
 sim.saveData()                    			# save params, cell info and sim output to file (pickle,mat,txt,etc)#
 
 #sim.analysis.plotRaster(include=cfg.recordCells, timeRange=[0,cfg.duration], orderBy='gid', orderInverse=True, labels='legend', popRates=True, lw=5, marker='.', markerSize=15, figSize=(18, 12), fontSize=9, dpi=300, saveFig='../data/'+cfg.simLabel[0:9]+'/'+cfg.simLabel + '_Raster_onecellperpop.png', showFig=False)
