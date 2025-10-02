@@ -148,7 +148,7 @@ def export_xstim_targets(sim, field, waveform, decay='1/r', stim_radius=1000,
 
 def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/', 
                                      stim_pattern='rank*_xstim_targets.json',
-                                     stim_delay=75, stim_dur=4, stim_amp_factor=1.0):
+                                     stim_delay=75, stim_dur=4, stim_amp_factor=1.0, scale=0.25):
     """
     Load extracellular stimulation target files (from export_xstim_targets)
     and add IClamp sources + targets into netParams.
@@ -161,6 +161,7 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
     stim_delay : float, ms
     stim_dur : float, ms
     stim_amp_factor : scaling factor to convert I_nA into IClamp.amp (nA)
+    scale: [0, 1.0] scale of simulation. Determines which xstim files to use.
 
     Returns
     -------
@@ -168,6 +169,9 @@ def load_xstim_targets_and_add_stims(netParams, stim_dir='xstim/',
     """
 
     all_targets = []
+
+    if scale != 0.25:
+        stim_dir = 'xstim/scale_' + str(int(scale*100)) + '/'
 
     files = glob.glob(os.path.join(stim_dir, stim_pattern))
     if len(files) == 0:

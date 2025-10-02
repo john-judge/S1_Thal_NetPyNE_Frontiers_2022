@@ -1204,7 +1204,8 @@ if cfg.addExtracellularStim:
     if not cfg.export_xstim_targets:
         load_xstim_targets_and_add_stims(netParams, 
                                         stim_delay=cfg.xStimDel,
-                                        stim_dur=cfg.xStimDur)
+                                        stim_dur=cfg.xStimDur,
+                                        scale=cfg.scale)
 
     # the following causes segfault at simulation runtime:
     #stim_radius = 100
