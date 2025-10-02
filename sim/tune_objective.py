@@ -1,6 +1,5 @@
 import numpy as np
 import gc
-from copy import deepcopy
 from measure_properties import TraceProperties
 from netpyne import sim 
 
@@ -79,21 +78,19 @@ def extract_features(traces, tvec):
     return np.array(features)
 
 def run_acsf_comparison(cfg_base, netParams):
-    cfg_acsf = deepcopy(cfg_base)
-    cfg_acsf.experiment_NBQX_global = False  # ACSF run
+    cfg_base.experiment_NBQX_global = False  # ACSF run
 
     from netpyne import sim
-    sim.createSimulateAnalyze(netParams, cfg_acsf)
+    sim.createSimulateAnalyze(netParams, cfg_base)
     trace_acsf = extract_traces(sim.simData)
     tvec = sim.simData['t']
     return extract_features(trace_acsf, tvec)
 
 def run_nbqx_comparison(cfg_base, netParams):
-    cfg_nbqx = deepcopy(cfg_base)
-    cfg_nbqx.experiment_NBQX_global = True  # NBQX run
+    cfg_base.experiment_NBQX_global = True  # NBQX run
 
     from netpyne import sim
-    sim.createSimulateAnalyze(netParams, cfg_nbqx)
+    sim.createSimulateAnalyze(netParams, cfg_base)
     trace_nbqx = extract_traces(sim.simData)
     tvec = sim.simData['t']
     return extract_features(trace_nbqx, tvec)
@@ -105,7 +102,6 @@ def myObjective(params):
         import traceback
         traceback.print_exc()   # will print full traceback to your terminal
         raise
-
 
 def myObjectiveInner(params):
     # params[0] -> propVelocity
@@ -119,21 +115,21 @@ def myObjectiveInner(params):
     netParams: network parameters
     """
     print("first arg to myObjective:", params)
-    cfg_base, netParams = cfg_base, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
-
-    cfg = deepcopy(cfg_base)
+    cfg, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
     cfg.propVelocity = params['propVelocity']
     cfg.partial_blockade_fraction = params['partial_blockade_fraction']
-
     nbqx_features = run_nbqx_comparison(cfg, netParams)
 
     # --- fetch ACSF from cache or simulate once ---
-    if params[0] not in _acsf_cache:
-        print(f"Running ACSF baseline for propVelocity={params[0]}")
+    if params['propVelocity'] not in _acsf_cache:
+        print(f"Running ACSF baseline for propVelocity={params['propVelocity']}")
+        cfg, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
+        cfg.propVelocity = params['propVelocity']
+        cfg.partial_blockade_fraction = params['partial_blockade_fraction']
         acsf_features = run_acsf_comparison(cfg, netParams)
-        _acsf_cache[params[0]] = acsf_features
+        _acsf_cache[params['propVelocity']] = acsf_features
     else:
-        acsf_features = _acsf_cache[params[0]]
+        acsf_features = _acsf_cache[params['propVelocity']]
 
     # Compare ACSF vs NBQX
     acsf_features = run_acsf_comparison(cfg, netParams)
