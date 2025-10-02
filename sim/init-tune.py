@@ -1,4 +1,5 @@
 from copy import deepcopy
+import os
 """
 init.py
 
@@ -28,17 +29,31 @@ def set_syn_blockade(fraction):
 
 
 cfg, netParams = sim.readCmdLineArgs()
-sim.initialize(
-    simConfig = cfg, 	
-    netParams = netParams)  				# create network object and set cfg and net params
 
-fraction_blockade = cfg.partial_blockade_fraction 
+net_filepath = os.path.join(cfg.saveFolder, "base_net_tuning.pkl")
+if not os.path.isfile(net_filepath):
+    print(("building network from scratch with netParams"))
 
-sim.net.createPops()               			# instantiate network populations
-sim.net.createCells()              			# instantiate network cells based on defined populations
-sim.net.connectCells()  
-sim.net.addStims() 							# add network stimulation
-sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
+    sim.initialize(
+        simConfig = cfg, 	
+        netParams = netParams)  				# create network object and set cfg and net params
+
+    fraction_blockade = cfg.partial_blockade_fraction 
+
+    sim.net.createPops()               			# instantiate network populations
+    sim.net.createCells()              			# instantiate network cells based on defined populations
+    sim.net.connectCells()  
+    sim.net.addStims() 							# add network stimulation
+    sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
+    # Save network for future runs
+    os.makedirs(cfg.simLabel, exist_ok=True)
+    sim.net.save(net_filepath)
+    print(f"Network saved to {net_filepath}")
+
+else:
+    print(f"Loading pre-built network from {net_filepath}...")
+    cfg.loadFromFile = True  # ensures network is loaded instead of rebuilt
+    sim.initialize(cfg=cfg, netParams=netParams) 
 
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
