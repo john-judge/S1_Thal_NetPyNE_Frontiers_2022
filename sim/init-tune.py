@@ -65,8 +65,8 @@ sim.gatherData()                  			# gather spiking data and cell info from ea
 acsf_data = deepcopy(sim.allSimData)  # save ACSF data
 sim.allSimData = {}
 print("Finished ACSF trial and copied data")
+sim.setupRecording()
 
-sim.clearAll()
 print("Cleared sim data and config")
 # now run NBQX trial
 set_syn_blockade(fraction=fraction_blockade)
