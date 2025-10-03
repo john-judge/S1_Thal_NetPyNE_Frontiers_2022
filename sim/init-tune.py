@@ -59,6 +59,10 @@ else:
 for i, cell in enumerate(sim.net.cells):
     print(i, cell.tags.get('cellLabel', ''), list(cell.secs.keys()))
 
+print(cfg.duration)        # should be > 0
+print(cfg.dt)              # recording step
+print(len(sim.net.cells))  # should match expected number of cells
+
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node

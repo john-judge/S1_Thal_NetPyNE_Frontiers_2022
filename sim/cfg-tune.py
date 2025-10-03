@@ -264,7 +264,7 @@ random.seed(4322)
 # record up to axon, dend, and apic 1000
 
 # record 1% of all compartments + all soma
-percent_to_record = 0.01
+percent_to_record = 0.5
 cfg.recordTraces['Vsoma'] = {'sec': 'soma','loc':0.5,
                                 'var':'v'
                                 }
