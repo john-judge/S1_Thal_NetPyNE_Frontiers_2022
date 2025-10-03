@@ -49,12 +49,7 @@ else:
     sim.net.connectCells()  
     sim.net.addStims() 							# add network stimulation
     sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
-    # Save network for future runs
-    os.makedirs(cfg.simLabel, exist_ok=True)
-    cfg.filename = 'base_net_tuning'
-    cfg.savePickle = True 
-    sim.saveData(filename=netFile, include=['net', 'simConfig', 'netParams'])  # save net and cfg only
-    print(f"[Node 0] Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
+
     
 for i, cell in enumerate(sim.net.cells):
     print(i, cell.tags.get('cellLabel', ''), list(cell.secs.keys()))
@@ -96,5 +91,15 @@ for key in sim.allSimData.keys():
 nbqx_data['t'] = sim.allSimData['t']
 sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
 sim.saveData()
+
+if not os.path.exists(netFile):
+    # Save network for future runs
+    os.makedirs(cfg.simLabel, exist_ok=True)
+    cfg.filename = 'base_net_tuning'
+    cfg.savePickle = True 
+    sim.saveData(filename=netFile, include=['net', 'simConfig', 'netParams'])  # save net and cfg only
+    print(f"[Node 0] Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
+
+    
 print('Finished both ACSF and NBQX trials')
 
