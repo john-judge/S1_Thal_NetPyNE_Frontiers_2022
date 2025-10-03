@@ -61,14 +61,15 @@ else:
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
 acsf_data = dict(sim.allSimData) # save ACSF data
+
+
+# now run NBQX trial
+print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
+set_syn_blockade(fraction=fraction_blockade)
 sim.allSimData = {}
 print("Finished ACSF trial and copied data")
 sim.setupRecording()
-
-print("Cleared sim data and config")
-# now run NBQX trial
-set_syn_blockade(fraction=fraction_blockade)
-print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
+print("Check that cfg.recordTraces is still set:", cfg.recordTraces)
 sim.runSim()                     
 sim.gatherData()  
 nbqx_data = dict(sim.allSimData)  # save NBQX data
