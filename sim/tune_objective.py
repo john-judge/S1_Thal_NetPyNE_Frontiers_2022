@@ -77,9 +77,9 @@ def extract_features(traces, tvec):
         features.append([tp.get_max_amp(), tp.get_half_amp_latency(), tp.get_half_width()])
     return np.array(features)
 
-def myObjective(params):
+def myObjective(simData):
     try:
-        return myObjectiveInner(params)
+        return myObjectiveInner(simData)
     except Exception as e:
         import traceback
         traceback.print_exc()   # will print full traceback to your terminal
