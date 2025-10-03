@@ -34,7 +34,8 @@ netFile = os.path.join(cfg.simLabel, 'base_net_tuning.pkl')
 if os.path.exists(netFile):
     print(f"Loading pre-built network from base_net_tuning...")
     cfg.loadFromFile = True  # ensures network is loaded instead of rebuilt
-    sim.initialize(cfg=cfg, netParams=netParams) 
+    sim.pc.gid_clear() # Clear the network from memory
+    sim.loadSim(netFile)
 else:
     print(("building network from scratch with netParams"))
 
@@ -53,7 +54,7 @@ else:
     os.makedirs(cfg.simLabel, exist_ok=True)
     cfg.filename = 'base_net_tuning'
     cfg.savePickle = True 
-    sim.saveSimData(include=['net', 'simConfig'])  # save net and cfg only
+    sim.saveSimData(filename=netFile, include=['net', 'simConfig'])  # save net and cfg only
     print(f"Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
     
 
