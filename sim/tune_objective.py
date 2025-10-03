@@ -47,6 +47,9 @@ def extract_traces(simData):
     # this at least roughly preserves the soma:neurite ratio
     avg_traces = {}
     for cell_id in traces:
+        # avoid dividing by zero if no traces
+        if len(traces[cell_id]) == 0:
+            continue
         avg_traces[cell_id] = np.average(np.array([
             traces[cell_id][k] for k in traces[cell_id]
         ]), axis=0)
