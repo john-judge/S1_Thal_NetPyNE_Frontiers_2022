@@ -19,8 +19,7 @@ if __name__ == '__main__':
     b.saveFolder = '../data/' + b.batchLabel
     b.method = 'optuna'
     b.runCfg = {'type': 'mpi_direct',
-            'script': 'init-tune.py', # single process mode #'mpiCommand': 'mpiexec -n 8 nrniv -python -mpi init-tune.py', 
-            'mpiCommand': 'python',
+            'mpiCommand': 'mpiexec -n 1 nrniv -python -mpi init-tune.py',
             'skip': True}
 
     # Optuna-specific configs
