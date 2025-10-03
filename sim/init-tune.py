@@ -29,7 +29,7 @@ def set_syn_blockade(fraction):
 
 
 cfg, netParams = sim.readCmdLineArgs()
-netFile = os.path.join(cfg.simLabel, 'base_net_tuning.pkl')
+netFile = '../base_net_tuning.pkl'
 if os.path.exists(netFile):
     print(f"Loading pre-built network from base_net_tuning...")
     cfg.loadFromFile = True  # ensures network is loaded instead of rebuilt
@@ -56,6 +56,8 @@ else:
     sim.saveData(filename=netFile, include=['net', 'simConfig', 'netParams'])  # save net and cfg only
     print(f"[Node 0] Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
     
+for gid, cell in sim.net.cells.items():
+    print(gid, list(cell.secs.keys()))
 
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
