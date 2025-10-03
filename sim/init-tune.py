@@ -66,14 +66,14 @@ print(len(sim.net.cells))  # should match expected number of cells
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
-acsf_data = {} #dict(sim.allSimData) # save ACSF data
+acsf_data = {} #dict(sim.allSimData) # save ACSF data, deep copy
 for key in sim.allSimData.keys():
     for k in ['dend', 'soma', 'axon', 'apic']:
         if k in key:
             for cell_id in sim.allSimData[key].keys():
                 if cell_id not in acsf_data:
                     acsf_data[cell_id] = {}
-                acsf_data[cell_id][key] = sim.allSimData[key][cell_id]
+                acsf_data[key][cell_id] = [x for x in sim.allSimData[key][cell_id]]
         acsf_data['t'] = sim.allSimData['t']
 
 # now run NBQX trial
@@ -92,7 +92,7 @@ for key in sim.allSimData.keys():
             for cell_id in sim.allSimData[key].keys():
                 if cell_id not in nbqx_data:
                     nbqx_data[cell_id] = {}
-                nbqx_data[cell_id][key] = sim.allSimData[key][cell_id]
+                nbqx_data[cell_id][key] = [x for x in sim.allSimData[key][cell_id]]
         nbqx_data['t'] = sim.allSimData['t']
 sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
 sim.saveData()
