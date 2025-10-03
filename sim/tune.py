@@ -19,13 +19,14 @@ if __name__ == '__main__':
     b.saveFolder = '../data/' + b.batchLabel
     b.method = 'optuna'
     b.runCfg = {'type': 'mpi_direct',
-            'mpiCommand': 'mpiexec -n 8 nrniv -python -mpi init-tune.py', 
+            'script': 'init-tune.py', # single process mode #'mpiCommand': 'mpiexec -n 8 nrniv -python -mpi init-tune.py', 
+            'mpiCommand': 'python',
             'skip': True}
 
     # Optuna-specific configs
     b.optimCfg = {
         'max_evals': 40,
-        'num_workers': 16,
+        'num_workers': 1,
         'fitnessFunc': myObjective,
         'fitnessFuncArgs': {    
         },
