@@ -56,8 +56,8 @@ else:
     sim.saveData(filename=netFile, include=['net', 'simConfig', 'netParams'])  # save net and cfg only
     print(f"[Node 0] Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
     
-for gid, cell in sim.net.cells.items():
-    print(gid, list(cell.secs.keys()))
+for i, cell in enumerate(sim.net.cells):
+    print(i, cell.tags.get('cellLabel', ''), list(cell.secs.keys()))
 
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
