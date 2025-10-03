@@ -66,8 +66,12 @@ print(len(sim.net.cells))  # should match expected number of cells
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
-acsf_data = dict(sim.allSimData) # save ACSF data
-
+acsf_data = {} #dict(sim.allSimData) # save ACSF data
+for key in sim.allSimData.keys():
+    for k in ['dend', 'soma', 'axon', 'apic']:
+        if k in key:
+            acsf_data[key] = sim.allSimData[key]
+        acsf_data['t'] = sim.allSimData['t']
 
 # now run NBQX trial
 print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
@@ -78,7 +82,12 @@ sim.setupRecording()
 print("Check that cfg.recordTraces is still set:", cfg.recordTraces)
 sim.runSim()                     
 sim.gatherData()  
-nbqx_data = dict(sim.allSimData)  # save NBQX data
+nbqx_data = {}
+for key in sim.allSimData.keys():
+    for k in ['dend', 'soma', 'axon', 'apic']:
+        if k in key:
+            nbqx_data[key] = sim.allSimData[key]
+        nbqx_data['t'] = sim.allSimData['t']
 sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
 sim.saveData()
 print('Finished both ACSF and NBQX trials')
