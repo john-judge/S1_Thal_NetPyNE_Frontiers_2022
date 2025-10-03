@@ -97,6 +97,7 @@ def myObjectiveInner(simData):
     netParams: network parameters
     """
     print("first arg to myObjective:", simData)
+    simData = simData['simData']
     simData_acsf = simData['acsf']
     simData_nbqx = simData['nbqx']
     simData_traces_acsf = extract_traces(simData_acsf)

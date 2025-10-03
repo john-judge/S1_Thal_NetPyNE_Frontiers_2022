@@ -73,6 +73,7 @@ print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
 sim.runSim()                     
 sim.gatherData()  
 nbqx_data = dict(sim.allSimData)  # save NBQX data
-sim.allSimData = {'nbqx': nbqx_data, 'acsf': acsf_data}
+sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
+sim.saveData()
 print('Finished both ACSF and NBQX trials')
 
