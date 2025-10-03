@@ -48,11 +48,13 @@ def extract_traces(simData):
     avg_traces = {}
     for cell_id in traces:
         # avoid dividing by zero if no traces
-        if len(traces[cell_id]) == 0:
+        if len(traces[cell_id].keys()) == 0:
             continue
-        avg_traces[cell_id] = np.average(np.array([
-            traces[cell_id][k] for k in traces[cell_id]
-        ]), axis=0)
+        avg_traces = np.array([traces[cell_id][k] for k in traces[cell_id]])
+        # avoid dividing by zero if no traces
+        if avg_traces.shape[0] == 0:
+            continue
+        avg_traces[cell_id] = np.average(avg_traces, axis=0)
 
     # gc cleanup traces to save memory
     del traces
