@@ -72,9 +72,9 @@ for key in sim.allSimData.keys():
         if k in key:
             for cell_id in sim.allSimData[key].keys():
                 if cell_id not in acsf_data:
-                    acsf_data[cell_id] = {}
+                    acsf_data[key] = {}
                 acsf_data[key][cell_id] = [x for x in sim.allSimData[key][cell_id]]
-        acsf_data['t'] = sim.allSimData['t']
+acsf_data['t'] = sim.allSimData['t']
 
 # now run NBQX trial
 print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
@@ -91,9 +91,9 @@ for key in sim.allSimData.keys():
         if k in key:
             for cell_id in sim.allSimData[key].keys():
                 if cell_id not in nbqx_data:
-                    nbqx_data[cell_id] = {}
-                nbqx_data[cell_id][key] = [x for x in sim.allSimData[key][cell_id]]
-        nbqx_data['t'] = sim.allSimData['t']
+                    nbqx_data[key] = {}
+                nbqx_data[key][cell_id] = [x for x in sim.allSimData[key][cell_id]]
+nbqx_data['t'] = sim.allSimData['t']
 sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
 sim.saveData()
 print('Finished both ACSF and NBQX trials')
