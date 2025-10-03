@@ -64,12 +64,16 @@ sim.runSim()                      			# run parallel Neuron simulation
 sim.gatherData()                  			# gather spiking data and cell info from each node
 acsf_data = deepcopy(sim.allSimData)  # save ACSF data
 sim.allSimData = {}
+print("Finished ACSF trial and copied data")
 
 sim.clearAll()
+print("Cleared sim data and config")
 # now run NBQX trial
 set_syn_blockade(fraction=fraction_blockade)
+print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
 sim.runSim()                     
 sim.gatherData()  
 nbqx_data = deepcopy(sim.allSimData)  # save NBQX data
 sim.allSimData = {'nbqx': nbqx_data, 'acsf': acsf_data}
+print('Finished both ACSF and NBQX trials')
 
