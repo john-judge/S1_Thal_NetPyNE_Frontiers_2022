@@ -53,7 +53,7 @@ else:
     os.makedirs(cfg.simLabel, exist_ok=True)
     cfg.filename = 'base_net_tuning'
     cfg.savePickle = True 
-    sim.saveData()
+    sim.saveSimData(include=['net', 'simConfig'])  # save net and cfg only
     print(f"Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
     
 
