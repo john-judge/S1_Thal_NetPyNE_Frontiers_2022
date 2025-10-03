@@ -51,11 +51,12 @@ else:
     sim.net.addStims() 							# add network stimulation
     sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
     # Save network for future runs
-    os.makedirs(cfg.simLabel, exist_ok=True)
-    cfg.filename = 'base_net_tuning'
-    cfg.savePickle = True 
-    sim.saveSimData(filename=netFile, include=['net', 'simConfig'])  # save net and cfg only
-    print(f"Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
+    if sim.rank == 0:
+        os.makedirs(cfg.simLabel, exist_ok=True)
+        cfg.filename = 'base_net_tuning'
+        cfg.savePickle = True 
+        sim.saveData(filename=netFile, include=['net', 'simConfig', 'netParams'])  # save net and cfg only
+        print(f"[Node 0] Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
     
 
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
