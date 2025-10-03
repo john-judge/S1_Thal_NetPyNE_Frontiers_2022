@@ -70,7 +70,10 @@ acsf_data = {} #dict(sim.allSimData) # save ACSF data
 for key in sim.allSimData.keys():
     for k in ['dend', 'soma', 'axon', 'apic']:
         if k in key:
-            acsf_data[key] = sim.allSimData[key]
+            for cell_id in sim.allSimData[key].keys():
+                if cell_id not in acsf_data:
+                    acsf_data[cell_id] = {}
+                acsf_data[cell_id][key] = sim.allSimData[key][cell_id]
         acsf_data['t'] = sim.allSimData['t']
 
 # now run NBQX trial
@@ -86,7 +89,10 @@ nbqx_data = {}
 for key in sim.allSimData.keys():
     for k in ['dend', 'soma', 'axon', 'apic']:
         if k in key:
-            nbqx_data[key] = sim.allSimData[key]
+            for cell_id in sim.allSimData[key].keys():
+                if cell_id not in nbqx_data:
+                    nbqx_data[cell_id] = {}
+                nbqx_data[cell_id][key] = sim.allSimData[key][cell_id]
         nbqx_data['t'] = sim.allSimData['t']
 sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
 sim.saveData()
