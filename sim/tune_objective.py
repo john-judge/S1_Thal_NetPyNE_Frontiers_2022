@@ -54,7 +54,10 @@ def extract_traces(simData):
         # avoid dividing by zero if no traces
         if avg_traces.shape[0] == 0:
             continue
-        avg_traces[cell_id] = np.average(avg_traces, axis=0)
+        try:
+            avg_traces[cell_id] = np.average(avg_traces, axis=0)
+        except ZeroDivisionError as e:
+            print("ZeroDivisionError for cell_id:", cell_id, "with avg_traces shape:", avg_traces.shape)
 
     # gc cleanup traces to save memory
     del traces
