@@ -61,15 +61,15 @@ print(len(sim.net.cells))  # should match expected number of cells
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
-acsf_data = {} #dict(sim.allSimData) # save ACSF data, deep copy
-for key in sim.allSimData.keys():
+acsf_data = sim.allSimData #dict(sim.allSimData) # save ACSF data, deep copy
+'''for key in sim.allSimData.keys():
     for k in ['dend', 'soma', 'axon', 'apic']:
         if k in key:
             for cell_id in sim.allSimData[key].keys():
                 if cell_id not in acsf_data:
                     acsf_data[key] = {}
                 acsf_data[key][cell_id] = [x for x in sim.allSimData[key][cell_id]]
-acsf_data['t'] = sim.allSimData['t']
+acsf_data['t'] = sim.allSimData['t']'''
 
 # now run NBQX trial
 print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
@@ -80,15 +80,15 @@ sim.setupRecording()
 print("Check that cfg.recordTraces is still set:", cfg.recordTraces)
 sim.runSim()                     
 sim.gatherData()  
-nbqx_data = {}
-for key in sim.allSimData.keys():
+nbqx_data = sim.allSimData
+'''for key in sim.allSimData.keys():
     for k in ['dend', 'soma', 'axon', 'apic']:
         if k in key:
             for cell_id in sim.allSimData[key].keys():
                 if cell_id not in nbqx_data:
                     nbqx_data[key] = {}
                 nbqx_data[key][cell_id] = [x for x in sim.allSimData[key][cell_id]]
-nbqx_data['t'] = sim.allSimData['t']
+nbqx_data['t'] = sim.allSimData['t']'''
 sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
 sim.saveData()
 
@@ -100,6 +100,6 @@ if not os.path.exists(netFile):
     sim.saveData(filename=netFile, include=['net', 'simConfig', 'netParams'])  # save net and cfg only
     print(f"[Node 0] Network saved to 'base_net_tuning.pkl' in {cfg.simLabel}")
 
-    
+
 print('Finished both ACSF and NBQX trials')
 
