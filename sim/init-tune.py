@@ -61,7 +61,7 @@ print(len(sim.net.cells))  # should match expected number of cells
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
-acsf_data = sim.allSimData #dict(sim.allSimData) # save ACSF data, deep copy
+acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep copy
 '''for key in sim.allSimData.keys():
     for k in ['dend', 'soma', 'axon', 'apic']:
         if k in key:
@@ -80,7 +80,7 @@ sim.setupRecording()
 print("Check that cfg.recordTraces is still set:", cfg.recordTraces)
 sim.runSim()                     
 sim.gatherData()  
-nbqx_data = sim.allSimData
+nbqx_data = dict(sim.allSimData)
 '''for key in sim.allSimData.keys():
     for k in ['dend', 'soma', 'axon', 'apic']:
         if k in key:
