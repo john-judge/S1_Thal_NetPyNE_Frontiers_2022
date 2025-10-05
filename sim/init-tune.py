@@ -1,4 +1,5 @@
 import os
+from neuron import h
 """
 init.py
 
@@ -9,6 +10,9 @@ import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim, specs
 import time
 
+
+pc = h.ParallelContext()
+rank = int(pc.id())
 
 def set_syn_blockade(fraction):
     """
@@ -45,7 +49,7 @@ def build_network(acsf=True):
 
 
 # start timer 
-if sim.rank == 0:
+if rank == 0:
     start_time = time.time()
 
 build_network()
@@ -54,7 +58,7 @@ sim.cfg.filename = 'acsf_run'
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
 sim.pc.barrier()   # Wait for all ranks to finish gatherData
-if sim.rank == 0:
+if rank == 0:
     acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep copy
 
 build_network(acsf=False)
@@ -62,7 +66,7 @@ sim.cfg.filename = 'nbqx_run'
 sim.runSim()                     
 sim.gatherData()  
 sim.pc.barrier()   # Wait for all ranks to finish gatherData
-if sim.rank == 0:
+if rank == 0:
     nbqx_data = dict(sim.allSimData)
 
     sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
