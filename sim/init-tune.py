@@ -61,7 +61,6 @@ acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep co
 print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
 sim.cfg.filename = 'nbqx_run'
 set_syn_blockade(fraction=fraction_blockade)
-sim.setupRecording()
 print("Check that cfg.recordTraces is still set:", cfg.recordTraces)
 sim.runSim()                     
 sim.gatherData()  
