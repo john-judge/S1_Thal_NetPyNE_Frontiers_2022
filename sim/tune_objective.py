@@ -50,12 +50,12 @@ def extract_traces(simData):
         # avoid dividing by zero if no traces
         if len(traces[cell_id].keys()) == 0:
             continue
-        avg_traces = np.array([traces[cell_id][k] for k in traces[cell_id]])
+        avg_traces_ = np.array([traces[cell_id][k] for k in traces[cell_id]])
         # avoid dividing by zero if no traces
-        if avg_traces.shape[0] == 0:
+        if avg_traces_.shape[0] == 0:
             continue
         try:
-            avg_traces[cell_id] = np.average(avg_traces, axis=0)
+            avg_traces[cell_id] = np.average(avg_traces_, axis=0)
         except ZeroDivisionError as e:
             print("ZeroDivisionError for cell_id:", cell_id, "with avg_traces shape:", avg_traces.shape)
 
