@@ -37,8 +37,6 @@ def build_network(acsf=True):
         simConfig = cfg, 	
         netParams = netParams)  				# create network object and set cfg and net params
 
-    fraction_blockade = cfg.partial_blockade_fraction 
-
     sim.net.createPops()               			# instantiate network populations
     sim.net.createCells()              			# instantiate network cells based on defined populations
     sim.net.connectCells()  
@@ -47,24 +45,29 @@ def build_network(acsf=True):
 
 
 # start timer 
-start_time = time.time()
+if sim.rank == 0:
+    start_time = time.time()
 
 build_network()
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.cfg.filename = 'acsf_run'
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
-acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep copy
+sim.pc.barrier()   # Wait for all ranks to finish gatherData
+if sim.rank == 0:
+    acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep copy
 
 build_network(acsf=False)
 sim.cfg.filename = 'nbqx_run'
 sim.runSim()                     
 sim.gatherData()  
-nbqx_data = dict(sim.allSimData)
+sim.pc.barrier()   # Wait for all ranks to finish gatherData
+if sim.rank == 0:
+    nbqx_data = dict(sim.allSimData)
 
-sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
-sim.saveData()
+    sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
+    sim.saveData()
 
-end_time = time.time()
-print(f"Total iteration simulation time (both ACSF and NBQX): {(end_time - start_time)/60} minutes")
+    end_time = time.time()
+    print(f"Total iteration simulation time (both ACSF and NBQX): {(end_time - start_time)/60} minutes")
 
