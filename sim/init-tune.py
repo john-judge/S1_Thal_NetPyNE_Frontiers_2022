@@ -50,6 +50,8 @@ else:
     sim.net.addStims() 							# add network stimulation
     sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 
+    sim.saveData(filename=netFile, include=['net'])
+
     
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.cfg.filename = 'acsf_run'
@@ -60,6 +62,8 @@ acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep co
 # now run NBQX trial
 print(f"Set synaptic blockade to {fraction_blockade} (0=full NBQX, 1=ACSF)")
 sim.cfg.filename = 'nbqx_run'
+# load network from file to reset to ACSF state
+sim.loadNet(netFile)
 set_syn_blockade(fraction=fraction_blockade)
 print("Check that cfg.recordTraces is still set:", cfg.recordTraces)
 sim.runSim()                     
