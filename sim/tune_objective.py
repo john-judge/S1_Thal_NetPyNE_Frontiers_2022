@@ -104,7 +104,6 @@ def myObjectiveInner(simData):
     cfg: simulation configuration object
     netParams: network parameters
     """
-    print("first arg to myObjective:", simData)
     simData = simData['simData']
     simData_acsf = simData['acsf']
     simData_nbqx = simData['nbqx']
