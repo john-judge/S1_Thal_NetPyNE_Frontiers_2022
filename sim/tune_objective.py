@@ -134,9 +134,9 @@ def myObjectiveInner(simData):
     sim_hw = nbqx_features[:, 2]
 
     # return mean squared error cost
-    err_ratio = mse_weights['ratio'] * (sim_ratio-exp_ratio)**2
-    err_latency = mse_weights['latency'] * (sim_latency-exp_latency)**2
-    err_hw = mse_weights['halfwidth'] * (sim_hw-exp_hw)**2
+    err_ratio = mse_weights['ratio'] * (np.mean(sim_ratio)-np.mean(exp_ratio))**2
+    err_latency = mse_weights['latency'] * (np.mean(sim_latency)-np.mean(exp_latency))**2
+    err_hw = mse_weights['halfwidth'] * (np.mean(sim_hw)-np.mean(exp_hw))**2
     err = err_ratio + err_latency + err_hw
     err = np.sum(err)
     print(f"Objective error: {err}, "
