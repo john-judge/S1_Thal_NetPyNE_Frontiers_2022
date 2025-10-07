@@ -34,7 +34,7 @@ if __name__ == '__main__':
         'maxiter_wait': 500,  # number of iterations (progress checks)
         'time_sleep': 120,  # seconds per iteration
         'maxFitness': 999999999,  # a large value approximating "infinity"
-        'direction': ['minimize', 'minimize', 'minimize'],  # 'minimize' or 'maximize' the fitness function
+        'directions': ['minimize', 'minimize', 'minimize'],  # 'minimize' or 'maximize' the fitness function
 
     }
 
