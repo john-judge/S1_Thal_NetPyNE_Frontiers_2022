@@ -2,6 +2,9 @@ import numpy as np
 import gc
 from measure_properties import TraceProperties
 from netpyne import sim 
+import os
+import json
+
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
 start_time = 500
@@ -133,13 +136,31 @@ def myObjectiveInner(simData):
     sim_latency = nbqx_features[:, 1]
     sim_hw = nbqx_features[:, 2]
 
-    # return mean squared error cost
-    err_ratio = mse_weights['ratio'] * (np.mean(sim_ratio)-np.mean(exp_ratio))**2
-    err_latency = mse_weights['latency'] * (np.mean(sim_latency)-np.mean(exp_latency))**2
-    err_hw = mse_weights['halfwidth'] * (np.mean(sim_hw)-np.mean(exp_hw))**2
+    # return mean squared error cost, normalized to target (experimental) value
+    err_ratio = mse_weights['ratio'] * (np.mean(sim_ratio)-np.mean(exp_ratio))**2 / np.mean(exp_ratio)
+    err_latency = mse_weights['latency'] * (np.mean(sim_latency)-np.mean(exp_latency))**2 / np.mean(exp_latency)
+    err_hw = mse_weights['halfwidth'] * (np.mean(sim_hw)-np.mean(exp_hw))**2 / np.mean(exp_hw)
     print(
-          f"ratio err: {np.sum(err_ratio)}, "
-          f"latency err: {np.sum(err_latency)}, "
-          f"halfwidth err: {np.sum(err_hw)}")
+          f"ratio err: {err_ratio}, "
+          f"latency err: {err_latency}, "
+          f"halfwidth err: {err_hw}")
+    
+    # save raw components for analysis
+    batch_label = getattr(sim.cfg, 'batchLabel', 'unnamed_batch')
+    save_folder = getattr(sim.cfg, 'saveFolder', './data')
+    trial_label = getattr(sim.cfg, 'simLabel', None)
+    print(os.getcwd(), save_folder, batch_label, trial_label)
+    with open(os.path.join(save_folder + "/" + trial_label, f"fitness_components.json"), 'w') as f:
+        json.dump({
+            'err_ratio': err_ratio,
+            'err_latency': err_latency,
+            'err_hw': err_hw,
+            'sim_ratio_mean': np.mean(sim_ratio),
+            'sim_latency_mean': np.mean(sim_latency),
+            'sim_hw_mean': np.mean(sim_hw),
+            'exp_ratio_mean': np.mean(exp_ratio),
+            'exp_latency_mean': np.mean(exp_latency),
+            'exp_hw_mean': np.mean(exp_hw),
+        }, f, indent=4)
 
-    return err_ratio, err_latency, err_hw
+    return err_ratio + err_latency + err_hw
