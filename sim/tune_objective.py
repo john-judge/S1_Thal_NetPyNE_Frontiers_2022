@@ -146,10 +146,11 @@ def myObjectiveInner(simData):
           f"halfwidth err: {err_hw}")
     
     # save raw components for analysis
-    batch_label = getattr(sim.cfg, 'batchLabel', 'unnamed_batch')
-    save_folder = getattr(sim.cfg, 'saveFolder', './data')
-    trial_label = getattr(sim.cfg, 'simLabel', None)
-    print(os.getcwd(), save_folder, batch_label, trial_label)
+    print("os.getcwd:", os.getcwd())
+    cfg_data = sim.allSimData.get('cfg', sim.allSimData.get('simConfig', {}))
+    trial_label = cfg_data.get('simLabel', cfg_data.get('filename', 'trial_unknown'))
+    save_folder = cfg_data.get('saveFolder', './data')
+    print(os.getcwd(), save_folder, trial_label)
     with open(os.path.join(save_folder + "/" + trial_label, f"fitness_components.json"), 'w') as f:
         json.dump({
             'err_ratio': err_ratio,
