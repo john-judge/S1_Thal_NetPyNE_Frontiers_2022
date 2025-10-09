@@ -146,12 +146,9 @@ def myObjectiveInner(simData):
           f"halfwidth err: {err_hw}")
     
     # save raw components for analysis
-    print("os.getcwd:", os.getcwd())
-    cfg_data = sim.allSimData.get('cfg', sim.allSimData.get('simConfig', {}))
-    trial_label = cfg_data.get('simLabel', cfg_data.get('filename', 'trial_unknown'))
-    save_folder = cfg_data.get('saveFolder', './data')
-    print(os.getcwd(), save_folder, trial_label)
-    with open(os.path.join(save_folder + "/" + trial_label, f"fitness_components.json"), 'w') as f:
+    save_folder = '../data/optuna_tuning'
+    curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(save_folder) if (os.path.isdir(os.path.join(save_folder, d)) and 'gen_' in d)])
+    with open(os.path.join(save_folder, f"fitness_components_trial{curr_trial}.json"), 'w') as f:
         json.dump({
             'err_ratio': err_ratio,
             'err_latency': err_latency,
@@ -163,5 +160,6 @@ def myObjectiveInner(simData):
             'exp_latency_mean': np.mean(exp_latency),
             'exp_hw_mean': np.mean(exp_hw),
         }, f, indent=4)
+    print("Files in ", save_folder, ": ", os.listdir(save_folder))
 
     return err_ratio + err_latency + err_hw
