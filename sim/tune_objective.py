@@ -4,13 +4,12 @@ from measure_properties import TraceProperties
 from netpyne import sim 
 import os
 import json
+import matplotlib.pyplot as plt
+import pickle
 
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
 start_time = 500
-
-# --- cache dict, keyed by propVelocity ---
-_acsf_cache = {}
 
 exp_data = {
     'nbqx_halfwidth_mean': 4.3623,
@@ -72,6 +71,7 @@ def extract_features(traces, tvec):
     """Return amplitude, latency, half-width."""
     int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
     features = []
+    processed_traces = []
     for tr in traces:
         # flatten the trace from start_time to end
         # i.e. draw a line from the value at start_time to the value at end_time
@@ -86,7 +86,8 @@ def extract_features(traces, tvec):
         tp = TraceProperties(tr, start=0, width=400, int_pts=int_pts)
         tp.measure_properties()
         features.append([tp.get_max_amp(), tp.get_half_amp_latency(), tp.get_half_width()])
-    return np.array(features)
+        processed_traces.append(tr)
+    return np.array(features), processed_traces
 
 def myObjective(simData):
     try:
@@ -115,8 +116,8 @@ def myObjectiveInner(simData):
     tvec = np.array(simData_acsf['t'])  # time vector is the same for both conditions
 
     # Compare ACSF vs NBQX
-    acsf_features = extract_features(list(simData_traces_acsf.values()), tvec)
-    nbqx_features = extract_features(list(simData_traces_nbqx.values()), tvec)
+    acsf_features, acsf_processed_traces = extract_features(list(simData_traces_acsf.values()), tvec)
+    nbqx_features, nbqx_processed_traces = extract_features(list(simData_traces_nbqx.values()), tvec)
 
     nbqx_features[:, 0] = nbqx_features[:, 0] / acsf_features[:, 0]  # first col is ratios
 
@@ -161,5 +162,26 @@ def myObjectiveInner(simData):
             'exp_hw_mean': np.mean(exp_hw),
         }, f, indent=4)
     print("Files in ", save_folder, ": ", os.listdir(save_folder))
+
+    # save the simulated traces of this trial to file
+    # pickle simData_traces_acsf and simData_traces_nbqx
+    with open(os.path.join(save_folder, f"simData_traces_acsf_trial{curr_trial}.pkl"), 'wb') as f:
+        pickle.dump(simData_traces_acsf, f)
+    with open(os.path.join(save_folder, f"simData_traces_nbqx_trial{curr_trial}.pkl"), 'wb') as f:
+        pickle.dump(simData_traces_nbqx, f)
+
+    # plot processed traces for this trial
+    plt.figure(figsize=(12, 6))
+    for tr in acsf_processed_traces:
+        plt.plot(tr, color='blue', alpha=0.1)
+    for tr in nbqx_processed_traces:
+        plt.plot(tr, color='red', alpha=0.1)
+    plt.title(f"Processed traces for trial {curr_trial} (blue=ACSF, red=NBQX)")
+    plt.xlabel("Time (ms)")
+    plt.ylabel("ΔF/F") 
+    plt.savefig(os.path.join(save_folder, f"processed_traces_trial{curr_trial}.png"))
+    plt.close()
+
+    
 
     return err_ratio + err_latency + err_hw
