@@ -61,6 +61,7 @@ sim.pc.barrier()   # Wait for all ranks to finish gatherData
 if rank == 0:
     acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep copy
 
+sim.allSimData = {}  # clear before next sim
 build_network(acsf=False)
 sim.cfg.filename = 'nbqx_run'
 sim.runSim()                     
