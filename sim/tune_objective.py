@@ -45,8 +45,8 @@ def extract_traces(simData):
                         num_prints -= 1
                         print(f"Extracted trace for cell {cell_id} compartment {compart} with shape {traces[cell_id][k].shape}")
 
-    # Average over each cell and call it a pixel
-    # this at least roughly preserves the soma:neurite ratio
+    # Average over each 5 cells and call it a pixel
+    # this at least roughly preserves the soma:neurite ratio and multi-cell blurring
     avg_traces = {}
     for cell_id in traces:
         # avoid dividing by zero if no traces
@@ -60,12 +60,24 @@ def extract_traces(simData):
             avg_traces[cell_id] = np.average(avg_traces_, axis=0)
         except ZeroDivisionError as e:
             print("ZeroDivisionError for cell_id:", cell_id, "with avg_traces shape:", avg_traces.shape)
+    # create random subsets of 5 cells and average them to create "pixels"
+    cell_ids = list(avg_traces.keys())
+    np.random.seed(42)  # for reproducibility
+    np.random.shuffle(cell_ids)
+    pixel_traces = {}
+    for i in range(0, len(cell_ids), 5):
+        pixel_id = f"pixel_{i//5}"
+        subset = cell_ids[i:i+5]
+        if len(subset) == 0:
+            continue
+        pixel_traces[pixel_id] = np.mean([avg_traces[cid] for cid in subset if cid in avg_traces], axis=0)
 
     # gc cleanup traces to save memory
     del traces
+    del avg_traces
     gc.collect()
 
-    return avg_traces
+    return pixel_traces
 
 def extract_features(traces, tvec):
     """Return amplitude, latency, half-width."""
