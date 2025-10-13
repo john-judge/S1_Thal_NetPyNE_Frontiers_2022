@@ -9,6 +9,7 @@ Starting script to tune ACSF and NBQX simulations of NetPyNE-based S1 model.
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim, specs
 import time
+import copy
 
 
 pc = h.ParallelContext()
@@ -35,8 +36,7 @@ def set_syn_blockade(fraction):
 def build_network(acsf=True):
     
     cfg, netParams = sim.readCmdLineArgs()
-    if not acsf:
-        cfg.experiment_NBQX_global = True
+    cfg.experiment_NBQX_global = (not acsf)  # if ACSF is False, then NBQX is True
     sim.initialize(
         simConfig = cfg, 	
         netParams = netParams)  				# create network object and set cfg and net params
@@ -59,7 +59,11 @@ sim.runSim()                      			# run parallel Neuron simulation
 sim.gatherData()                  			# gather spiking data and cell info from each node
 sim.pc.barrier()   # Wait for all ranks to finish gatherData
 if rank == 0:
-    acsf_data = dict(sim.allSimData) #dict(sim.allSimData) # save ACSF data, deep copy
+    try:
+        acsf_data = copy.deepcopy(dict(sim.allSimData)) # save ACSF data, deep copy
+    except Exception as e:
+        print("Error copying ACSF data:", e)
+        acsf_data = dict(sim.allSimData)
 
 sim.allSimData = {}  # clear before next sim
 build_network(acsf=False)
@@ -68,7 +72,11 @@ sim.runSim()
 sim.gatherData()  
 sim.pc.barrier()   # Wait for all ranks to finish gatherData
 if rank == 0:
-    nbqx_data = dict(sim.allSimData)
+    try:
+        nbqx_data = copy.deepcopy(dict(sim.allSimData))  # save NBQX data, deep copy
+    except Exception as e:
+        print("Error copying NBQX data:", e)
+        nbqx_data = dict(sim.allSimData)
 
     sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
     sim.saveData()

@@ -121,8 +121,20 @@ def myObjectiveInner(simData):
     netParams: network parameters
     """
     simData = simData['simData']
+    
     simData_acsf = simData['acsf']
     simData_nbqx = simData['nbqx']
+
+    print("simData_acsf keys:", simData_acsf.keys())
+    if 'simConfig' in simData_acsf:
+        cfg = simData_acsf['simConfig']
+        print("simConfig.experiment_NBQX_global for acsf:", cfg.experiment_NBQX_global)
+    print("simData_nbqx keys:", simData_nbqx.keys())
+    if 'simConfig' in simData_nbqx:
+        cfg = simData_nbqx['simConfig']
+        print("simConfig.experiment_NBQX_global for nbqx:", cfg.experiment_NBQX_global)
+
+    # TO DO: put hVOS/optical processing here instead of just using voltage traces
     simData_traces_acsf = extract_traces(simData_acsf)
     simData_traces_nbqx = extract_traces(simData_nbqx)
     tvec = np.array(simData_acsf['t'])  # time vector is the same for both conditions
