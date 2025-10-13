@@ -81,7 +81,7 @@ def extract_features(traces, tvec):
         m, b = np.polyfit(x_, y, 1)
         trend = np.polyval([m, b], np.arange(tr.shape[0]))
         tr = tr - trend
-        tr = -tr[start_time:]  # only analyze from start_time onward, and invert
+        tr = tr[start_time:]  # only analyze from start_time onward, and invert
         tr -= np.min(tr)  # baseline to 0
         tp = TraceProperties(tr, start=0, width=400, int_pts=int_pts)
         tp.measure_properties()
