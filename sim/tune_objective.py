@@ -253,7 +253,16 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
                 os.remove(os.path.join(cell_model_rec_out_dir, file))
         del cam
         gc.collect()
-    return all_cells_rec
+
+    pixel_traces = {}
+    print('all_cells_rec shape:', all_cells_rec.shape)
+    if all_cells_rec is not None:
+        for i in range(all_cells_rec.shape[1]):
+            for j in range(all_cells_rec.shape[2]):
+                if np.count_nonzero(all_cells_rec[:, i, j]) > 0:
+                    pixel_id = f"pixel_{i}_{j}"
+                    pixel_traces[pixel_id] = all_cells_rec[:, i, j]
+    return pixel_traces
 
 def load_morphologies(simData, cell_id_to_me_type_map, 
                         target_hVOS_populations = ("L4_SS", "L4_PC")):

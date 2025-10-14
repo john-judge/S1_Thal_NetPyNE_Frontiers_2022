@@ -10,6 +10,8 @@ import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim, specs
 import time
 import copy
+from netpyne import specs
+import importlib.util, os
 
 
 pc = h.ParallelContext()
@@ -32,20 +34,12 @@ def set_syn_blockade(fraction):
     }
     sim.net.modifyConns(modification_params)
 
-from netpyne import specs
-import importlib.util, os
-
 def load_cfg_and_netparams(cfg_file, netparams_file, acsf=True):
     """Reload cfg and netParams after modifying cfg."""
     # Load cfg file
     cfg_context = {}
     exec(open(cfg_file).read(), cfg_context)
     cfg = cfg_context['cfg']
-
-    if not acsf:
-        cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
-        cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
-        cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
 
     # Make sure specs and cfg are visible when loading netParams
     np_context = {'cfg': cfg, 'specs': specs}
@@ -54,11 +48,32 @@ def load_cfg_and_netparams(cfg_file, netparams_file, acsf=True):
 
     return cfg, netParams
 
+def modify_cfg_for_tuning(cfg, acsf=True):
+    
+    if not acsf:
+        cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
+        cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
+        cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
+
+    return cfg
+
+def rebuild_netParams_from_cfg(cfg, netParamsPath='netParams.py'):
+    """
+    Reload netParams.py with an existing cfg (including CLI modifications)
+    so that conditional logic depending on cfg values is re-evaluated.
+    """
+    # Ensure cfg is visible in the exec scope
+    context = {'cfg': cfg, 'specs': specs}
+    exec(open(netParamsPath).read(), context)
+    netParams = context['netParams']
+    return netParams
 
 def build_network(acsf=True):
     
-    #cfg, netParams = sim.readCmdLineArgs()
-    cfg, netParams = load_cfg_and_netparams('cfg-tune.py', 'netParams.py', acsf=acsf)
+    cfg, netParams = sim.readCmdLineArgs()
+    if not acsf:  # ACSF by default. Modify cfg manually and rebuild netParams if NBQX
+        cfg = modify_cfg_for_tuning(cfg, acsf=acsf)
+        netParams = rebuild_netParams_from_cfg(cfg)
 
     sim.initialize(
         simConfig = cfg, 	
