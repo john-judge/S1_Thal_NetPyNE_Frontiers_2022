@@ -345,15 +345,6 @@ def myObjectiveInner(simData):
     simData_acsf = simData['acsf']
     simData_nbqx = simData['nbqx']
 
-    print("simData_acsf keys:", simData_acsf.keys())
-    if 'simConfig' in simData_acsf:
-        cfg = simData_acsf['simConfig']
-        print("simConfig.experiment_NBQX_global for acsf:", cfg.experiment_NBQX_global)
-    print("simData_nbqx keys:", simData_nbqx.keys())
-    if 'simConfig' in simData_nbqx:
-        cfg = simData_nbqx['simConfig']
-        print("simConfig.experiment_NBQX_global for nbqx:", cfg.experiment_NBQX_global)
-
     cell_id_to_me_type_map = load_cell_id_to_me_type_map('../data/cell_id_to_me_type_map.json')
     cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
     cells_nbqx, _ = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
