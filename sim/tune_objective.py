@@ -296,7 +296,7 @@ def load_morphologies(simData, cell_id_to_me_type_map,
         x = cell_id_to_me_type_map[short_cell_id]['x']
         y = cell_id_to_me_type_map[short_cell_id]['y']
         z = cell_id_to_me_type_map[short_cell_id]['z']
-        cells[cell_id] = Cell(cell_id, me_type, axons, apics, dends, soma, x, y, z, optical_filelabel=optical_type)
+        cells[cell_id] = Cell(cell_id, me_type, axons, apics, dends, soma, x, y, z, optical_filelabel='hVOS')
 
         me_type = me_type.split("_barrel")[0]  # remove barrel suffix if present
         if me_type not in me_type_morphology_map:
