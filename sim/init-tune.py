@@ -47,6 +47,11 @@ def build_network(acsf=True):
     sim.net.addStims() 							# add network stimulation
     sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 
+    try:
+        print(sim.cfg.partial_blockade_fraction, "partial_blockade_fraction for ACSF = ", acsf)
+    except Exception as e:
+        print("Error accessing partial_blockade_fraction:", e)
+
 
 # start timer 
 if rank == 0:
