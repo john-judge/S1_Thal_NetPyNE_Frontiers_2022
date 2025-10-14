@@ -10,16 +10,12 @@ import sys
 
 sys.path.insert(0, '../src/hVOS')  # import from src/hVOS
 
-from src.hVOS.cell import Cell
-from src.hVOS.morphology import Morphology
-from src.hVOS.hvos_readout import hVOSReadout
-from src.hVOS.vsd_readout import VSDReadout
-from src.hVOS.camera import Camera
-from src.hVOS.psf import PSF
-from src.hVOS.mcPSF import mcPSF
-from src.hVOS.compartment_file import MemoryMappedCompartmentVoltages
+from cell import Cell
+from morphology import Morphology
+from hvos_readout import hVOSReadout
+from camera import Camera
+from psf import PSF
 from cam_params import cam_params
-from src.hVOS.subconn import SubConnMap
 
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
