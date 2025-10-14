@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import gc
 from PIL import Image, ImageDraw, ImageFont
-from skimage.measure import block_reduce
+#from skimage.measure import block_reduce
 
 try:
     from src.hVOS.cell_recording import CellRecording
@@ -65,6 +65,52 @@ class Camera:
             self.rescale_psf()
             #self.orient_psf_to_camera()
 
+    def numpy_block_reduce(self, array, block_size, func):
+        """
+        Performs block reduction on a NumPy array.
+
+        Parameters
+        ----------
+        array : np.ndarray
+            The input array.
+        block_size : tuple of int
+            The size of the blocks along each dimension.
+        func : callable
+            The reduction function to apply (e.g., np.mean, np.sum, np.max).
+
+        Returns
+        -------
+        np.ndarray
+            The block-reduced array.
+        """
+        if len(array.shape) != len(block_size):
+            raise ValueError("Array and block_size must have the same number of dimensions.")
+        
+        # Ensure array dimensions are divisible by block_size
+        for dim_size, block_dim in zip(array.shape, block_size):
+            if dim_size % block_dim != 0:
+                raise ValueError(f"Array dimension {dim_size} not divisible by block size {block_dim}.")
+
+        # Reshape and transpose to group blocks
+        new_shape = []
+        transpose_axes = []
+        for i, (dim_size, block_dim) in enumerate(zip(array.shape, block_size)):
+            new_shape.extend([dim_size // block_dim, block_dim])
+            transpose_axes.append(2 * i)
+            transpose_axes.append(2 * i + 1)
+        
+        # Example for 2D: (H, W) -> (H/bh, bh, W/bw, bw) -> (H/bh, W/bw, bh, bw)
+        reshaped_array = array.reshape(new_shape)
+        transposed_array = reshaped_array.transpose(*transpose_axes) # Adjust for higher dimensions
+        
+        # Apply the reduction function
+        # For 2D, we reduce along axes -2 and -1 (the block dimensions)
+        reduction_axes = tuple(range(len(array.shape), len(transposed_array.shape)))
+        reduced_array = func(transposed_array, axis=reduction_axes)
+        
+        return reduced_array
+
+
     def rescale_psf(self):
         ''' 
         The PSF is a 3D array, with the center of the PSF at the center of the array.
@@ -84,7 +130,7 @@ class Camera:
         downsample_factor = int(self.camera_resolution / self.psf_resolution)
         # downsample the PSF along all three dimensions. Use binning to downsample
         # along each dimension.
-        self.psf = block_reduce(self.psf, (downsample_factor, downsample_factor, downsample_factor), np.mean)
+        self.psf = self.numpy_block_reduce(self.psf, (downsample_factor, downsample_factor, downsample_factor), np.mean)
         # normalize the PSF so that its sum is 1
         self.psf /= np.sum(self.psf)
 
