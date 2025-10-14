@@ -5,7 +5,10 @@ from PIL import Image, ImageDraw, ImageFont
 import imageio
 from skimage.measure import block_reduce
 
-from src.hVOS.cell_recording import CellRecording
+try:
+    from src.hVOS.cell_recording import CellRecording
+except ModuleNotFoundError:
+    from cell_recording import CellRecording  # for testing in this directory
 
 
 class Camera:
