@@ -1,4 +1,7 @@
-from src.hVOS.camera import Camera
+try:
+    from src.hVOS.camera import Camera
+except ModuleNotFoundError:
+    from camera import Camera  # for testing in this directory
 
 
 class SubConnMap:

@@ -1,5 +1,8 @@
 import numpy as np
-from src.hVOS.optical_readout import OpticalReadout
+try:
+    from src.hVOS.optical_readout import OpticalReadout
+except ModuleNotFoundError:
+    from optical_readout import OpticalReadout  # for testing in this directory
 
 
 class VSDReadout (OpticalReadout):

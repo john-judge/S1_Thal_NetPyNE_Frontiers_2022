@@ -2,7 +2,10 @@ from scipy.signal import convolve2d
 import numpy
 import matplotlib.pyplot as pyplot
 
-import src.hVOS.microscPSF as msPSF
+try:
+    import src.hVOS.microscPSF as msPSF
+except ModuleNotFoundError:
+    import microscPSF as msPSF  # for testing in this directory
 
 
 class PSF:
