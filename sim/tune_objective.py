@@ -6,6 +6,9 @@ import os
 import json
 import matplotlib.pyplot as plt
 import pickle
+import sys
+
+sys.path.insert(0, '../src/hVOS')  # import from src/hVOS
 
 from src.hVOS.cell import Cell
 from src.hVOS.morphology import Morphology
