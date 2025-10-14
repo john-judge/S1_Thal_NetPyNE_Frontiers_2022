@@ -7,6 +7,17 @@ import json
 import matplotlib.pyplot as plt
 import pickle
 
+from src.hVOS.cell import Cell
+from src.hVOS.morphology import Morphology
+from src.hVOS.hvos_readout import hVOSReadout
+from src.hVOS.vsd_readout import VSDReadout
+from src.hVOS.camera import Camera
+from src.hVOS.psf import PSF
+from src.hVOS.mcPSF import mcPSF
+from src.hVOS.compartment_file import MemoryMappedCompartmentVoltages
+from cam_params import cam_params
+from src.hVOS.subconn import SubConnMap
+
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
 start_time = 500
@@ -109,6 +120,196 @@ def myObjective(simData):
         traceback.print_exc()   # will print full traceback to your terminal
         raise
 
+def load_cell_id_to_me_type_map(file_path):
+    cell_id_to_me_type_map = {}
+    target_dir_net = '../data/optuna_tuning/gen_0/trial_0_data.pkl'
+
+    with open(target_dir_net, 'rb') as f:
+        data = pickle.load(f)
+        print(data.keys())
+        for cell_dict in data['net']['cells']:
+            cell_id_to_me_type_map[cell_dict['gid']] = {
+                'me_type': cell_dict['tags']['cellType'],
+                'x': cell_dict['tags']['x'],
+                'y': cell_dict['tags']['y'],
+                'z': cell_dict['tags']['z']
+            }
+    return cell_id_to_me_type_map
+
+def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map,
+                                            target_hVOS_populations = ("L4_SS", "L4_PC")):
+    target_population_cells = [
+    cells[cell_id] for cell_id in cells 
+        if any([t_pop in cells[cell_id].get_me_type() for 
+                    t_pop in target_hVOS_populations ]) 
+    ]
+    hvos_readout = hVOSReadout(target_hVOS_populations, 
+                                {cell.get_cell_id(): cell for cell in target_population_cells}, 
+                                me_type_morphology_map,
+                                force_overwrite=True)
+    
+    curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(save_folder) if (os.path.isdir(os.path.join(save_folder, d)) and 'gen_' in d)])
+    save_folder = '../data/optuna_tuning/gen_' + str(curr_trial)
+    hvos_readout.compute_optical_signal(save_folder)
+
+    ####################################
+    # Create PSF 
+    ####################################
+    psf = PSF(
+        radial_lim=(0, 100.0),  # radial limits, keep < image width 
+        axial_lim=(-100.0, 100.0),  # axial limits
+    )
+    # build 3D PSF 
+    psf = psf.build_3D_PSF()
+
+
+    ######################################
+    # determine which morphology to use for each cell
+    ######################################
+    for morph_key in me_type_morphology_map:
+        for morph in me_type_morphology_map[morph_key]:
+            print("Seeking match for morphology:", morph.me_type)
+            for cell in target_population_cells:
+                if cell.get_me_type().split("_barrel")[0] == morph.me_type:
+
+                    if morph.does_cell_match_morphology(cell):
+                        cell.set_morphology(morph)
+            
+    if any([cell.get_morphology() == None 
+            for cell in target_population_cells]):
+        print(str(sum([cell.get_morphology() == None 
+            for cell in target_population_cells])) + " target cells are missing structure data:")
+        # report which cells are missing morphology
+        for cell in target_population_cells:
+            if cell.get_morphology() is None:
+                raise("Cell", cell.get_cell_id(), "is missing morphology for me_type", cell.get_me_type())
+
+    #######################################
+    # Draw cells with PSF
+    #######################################
+    model_rec_out_dir = save_folder + '/'
+    os.makedirs(model_rec_out_dir + 'psf/', exist_ok=True)
+    time = np.array(simData['t'])  # time vector is the same for both conditions
+
+    time_step_size = time[1] - time[0]
+
+
+    view_center_cell = 0  # view center cell is the cell to center on.
+    # other cells may or may not be in view.
+    soma_position = None
+    if cam_params['cam_fov'] is not None:
+        if type(cam_params['cam_fov']) == int:
+            view_center_cell = cam_params['cam_fov']
+            soma_position = target_population_cells[view_center_cell].get_soma_position()
+        elif type(cam_params['cam_fov']) == list:
+            soma_position = cam_params['cam_fov']
+        else:
+            soma_position = target_population_cells[view_center_cell].get_soma_position()
+
+    cam_width = cam_params['cam_width']
+    cam_height = cam_params['cam_height']
+    camera_resolution = cam_params['cam_resolution']
+    soma_dend_hVOS_ratio = 0.5
+    comparts = ['axon', 'dend', 'soma', 'apic']
+    all_cells_rec = None
+    print("location of soma of cell to center on:", soma_position)
+    for target_cell in target_population_cells:
+        cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
+        os.makedirs(cell_model_rec_out_dir, exist_ok=True)
+        cam = Camera([target_cell], 
+                    me_type_morphology_map, 
+                    time,
+                    fov_center=soma_position,
+                    camera_resolution=camera_resolution,
+                    camera_width=cam_width,
+                    camera_height=cam_height,
+                    psf=psf,
+                    data_dir=cell_model_rec_out_dir, 
+                    use_2d_psf=False,
+                    soma_dend_hVOS_ratio=soma_dend_hVOS_ratio
+                    )
+        cam._draw_cell(target_cell)
+
+        recording = cam.get_cell_recording()  # returns a CellRecording object
+        recording = recording.get_combined_recording()
+
+
+        # store recording in all_cells_rec, superimposed
+        if all_cells_rec is None:
+            all_cells_rec = recording
+        else:
+            for compart in comparts:
+                all_cells_rec[:] += recording[:]
+
+        psf_nonzero_files = cam.get_cell_recording().get_non_zero_file_list()
+        print("PSF non-zero files:", psf_nonzero_files)
+        cam.close_memmaps()
+
+        # delete all zero files to save disk space
+        for file in os.listdir(cell_model_rec_out_dir):
+            if file not in psf_nonzero_files and (file.endswith('.mm') or file.endswith('.npy')):
+                os.remove(os.path.join(cell_model_rec_out_dir, file))
+        del cam
+        gc.collect()
+    return all_cells_rec
+
+def load_morphologies(simData, cell_id_to_me_type_map, 
+                        target_hVOS_populations = ("L4_SS", "L4_PC")):
+    
+    # simData is keyed by cell_id and compartment name
+    morphology_data_dir = '../../NMC_model/NMC.NeuronML2/'
+
+    #######################################
+    # for each soma, get a cell id and aggregate its axons, apics, dends
+    #######################################
+    cells = {}
+    me_type_morphology_map = {}
+    for cell_id in simData:
+        axons, apics, dends, soma = {}, {}, {}, None
+        for compart in simData[cell_id].keys():
+            data = simData[cell_id][compart]
+            if data is None:
+                print("Data not found for cell:", cell_id, "compartment:", compart)
+                continue
+
+            if 'soma' in compart:
+                soma = data
+            elif 'axon' in compart:
+                axons[compart] = data
+            elif 'apic' in compart:
+                apics[compart] = data
+            elif 'dend' in compart:
+                dends[compart] = data
+            else:
+                print("Unknown compart:", compart)
+                continue
+
+        if soma is None:
+            print("No soma found for cell:", cell_id)
+            continue
+
+        short_cell_id = int(cell_id.replace('cell_', ''))
+        me_type = cell_id_to_me_type_map[short_cell_id]['me_type']
+        x = cell_id_to_me_type_map[short_cell_id]['x']
+        y = cell_id_to_me_type_map[short_cell_id]['y']
+        z = cell_id_to_me_type_map[short_cell_id]['z']
+        cells[cell_id] = Cell(cell_id, me_type, axons, apics, dends, soma, x, y, z, optical_filelabel=optical_type)
+
+        me_type = me_type.split("_barrel")[0]  # remove barrel suffix if present
+        if me_type not in me_type_morphology_map:
+            # load morphology
+            # find files in morphology_data_dir with me_type in the name
+            m_type, e_type = me_type[:6], me_type[7:]
+            me_type_files = [f for f in os.listdir(morphology_data_dir) if (m_type in f and e_type in f and f.endswith('.cell.nml'))]
+            if len(me_type_files) == 0:
+                assert me_type not in target_hVOS_populations  # we only care if we cannot load a target population
+            
+            # load all morphology file matches
+            me_type_morphology_map[me_type] = [Morphology(me_type, morphology_data_dir + me_type_file) for me_type_file in me_type_files]
+
+    return cells, me_type_morphology_map
+
+
 def myObjectiveInner(simData):
     # simData['acsf'] and simData['nbqx'] are the two conditions
     # each is a dict with keys like 'Vsoma', 'Vdend_32', etc
@@ -120,6 +321,7 @@ def myObjectiveInner(simData):
     cfg: simulation configuration object
     netParams: network parameters
     """
+    
     simData = simData['simData']
     
     simData_acsf = simData['acsf']
@@ -134,9 +336,14 @@ def myObjectiveInner(simData):
         cfg = simData_nbqx['simConfig']
         print("simConfig.experiment_NBQX_global for nbqx:", cfg.experiment_NBQX_global)
 
+    cell_id_to_me_type_map = load_cell_id_to_me_type_map('../data/cell_id_to_me_type_map.json')
+    cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
+    cells_nbqx, _ = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
     # TO DO: put hVOS/optical processing here instead of just using voltage traces
-    simData_traces_acsf = extract_traces(simData_acsf)
-    simData_traces_nbqx = extract_traces(simData_nbqx)
+    simData_traces_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
+                                                                  me_type_morphology_map)
+    simData_traces_nbqx = average_voltage_traces_into_hVOS_pixels(simData_nbqx, cells_nbqx, 
+                                                                  me_type_morphology_map)
     tvec = np.array(simData_acsf['t'])  # time vector is the same for both conditions
 
     # Compare ACSF vs NBQX
