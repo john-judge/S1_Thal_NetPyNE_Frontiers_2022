@@ -48,9 +48,9 @@ def build_network(acsf=True):
     sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
 
     try:
-        print(sim.cfg.partial_blockade_fraction, "partial_blockade_fraction for ACSF = ", acsf)
+        print(sim.cfg.synWeightFractionEE[0], "cfg.synWeightFractionEE[0] for ACSF = ", acsf)
     except Exception as e:
-        print("Error accessing partial_blockade_fraction:", e)
+        print("Error accessing synWeightFractionEE[0]:", e)
 
 
 # start timer 
