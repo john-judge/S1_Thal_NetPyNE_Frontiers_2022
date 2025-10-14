@@ -40,6 +40,8 @@ class Cell:
         return f"Cell(id={self.cell_id}, me_type={self.me_type}, position={self.x}, {self.y}, {self.z})"
 
     def load_data(self, data_pointer):
+        if type(data_pointer) is np.ndarray:
+            return data_pointer
         i_data, mmap_fp = data_pointer
         return mmap_fp[i_data, :]
     
