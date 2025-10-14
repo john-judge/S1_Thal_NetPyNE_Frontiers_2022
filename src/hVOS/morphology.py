@@ -99,6 +99,8 @@ class Morphology:
         cell_compart_dict = {comp_id.replace("V", "").replace("soma_0","soma"):True 
                              for comp_id in cell_compartment_list}
         
+        print("morph_compartment_list:", morph_compartment_list)
+        print("cell_compartment_list:", cell_compartment_list)
         return all([comp_id in cell_compart_dict for 
                             comp_id in morph_compartment_list if 'soma' not in comp_id])
 

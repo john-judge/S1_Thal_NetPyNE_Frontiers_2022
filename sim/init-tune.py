@@ -32,13 +32,34 @@ def set_syn_blockade(fraction):
     }
     sim.net.modifyConns(modification_params)
 
+from netpyne import specs
+import importlib.util, os
+
+def load_cfg_and_netparams(cfg_file, netparams_file, acsf=True):
+    """Reload cfg and netParams after modifying cfg."""
+    # Load cfg file
+    cfg_context = {}
+    exec(open(cfg_file).read(), cfg_context)
+    cfg = cfg_context['cfg']
+
+    if not acsf:
+        cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
+        cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
+        cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
+
+    # Make sure specs and cfg are visible when loading netParams
+    np_context = {'cfg': cfg, 'specs': specs}
+    exec(open(netparams_file).read(), np_context)
+    netParams = np_context['netParams']
+
+    return cfg, netParams
+
 
 def build_network(acsf=True):
     
-    cfg, netParams = sim.readCmdLineArgs()
-    cfg.experiment_NBQX_global = (not acsf)  # if ACSF is False, then NBQX is True
-    if not acsf:
-        sim.cfg.synWeightFractionEE[0] = sim.cfg.partial_blockade_fraction
+    #cfg, netParams = sim.readCmdLineArgs()
+    cfg, netParams = load_cfg_and_netparams('cfg-tune.py', 'netParams.py', acsf=acsf)
+
     sim.initialize(
         simConfig = cfg, 	
         netParams = netParams)  				# create network object and set cfg and net params

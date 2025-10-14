@@ -170,6 +170,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
         for morph in me_type_morphology_map[morph_key]:
             print("Seeking match for morphology:", morph.me_type)
             for cell in target_population_cells:
+                print('Compare:', morph.me_type, "to", cell.get_me_type().split("_barrel")[0])
                 if cell.get_me_type().split("_barrel")[0] == morph.me_type:
 
                     if morph.does_cell_match_morphology(cell):
