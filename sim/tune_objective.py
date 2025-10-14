@@ -266,7 +266,7 @@ def load_morphologies(simData, cell_id_to_me_type_map,
     me_type_morphology_map = {}
     loaded_compart_data = {}
     for k in simData:
-        if compart[:4] in k:
+        if any([compart in k for compart in ['soma', 'dend', 'apic', 'axon']]):
             for cell_id in simData[k]:
                 if cell_id not in loaded_compart_data:
                     loaded_compart_data[cell_id] = {}
