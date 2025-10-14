@@ -147,7 +147,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
                                 {cell.get_cell_id(): cell for cell in target_population_cells}, 
                                 me_type_morphology_map,
                                 force_overwrite=True)
-    
+    save_folder = '../data/optuna_tuning/"
     curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(save_folder) if (os.path.isdir(os.path.join(save_folder, d)) and 'gen_' in d)])
     save_folder = '../data/optuna_tuning/gen_' + str(curr_trial)
     hvos_readout.compute_optical_signal(save_folder)
