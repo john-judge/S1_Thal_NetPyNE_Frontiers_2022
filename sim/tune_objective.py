@@ -264,10 +264,17 @@ def load_morphologies(simData, cell_id_to_me_type_map,
     #######################################
     cells = {}
     me_type_morphology_map = {}
-    for cell_id in simData:
+    loaded_compart_data = {}
+    for k in simData:
+        if compart[:4] in k:
+            for cell_id in simData[k]:
+                if cell_id not in loaded_compart_data:
+                    loaded_compart_data[cell_id] = {}
+                loaded_compart_data[cell_id][k] = np.array(simData[k][cell_id])
+    for cell_id in loaded_compart_data:
         axons, apics, dends, soma = {}, {}, {}, None
-        for compart in simData[cell_id].keys():
-            data = simData[cell_id][compart]
+        for compart in loaded_compart_data[cell_id].keys():
+            data = loaded_compart_data[cell_id][compart]
             if data is None:
                 print("Data not found for cell:", cell_id, "compartment:", compart)
                 continue
