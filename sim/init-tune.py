@@ -37,6 +37,8 @@ def build_network(acsf=True):
     
     cfg, netParams = sim.readCmdLineArgs()
     cfg.experiment_NBQX_global = (not acsf)  # if ACSF is False, then NBQX is True
+    if not acsf:
+        sim.cfg.synWeightFractionEE[0] = sim.cfg.partial_blockade_fraction
     sim.initialize(
         simConfig = cfg, 	
         netParams = netParams)  				# create network object and set cfg and net params
