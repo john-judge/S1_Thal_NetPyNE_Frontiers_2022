@@ -9,6 +9,7 @@ import pickle
 import sys
 
 sys.path.insert(0, '../src/hVOS')  # import from src/hVOS
+sys.path.insert(0, '..')  # import from src/hVOS/cell
 
 from cell import Cell
 from morphology import Morphology
