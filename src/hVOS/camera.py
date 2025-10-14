@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import gc
 from PIL import Image, ImageDraw, ImageFont
-import imageio
 from skimage.measure import block_reduce
 
 try:
@@ -139,6 +138,7 @@ class Camera:
 
     def add_time_annotations(self, frame_step_size, img_filenames):
         # add time annotations
+        import imageio
         final_images = []
         t_frame = 0
 
@@ -179,6 +179,7 @@ class Camera:
                                 frames=(0,999), time_step_size=0.1, frame_stride=10,
                                 vmin=0, vmax=0.01, autoscale_minmax=True, flip=True):
         """ Animate the frames to a video. """
+        import imageio
         # each timestep to a frame in a list of images
         sign = -1 if flip else 1
         time_step_size *= frame_stride
