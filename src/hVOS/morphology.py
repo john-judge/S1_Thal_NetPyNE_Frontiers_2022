@@ -86,7 +86,6 @@ class Morphology:
     
     def does_cell_match_morphology(self, cell):
         # Check if the cell morphology matches the morphology structure    
-        print("Checking details for cell:", cell.get_cell_id(), cell.get_me_type()) 
         if cell.get_me_type().split("_barrel")[0] != self.me_type:
             return False
         
@@ -94,15 +93,11 @@ class Morphology:
         #  structure_data of this morphology (compartment lists should match)
         morph_compartment_list = self.get_compartment_id_list()
         cell_compartment_list = cell.get_list_compartment_ids()
-        print("compare lengths:", len(morph_compartment_list), len(cell_compartment_list))
         if len(morph_compartment_list) != len(cell_compartment_list):
             return False
         
         cell_compart_dict = {comp_id.replace("V", "").replace("soma_0","soma"):True 
                              for comp_id in cell_compartment_list}
-        
-        print("morph_compartment_list:", morph_compartment_list)
-        print("cell_compartment_list:", cell_compartment_list)
         return all([comp_id in cell_compart_dict for 
                             comp_id in morph_compartment_list if 'soma' not in comp_id])
 

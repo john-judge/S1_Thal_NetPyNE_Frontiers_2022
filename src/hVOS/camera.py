@@ -65,50 +65,57 @@ class Camera:
             self.rescale_psf()
             #self.orient_psf_to_camera()
 
-    def numpy_block_reduce(self, array, block_size, func):
-        """
-        Performs block reduction on a NumPy array.
+    def numpy_block_reduce(image, block_size, func=np.sum, cval=0, func_kwargs=None):
+        """Down-sample image by applying function to local blocks.
 
         Parameters
         ----------
-        array : np.ndarray
-            The input array.
-        block_size : tuple of int
-            The size of the blocks along each dimension.
+        image : ndarray
+            N-dimensional input image.
+        block_size : array_like or int
+            Array containing down-sampling integer factor along each axis.
+            If a single integer, it is used as the factor along all axes.
         func : callable
-            The reduction function to apply (e.g., np.mean, np.sum, np.max).
+            Function object which is used to calculate the return value for each
+            local block. This function must implement an ``axis`` parameter.
+            Primary functions are ``numpy.sum``, ``numpy.min``, ``numpy.max``,
+            ``numpy.mean``, ``numpy.median``, ``numpy.prod``, ``numpy.std``.
+        cval : float, optional
+            Constant padding value if image is not perfectly divisible by
+            the block size.
+        func_kwargs : dict, optional
+            Keyword arguments passed to func.
 
         Returns
         -------
-        np.ndarray
-            The block-reduced array.
+        output : ndarray
+            Down-sampled image with same number of dimensions as input image.
         """
-        if len(array.shape) != len(block_size):
-            raise ValueError("Array and block_size must have the same number of dimensions.")
-        
-        # Ensure array dimensions are divisible by block_size
-        for dim_size, block_dim in zip(array.shape, block_size):
-            if dim_size % block_dim != 0:
-                raise ValueError(f"Array dimension {dim_size} not divisible by block size {block_dim}.")
+        if isinstance(block_size, int):
+            block_size = (block_size,) * image.ndim
+        elif len(block_size) != image.ndim:
+            raise ValueError("`block_size` must have the same length as `image.shape`.")
 
-        # Reshape and transpose to group blocks
-        new_shape = []
-        transpose_axes = []
-        for i, (dim_size, block_dim) in enumerate(zip(array.shape, block_size)):
-            new_shape.extend([dim_size // block_dim, block_dim])
-            transpose_axes.append(2 * i)
-            transpose_axes.append(2 * i + 1)
-        
-        # Example for 2D: (H, W) -> (H/bh, bh, W/bw, bw) -> (H/bh, W/bw, bh, bw)
-        reshaped_array = array.reshape(new_shape)
-        transposed_array = reshaped_array.transpose(*transpose_axes) # Adjust for higher dimensions
-        
-        # Apply the reduction function
-        # For 2D, we reduce along axes -2 and -1 (the block dimensions)
-        reduction_axes = tuple(range(len(array.shape), len(transposed_array.shape)))
-        reduced_array = func(transposed_array, axis=reduction_axes)
-        
-        return reduced_array
+        if func_kwargs is None:
+            func_kwargs = {}
+
+        pad_width = []
+        for i in range(image.ndim):
+            if image.shape[i] % block_size[i] != 0:
+                pad_width.append((0, block_size[i] - (image.shape[i] % block_size[i])))
+            else:
+                pad_width.append((0, 0))
+
+        image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=cval)
+
+        blocked_shape = tuple(s // b for s, b in zip(image.shape, block_size))
+        blocked_view = np.lib.stride_tricks.as_strided(
+            image,
+            shape=blocked_shape + block_size,
+            strides=tuple(s * b for s, b in zip(image.strides, block_size)) + image.strides
+        )
+
+        return func(blocked_view, axis=tuple(range(image.ndim, blocked_view.ndim)), **func_kwargs)
 
 
     def rescale_psf(self):
