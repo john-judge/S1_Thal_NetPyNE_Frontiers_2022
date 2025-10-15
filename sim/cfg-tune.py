@@ -248,7 +248,8 @@ elif cfg.cellsrec == 2:
                     else:
                         numberME+=int(cfg.cellNumber[metype]/5.0)
 elif cfg.cellsrec == 3:  # record all cells of target ME types
-    cfg.recordCells = [pop for pop in cfg.allpops if any([target in pop for target in target_me_types])]
+    cfg.recordCells = [pop for pop in cfg.allpops 
+                       if any([target in pop for target in target_me_types])]
     '''for metype in cfg.cellParamLabels:
         if any([target in metype for target in target_me_types]):
             for numberME in range(cfg.cellNumber[metype]):
@@ -264,7 +265,7 @@ random.seed(4322)
 # record up to axon, dend, and apic 1000
 
 # record 1% of all compartments + all soma
-percent_to_record = 0.5
+percent_to_record = 1.0
 cfg.recordTraces['Vsoma'] = {'sec': 'soma','loc':0.5,
                                 'var':'v'
                                 }
