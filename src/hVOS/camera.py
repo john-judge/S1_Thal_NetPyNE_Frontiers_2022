@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import gc
 from PIL import Image, ImageDraw, ImageFont
-#from skimage.measure import block_reduce
+from skimage.measure import block_reduce
 
 try:
     from src.hVOS.cell_recording import CellRecording
@@ -65,58 +65,7 @@ class Camera:
             self.rescale_psf()
             #self.orient_psf_to_camera()
 
-    def numpy_block_reduce(image, block_size, func=np.sum, cval=0, func_kwargs=None):
-        """Down-sample image by applying function to local blocks.
-
-        Parameters
-        ----------
-        image : ndarray
-            N-dimensional input image.
-        block_size : array_like or int
-            Array containing down-sampling integer factor along each axis.
-            If a single integer, it is used as the factor along all axes.
-        func : callable
-            Function object which is used to calculate the return value for each
-            local block. This function must implement an ``axis`` parameter.
-            Primary functions are ``numpy.sum``, ``numpy.min``, ``numpy.max``,
-            ``numpy.mean``, ``numpy.median``, ``numpy.prod``, ``numpy.std``.
-        cval : float, optional
-            Constant padding value if image is not perfectly divisible by
-            the block size.
-        func_kwargs : dict, optional
-            Keyword arguments passed to func.
-
-        Returns
-        -------
-        output : ndarray
-            Down-sampled image with same number of dimensions as input image.
-        """
-        if isinstance(block_size, int):
-            block_size = (block_size,) * image.ndim
-        elif len(block_size) != image.ndim:
-            raise ValueError("`block_size` must have the same length as `image.shape`.")
-
-        if func_kwargs is None:
-            func_kwargs = {}
-
-        pad_width = []
-        for i in range(image.ndim):
-            if image.shape[i] % block_size[i] != 0:
-                pad_width.append((0, block_size[i] - (image.shape[i] % block_size[i])))
-            else:
-                pad_width.append((0, 0))
-
-        image = np.pad(image, pad_width=pad_width, mode='constant', constant_values=cval)
-
-        blocked_shape = tuple(s // b for s, b in zip(image.shape, block_size))
-        blocked_view = np.lib.stride_tricks.as_strided(
-            image,
-            shape=blocked_shape + block_size,
-            strides=tuple(s * b for s, b in zip(image.strides, block_size)) + image.strides
-        )
-
-        return func(blocked_view, axis=tuple(range(image.ndim, blocked_view.ndim)), **func_kwargs)
-
+    
 
     def rescale_psf(self):
         ''' 
@@ -137,7 +86,7 @@ class Camera:
         downsample_factor = int(self.camera_resolution / self.psf_resolution)
         # downsample the PSF along all three dimensions. Use binning to downsample
         # along each dimension.
-        self.psf = self.numpy_block_reduce(self.psf, (downsample_factor, downsample_factor, downsample_factor), np.mean)
+        self.psf = block_reduce(self.psf, (downsample_factor, downsample_factor, downsample_factor), np.mean)
         # normalize the PSF so that its sum is 1
         self.psf /= np.sum(self.psf)
 
