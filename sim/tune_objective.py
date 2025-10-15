@@ -215,7 +215,9 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     all_cells_rec = None
     print("location of soma of cell to center on:", soma_position)
     print("Number of target population cells:", len(target_population_cells))
-    for target_cell in target_population_cells:
+    num_cells_to_draw = 3
+    print("Drawing", num_cells_to_draw, "cells.")
+    for target_cell in target_population_cells[:num_cells_to_draw]:
         cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
         cam = Camera([target_cell], 
