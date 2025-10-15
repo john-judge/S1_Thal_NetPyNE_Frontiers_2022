@@ -100,7 +100,9 @@ class CellRecording:
     def get_combined_recording(self, compart_id=None, activity_type=None):
         """ Get the combined recording of the cell. """
         if compart_id is None and activity_type is None:
-            return sum([self.recordings[compart] for compart in self.compartments])
+            return sum([self.recordings[compart]['spiking'] 
+                        + self.recordings[compart]['synaptic'] 
+                        for compart in self.compartments])
         if compart_id is None:
             return sum([self.recordings[compart][activity_type] for compart in self.compartments])
         if compart_id not in self.compartments:
