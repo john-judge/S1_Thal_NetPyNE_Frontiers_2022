@@ -138,11 +138,12 @@ def load_cell_id_to_me_type_map(file_path):
 
 def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map,
                                             target_hVOS_populations = ("L4_SS", "L4_PC")):
+    num_cells_to_draw = 3    
     target_population_cells = [
     cells[cell_id] for cell_id in cells 
         if any([t_pop in cells[cell_id].get_me_type() for 
                     t_pop in target_hVOS_populations ]) 
-    ]
+    ][:num_cells_to_draw]
     hvos_readout = hVOSReadout(target_hVOS_populations, 
                                 {cell.get_cell_id(): cell for cell in target_population_cells}, 
                                 me_type_morphology_map,
@@ -166,14 +167,22 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     ######################################
     # determine which morphology to use for each cell
     ######################################
+    num_morph_matches = 0
     for morph_key in me_type_morphology_map:
+        if num_morph_matches >= len(target_population_cells):
+            break
         for morph in me_type_morphology_map[morph_key]:
+            if num_morph_matches >= len(target_population_cells):
+                break
             print("Seeking match for morphology:", morph.me_type)
             for cell in target_population_cells:
+                if num_morph_matches >= len(target_population_cells):
+                    break
                 if cell.get_me_type().split("_barrel")[0] == morph.me_type:
 
                     if morph.does_cell_match_morphology(cell):
                         cell.set_morphology(morph)
+                        num_morph_matches += 1
             
     if any([cell.get_morphology() == None 
             for cell in target_population_cells]):
@@ -215,9 +224,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     all_cells_rec = None
     print("location of soma of cell to center on:", soma_position)
     print("Number of target population cells:", len(target_population_cells))
-    num_cells_to_draw = 3
-    print("Drawing", num_cells_to_draw, "cells.")
-    for target_cell in target_population_cells[:num_cells_to_draw]:
+    for target_cell in target_population_cells:
         cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
         cam = Camera([target_cell], 

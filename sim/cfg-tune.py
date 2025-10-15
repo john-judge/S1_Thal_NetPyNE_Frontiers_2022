@@ -264,7 +264,7 @@ random.seed(4322)
 #cfg.recordTraces = {'V_soma': {'sec':'soma', 'loc':0.5, 'var':'v'}}  ## Dict with traces to record
 # record up to axon, dend, and apic 1000
 
-# record 1% of all compartments + all soma
+# record x% of all compartments + all soma
 percent_to_record = 1.0
 cfg.recordTraces['Vsoma'] = {'sec': 'soma','loc':0.5,
                                 'var':'v'
