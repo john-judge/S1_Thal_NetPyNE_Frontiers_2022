@@ -16,7 +16,7 @@ from morphology import Morphology
 from hvos_readout import hVOSReadout
 from camera import Camera
 from psf import PSF
-from cam_params import cam_params
+from cam_params import cam_params_tune as cam_params
 
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
@@ -235,7 +235,8 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
                     psf=psf,
                     data_dir=cell_model_rec_out_dir, 
                     use_2d_psf=False,
-                    soma_dend_hVOS_ratio=soma_dend_hVOS_ratio
+                    soma_dend_hVOS_ratio=soma_dend_hVOS_ratio,
+                    compartment_include_prob=0.5,  # for speed during tuning
                     )
         cam._draw_cell(target_cell)
 
