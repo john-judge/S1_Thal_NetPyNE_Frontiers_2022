@@ -12,68 +12,97 @@ import time
 import copy
 from netpyne import specs
 import importlib.util, os
+import sys
 
 
 pc = h.ParallelContext()
 rank = int(pc.id())
 
-def set_syn_blockade(fraction):
+def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.py'):
     """
-    Scale AMPA connection weights by `fraction`.
-    fraction = 0.0 -> NBQX (block AMPA)
-    fraction = 1.0 -> ACSF (normal)
+    Based on `netpyne.sim.setup.readCmdLineArgs` but allows
+    cfg to be modified to enable NBQX (cfg.experiment_NBQX_global = True)
+    before netParams is loaded.
+
+    Parameters
+    ----------
+    simConfigDefault : str
+
+    netParamsDefault : str
+
+
     """
-    modification_params = {
-        'conds': {
-            # target only AMPA synapses
-            'synMech': ['AMPA']
-        },
-        'set': {
-            'weight': lambda w: w * fraction  # scale relative to current weight
-        }
-    }
-    sim.net.modifyConns(modification_params)
 
-def load_cfg_and_netparams(cfg_file, netparams_file, acsf=True):
-    """Reload cfg and netParams after modifying cfg."""
-    # Load cfg file
-    cfg_context = {}
-    exec(open(cfg_file).read(), cfg_context)
-    cfg = cfg_context['cfg']
+    from .. import sim
+    import __main__
 
-    # Make sure specs and cfg are visible when loading netParams
-    np_context = {'cfg': cfg, 'specs': specs}
-    exec(open(netparams_file).read(), np_context)
-    netParams = np_context['netParams']
+    if len(sys.argv) > 1:
+        print(
+            '\nReading command line arguments using syntax: python file.py [simConfig=filepath] [netParams=filepath]'
+        )
+    cfgPath = None
+    netParamsPath = None
+
+    # read simConfig and netParams paths
+    for arg in sys.argv:
+        if arg.startswith('simConfig='):
+            cfgPath = arg.split('simConfig=')[1]
+
+        elif arg.startswith('netParams='):
+            netParamsPath = arg.split('netParams=')[1]
+
+    if cfgPath is None and simConfigDefault is not None:
+        cfgPath = simConfigDefault
+    if netParamsPath is None and netParamsDefault is not None:
+        netParamsPath = netParamsDefault
+
+    if cfgPath:
+        print(f'Importing simConfig from {cfgPath}')
+        if cfgPath.endswith('.py'):
+            cfgModule = sim.loadPythonModule(cfgPath)
+            cfg = cfgModule.cfg
+        else:
+            cfg = sim.loadSimCfg(cfgPath, setLoaded=False)
+        __main__.cfg = cfg
+
+        if not cfg:
+            print('\nWarning: Could not load cfg from command line path or from default cfg.py')
+            print('This usually occurs when cfg.py crashes.  Please ensure that your cfg.py file')
+            print('completes successfully on its own (i.e. execute "python cfg.py" and fix any bugs).')
+    else:
+        print('\nNo command line argument or default value for cfg provided.')
+        cfg = None
+
+    # modify cfg here before loading netParams
+    # to enable NBQX
+    cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
+    cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
+    cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
+
+    if netParamsPath:
+        print(f'Importing netParams from {netParamsPath}')
+        if netParamsPath.endswith('py'):
+            netParamsModule = sim.loadPythonModule(netParamsPath)
+            netParams = netParamsModule.netParams
+        else:
+            netParams = sim.loadNetParams(netParamsPath, setLoaded=False)
+
+        if not netParams:
+            print('\nWarning: Could not load netParams from command line path or from default netParams.py')
+            print('This usually occurs when netParams.py crashes.  Please ensure that your netParams.py file')
+            print('completes successfully on its own (i.e. execute "python netParams.py" and fix any bugs).')
+    else:
+        print('\nNo command line argument or default value for netParams provided.')
+        netParams = None
 
     return cfg, netParams
 
-def modify_cfg_for_tuning(cfg, acsf=True):
-    
-    if not acsf:
-        cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
-        cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
-        cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
-
-    return cfg
-
-def rebuild_netParams_from_cfg(cfg, netParamsPath='netParams.py'):
-    """
-    Reload netParams.py with an existing cfg (including CLI modifications)
-    so that conditional logic depending on cfg values is re-evaluated.
-    """
-    # Ensure cfg is visible in the exec scope
-    context = {'cfg': cfg, 'specs': specs}
-    exec(open(netParamsPath).read(), context)
-    netParams = context['netParams']
-    return netParams
-
 def build_network(acsf=True):
-    
-    cfg, netParams = sim.readCmdLineArgs()
-    if not acsf:  # ACSF by default. Modify cfg manually and rebuild netParams if NBQX
-        cfg = modify_cfg_for_tuning(cfg, acsf=acsf)
-        netParams = rebuild_netParams_from_cfg(cfg)
+    cfg, netParams = None, None
+    if acsf:
+        cfg, netParams = sim.readCmdLineArgs()
+    else:  # nbqx
+        cfg, netParams = readCmdLineArgs_nbqx()
 
     sim.initialize(
         simConfig = cfg, 	
