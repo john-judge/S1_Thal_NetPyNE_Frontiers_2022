@@ -33,7 +33,6 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
 
     """
 
-    from .. import sim
     import __main__
 
     if len(sys.argv) > 1:
