@@ -29,8 +29,11 @@ class Camera:
                  spike_thresh=0.1674, # optial a.u., found in data['net']['params']['defaultThreshold'], then 0.196 + 0.00286 * -10 = 0.1674
                  init_dummy=False,
                  draw_synapses=None,
-                 soma_dend_hVOS_ratio=1.0
+                 soma_dend_hVOS_ratio=1.0,
+                 compartment_include_prob=1.0  # probability of including each compartment in the camera view; reduce for speed (e.g. for tuning)
                  ):  
+        # seed random
+        np.random.seed(4332)
         self.target_cells = target_cells
         self.morphologies = morphologies
         self.time = time
@@ -50,6 +53,7 @@ class Camera:
 
         # optical tuning
         self.soma_dend_hVOS_ratio = soma_dend_hVOS_ratio
+        self.compartment_include_prob = compartment_include_prob
 
         # make memory-mapped numpy arrays.
         self.cell_recording = None
@@ -64,8 +68,6 @@ class Camera:
         if not init_dummy:
             self.rescale_psf()
             #self.orient_psf_to_camera()
-
-    
 
     def rescale_psf(self):
         ''' 
@@ -239,6 +241,8 @@ class Camera:
         # follow the morphology of the cell, pulling optical trace from each compartment
         # and drawing it on the camera view
         for compartment in structure:
+            if np.random.rand() > self.compartment_include_prob:
+                continue
             intensity_value = np.array(cell.get_optical_trace("V" + compartment))
             spike_mask = intensity_value > self.spike_thresh
             if time_step is not None:
