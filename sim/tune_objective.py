@@ -161,36 +161,43 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     # build 3D PSF 
     psf = psf.build_3D_PSF()
 
-
     ######################################
     # determine which morphology to use for each cell
     ######################################
-    num_morph_matches = 0
     for morph_key in me_type_morphology_map:
-        if num_morph_matches >= len(target_population_cells):
+        if all([cell.get_morphology() is not None 
+            for cell in target_population_cells]):
             break
         for morph in me_type_morphology_map[morph_key]:
-            if num_morph_matches >= len(target_population_cells):
+            if all([cell.get_morphology() is not None 
+                for cell in target_population_cells]):
                 break
             print("Seeking match for morphology:", morph.me_type)
             for cell in target_population_cells:
-                if num_morph_matches >= len(target_population_cells):
+                if all([cell.get_morphology() is not None 
+                    for cell in target_population_cells]):
                     break
                 if cell.get_me_type().split("_barrel")[0] == morph.me_type:
 
                     if morph.does_cell_match_morphology(cell):
                         cell.set_morphology(morph)
-                        num_morph_matches += 1
             
-    if any([cell.get_morphology() == None 
+    if any([cell.get_morphology() is None 
             for cell in target_population_cells]):
-        print(str(sum([cell.get_morphology() == None 
+        print(str(sum([cell.get_morphology() is None 
             for cell in target_population_cells])) + " target cells are missing structure data:")
         # report which cells are missing morphology
+        safe_cells = []
         for cell in target_population_cells:
             if cell.get_morphology() is None:
                 print("Cell", cell.get_cell_id(), "is missing morphology for me_type", cell.get_me_type())
-        raise Exception("Some target cells are missing morphology data. Review above messages.")
+            else:
+                safe_cells.append(cell)
+        target_population_cells = safe_cells
+        if len(target_population_cells) == 0:
+            raise Exception("All target cells are missing morphology data. Review above messages.")
+        else:
+            print("Some target cells are missing morphology data. Continuing with", len(target_population_cells), "cells that have morphology data.")
 
     #######################################
     # Draw cells with PSF
