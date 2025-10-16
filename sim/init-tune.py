@@ -89,7 +89,18 @@ def build_network(acsf=True):
         print(sim.cfg.synWeightFractionEE[0], "cfg.synWeightFractionEE[0] for ACSF = ", acsf)
     except Exception as e:
         print("Error accessing synWeightFractionEE[0]:", e)
-
+    net_p = None
+    try:
+        net_p = sim.net.connParams
+    except Exception as e:
+        try:
+            net_p = sim.netParams.connParams
+        except Exception as e2:
+            print("Error accessing sim.netParams.connParams:", e2)
+    if net_p is not None:
+        key0 = list(net_p.keys())[0]
+        synMechWeightFactor = net_p[key0].get('synMechWeightFactor', None)
+        print(f"Example synMechWeightFactor from connParams: {synMechWeightFactor} for ACSF = ", acsf)
 
 # start timer 
 if rank == 0:

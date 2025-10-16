@@ -20,8 +20,6 @@ from cam_params import cam_params
 
 
 # from recording 10/23/2024 slice 1 L2/3_Stim
-start_time = 500
-
 exp_data = {
     'nbqx_halfwidth_mean': 4.3623,
     'nbqx_latency_mean': 3.5624,
@@ -90,7 +88,7 @@ def extract_traces(simData):
 
     return pixel_traces
 
-def extract_features(traces, tvec):
+def extract_features(traces, tvec, start_time=500):
     """Return amplitude, latency, half-width."""
     int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
     features = []
@@ -104,7 +102,7 @@ def extract_features(traces, tvec):
         m, b = np.polyfit(x_, y, 1)
         trend = np.polyval([m, b], np.arange(tr.shape[0]))
         tr = tr - trend
-        tr = tr[start_time:]  # only analyze from start_time onward, and invert
+        tr = -tr[start_time:]  # only analyze from start_time onward, and invert
         tr -= np.min(tr)  # baseline to 0
         tp = TraceProperties(tr, start=0, width=400, int_pts=int_pts)
         tp.measure_properties()
@@ -275,7 +273,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
                 if np.count_nonzero(all_cells_rec[:, i, j]) > 0:
                     pixel_id = f"pixel_{i}_{j}"
                     pixel_traces[pixel_id] = all_cells_rec[:, i, j]
-    return pixel_traces
+    return pixel_traces, all_cells_rec
 
 def load_morphologies(simData, cell_id_to_me_type_map, 
                         target_hVOS_populations = ("L4_SS", "L4_PC")):
@@ -361,10 +359,11 @@ def myObjectiveInner(simData):
     cell_id_to_me_type_map = load_cell_id_to_me_type_map('../data/cell_id_to_me_type_map.json')
     cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
     cells_nbqx, _ = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
-    # TO DO: put hVOS/optical processing here instead of just using voltage traces
-    simData_traces_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
+    
+    # hVOS/optical processing
+    simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
                                                                   me_type_morphology_map)
-    simData_traces_nbqx = average_voltage_traces_into_hVOS_pixels(simData_nbqx, cells_nbqx, 
+    simData_traces_nbqx, all_cells_rec_nbqx = average_voltage_traces_into_hVOS_pixels(simData_nbqx, cells_nbqx, 
                                                                   me_type_morphology_map)
     tvec = np.array(simData_acsf['t'])  # time vector is the same for both conditions
 
@@ -415,6 +414,10 @@ def myObjectiveInner(simData):
             'exp_hw_mean': np.mean(exp_hw),
         }, f, indent=4)
     print("Files in ", save_folder, ": ", os.listdir(save_folder))
+
+    # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
+    np.save(os.path.join(save_folder, f"all_cells_rec_acsf_trial{curr_trial}.npy"), all_cells_rec_acsf)
+    np.save(os.path.join(save_folder, f"all_cells_rec_nbqx_trial{curr_trial}.npy"), all_cells_rec_nbqx)
 
     # save the simulated traces of this trial to file
     # pickle simData_traces_acsf and simData_traces_nbqx
