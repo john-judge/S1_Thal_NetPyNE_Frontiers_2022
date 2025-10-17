@@ -34,6 +34,7 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
     """
 
     import __main__
+    from netpyne import sim, specs
 
     if len(sys.argv) > 1:
         print(
@@ -74,9 +75,13 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
 
     # modify cfg here before loading netParams
     # to enable NBQX
-    cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
-    cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
-    cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
+    # http://doc.netpyne.org/user_documentation.html#running-a-batch-job-beta
+    cfg.update({'experiment_NBQX_global': True,
+                'synWeightFractionEE': [cfg.partial_blockade_fraction, 1.0],
+                'synWeightFractionEI': [cfg.partial_blockade_fraction, 1.0]}, force_match=True)
+    #cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
+    #cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
+    #cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
 
     if netParamsPath:
         print(f'Importing netParams from {netParamsPath}')
@@ -99,9 +104,9 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
 def build_network(acsf=True):
     cfg, netParams = None, None
     if acsf:
-        cfg, netParams = sim.readCmdLineArgs()
+        cfg, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
     else:  # nbqx
-        cfg, netParams = readCmdLineArgs_nbqx()
+        cfg, netParams = readCmdLineArgs_nbqx(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
 
     sim.initialize(
         simConfig = cfg, 	

@@ -7,6 +7,7 @@ import json
 import matplotlib.pyplot as plt
 import pickle
 import sys
+import time
 
 sys.path.insert(0, '../src/hVOS')  # import from src/hVOS
 sys.path.insert(0, '..')  # import from src/hVOS/cell
@@ -346,7 +347,6 @@ def load_morphologies(simData, cell_id_to_me_type_map,
 
     return cells, me_type_morphology_map
 
-
 def myObjectiveInner(simData):
     # simData['acsf'] and simData['nbqx'] are the two conditions
     # each is a dict with keys like 'Vsoma', 'Vdend_32', etc
@@ -358,7 +358,10 @@ def myObjectiveInner(simData):
     cfg: simulation configuration object
     netParams: network parameters
     """
-    
+    # start timer
+    timer = time.time()
+    start_time=500
+
     simData = simData['simData']
     
     simData_acsf = simData['acsf']
@@ -434,6 +437,12 @@ def myObjectiveInner(simData):
     with open(os.path.join(save_folder, f"simData_traces_nbqx_trial{curr_trial}.pkl"), 'wb') as f:
         pickle.dump(simData_traces_nbqx, f)
 
+    # save processed traces to pickle
+    with open(os.path.join(save_folder, f"processed_traces_acsf_trial{curr_trial}.pkl"), 'wb') as f:
+        pickle.dump(acsf_processed_traces, f)
+    with open(os.path.join(save_folder, f"processed_traces_nbqx_trial{curr_trial}.pkl"), 'wb') as f:
+        pickle.dump(nbqx_processed_traces, f)
+
     # plot processed traces for this trial
     plt.figure(figsize=(12, 6))
     for tr in acsf_processed_traces:
@@ -446,6 +455,8 @@ def myObjectiveInner(simData):
     plt.savefig(os.path.join(save_folder, f"processed_traces_trial{curr_trial}.png"))
     plt.close()
 
-    
+    # end timer
+    end_timer = time.time()
+    print(f"Objective function computation time: {end_timer - timer} seconds")
 
     return err_ratio + err_latency + err_hw
