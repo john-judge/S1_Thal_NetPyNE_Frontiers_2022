@@ -82,10 +82,12 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
                 'synWeightFractionEE': [cfg.partial_blockade_fraction, 1.0],
                 'synWeightFractionEI': [cfg.partial_blockade_fraction, 1.0]}, force_match=True)
     #cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
-    #cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
-    #cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
+    cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
+    cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
 
-    print("CFG after modification for NBQX:", cfg.synWeightFractionEE)
+    print("CFG after modification for NBQX:", cfg.synWeightFractionEE, 
+          '\nexperiment_NBQX_global =', cfg.experiment_NBQX_global,
+          '\npartial_blockade_fraction =', cfg.partial_blockade_fraction)
 
     if netParamsPath:
         print(f'Importing netParams from {netParamsPath}')
