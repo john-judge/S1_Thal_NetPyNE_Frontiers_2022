@@ -121,7 +121,9 @@ def myObjective(simData):
 
 def load_cell_id_to_me_type_map(file_path):
     cell_id_to_me_type_map = {}
-    target_dir_net = '../data/optuna_tuning/gen_0/trial_0_data.pkl'
+    save_folder = '../data/optuna_tuning'
+    curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(save_folder) if (os.path.isdir(os.path.join(save_folder, d)) and 'gen_' in d)])
+    target_dir_net = f'../data/optuna_tuning/gen_{curr_trial}/trial_{curr_trial}_data.pkl'
 
     with open(target_dir_net, 'rb') as f:
         data = pickle.load(f)
