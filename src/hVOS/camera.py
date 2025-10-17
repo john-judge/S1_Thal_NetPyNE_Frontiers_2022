@@ -3,7 +3,8 @@ import numpy as np
 import gc
 from PIL import Image, ImageDraw, ImageFont
 from skimage.measure import block_reduce
-
+import os
+from scipy import sparse
 try:
     from src.hVOS.cell_recording import CellRecording
 except ModuleNotFoundError:
@@ -30,10 +31,13 @@ class Camera:
                  init_dummy=False,
                  draw_synapses=None,
                  soma_dend_hVOS_ratio=1.0,
-                 compartment_include_prob=1.0  # probability of including each compartment in the camera view; reduce for speed (e.g. for tuning)
+                 compartment_include_prob=1.0,  # probability of including each compartment in the camera view; reduce for speed (e.g. for tuning)
+                 precompute_geometry=False,
+                 geometry_cache_filename=None
                  ):  
         # seed random
         np.random.seed(4332)
+
         self.target_cells = target_cells
         self.morphologies = morphologies
         self.time = time
@@ -68,6 +72,29 @@ class Camera:
         if not init_dummy:
             self.rescale_psf()
             #self.orient_psf_to_camera()
+
+        # store precomputed geometry mappings for each cell
+        self.precompute_geometry = precompute_geometry
+        self.geometry_map = {}  # cell_id → list of (pixel_idx, weight)
+        self.geometry_filename = geometry_cache_filename
+
+        if self.geometry_filename and os.path.exists(self.geometry_filename):
+            self.load_geometry(self.geometry_filename)
+
+    def save_geometry(self, filename=None):
+        """Save precomputed geometry map to disk."""
+        import pickle, os
+        filename = filename or self.geometry_filename or (self.data_dir + "geometry_cache.pkl")
+        with open(filename, "wb") as f:
+            pickle.dump(self.geometry_map, f)
+        print(f"Saved geometry map with {len(self.geometry_map)} cells to {filename}")
+
+    def load_geometry(self, filename):
+        """Load precomputed geometry map from disk."""
+        import pickle
+        with open(filename, "rb") as f:
+            self.geometry_map = pickle.load(f)
+        print(f"Loaded geometry map from {filename} with {len(self.geometry_map)} cells")
 
     def rescale_psf(self):
         ''' 
@@ -234,6 +261,15 @@ class Camera:
         """ Draw the camera view of a single cell at a single time step. 
         Returns true if the cell is within the camera view, false otherwise."""
         print("Drawing", cell)
+
+        if self.precompute_geometry and cell.get_cell_id() in self.geometry_map:
+            print("Using precomputed mapping")
+            geom = self.geometry_map[cell.get_cell_id()]
+            for (pixel_i, pixel_j, weight) in geom:
+                # directly record the optical intensity without geometric computation
+                self.cell_recording.record_activity(pixel_i, pixel_j, weight, time_step)
+            return True
+
         x_soma, y_soma, z_soma = cell.get_soma_position()
         structure = cell.get_morphology().get_structure()
         is_cell_in_bounds = False
@@ -265,6 +301,11 @@ class Camera:
             gc.collect()
         del structure
         gc.collect()
+
+        if self.precompute_geometry and cell.get_cell_id() not in self.geometry_map:
+            # record geometry that was traversed during drawing
+            self.geometry_map[cell.get_cell_id()] = self._capture_last_geometry()
+
         return is_cell_in_bounds
 
     def _draw_segment(self, segment, intensity_value, x_soma, y_soma, z_soma, t, decomp_type=None, spike_mask=None):
@@ -653,6 +694,11 @@ class Camera:
                 x_psf_weighted_bounded = \
                     xy_psf_weighted[x_psf_lim[0]-x_psf_lim[0]:x_psf_lim[1]-x_psf_lim[0],
                                     y_psf_lim[0]-y_psf_lim[0]:y_psf_lim[1]-y_psf_lim[0]]
+            
+            if self.precompute_geometry:
+                if not hasattr(self, "_geometry_buffer"):
+                    self._geometry_buffer = []
+                self._geometry_buffer.append((i, j, weight))
 
             self.record_point_intensity(None, None, x_psf_weighted_bounded, 
                                         t, i_bounds=i_bounds, j_bounds=j_bounds,
@@ -667,3 +713,26 @@ class Camera:
         """ Record the intensity of a point on the camera view. """
         self.cell_recording.record_activity(i, j, weights, t, i_bounds=i_bounds, j_bounds=j_bounds,
                                             compart=decomp_type, spike_mask=spike_mask)
+
+    def _capture_last_geometry(self):
+        geom = getattr(self, "_geometry_buffer", [])
+        self._geometry_buffer = []
+        return geom
+
+
+    def get_sparse_W(self, cell_id):
+        geom = np.array(self.geometry_map[cell_id])
+        rows, cols, data = geom[:,0], geom[:,1], geom[:,2]
+        P = self.camera_width * self.camera_height
+        C = len(self.target_cells[cell_id].get_morphology().get_structure())
+        # flatten pixel indices
+        flat_rows = rows * self.camera_height + cols
+        W = sparse.csr_matrix((data, (flat_rows, np.arange(len(data)))), shape=(P, C))
+        return W
+    
+    def fast_draw_cell(self, W, Vm):
+        """ Fast draw a cell using precomputed sparse matrix W and Vm. """
+        # Vm is (C, T)
+        # W is (P, C)
+        # result is (P, T)
+        P = W @ Vm

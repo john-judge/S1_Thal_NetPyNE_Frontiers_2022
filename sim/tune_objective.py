@@ -69,7 +69,7 @@ def extract_traces(simData):
         try:
             avg_traces[cell_id] = np.average(avg_traces_, axis=0)
         except ZeroDivisionError as e:
-            print("ZeroDivisionError for cell_id:", cell_id, "with avg_traces shape:", avg_traces.shape)
+            print("ZeroDivisionError for cell_id:", cell_id, "with avg_traces shape:", avg_traces_.shape)
     # create random subsets of 5 cells and average them to create "pixels"
     cell_ids = list(avg_traces.keys())
     np.random.seed(42)  # for reproducibility
@@ -211,7 +211,6 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
 
     time_step_size = time[1] - time[0]
 
-
     view_center_cell = 0  # view center cell is the cell to center on.
     # other cells may or may not be in view.
     soma_position = None
@@ -232,9 +231,14 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     all_cells_rec = None
     print("location of soma of cell to center on:", soma_position)
     print("Number of target population cells:", len(target_population_cells))
+
     for target_cell in target_population_cells:
         cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
+        geometry_cache = save_folder + f'/geometry_cache{target_cell.get_cell_id()}.pkl'
+        geometry_cache_file = None
+        if not os.path.exists(geometry_cache):
+            geometry_cache_file = geometry_cache
         cam = Camera([target_cell], 
                     me_type_morphology_map, 
                     time,
@@ -246,9 +250,14 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
                     data_dir=cell_model_rec_out_dir, 
                     use_2d_psf=False,
                     soma_dend_hVOS_ratio=soma_dend_hVOS_ratio,
-                    compartment_include_prob=0.5,  # for speed during tuning
+                    compartment_include_prob=1.0,  # reduce for speed during tuning
+                    precompute_geometry=True,
+                    geometry_cache_filename=geometry_cache_file
                     )
         cam._draw_cell(target_cell)
+
+        if geometry_cache_file is None:
+            cam.save_geometry(geometry_cache)
 
         recording = cam.get_cell_recording()  # returns a CellRecording object
         try:
@@ -431,13 +440,6 @@ def myObjectiveInner(simData):
     # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
     np.save(os.path.join(save_folder, f"all_cells_rec_acsf_trial{curr_trial}.npy"), all_cells_rec_acsf)
     np.save(os.path.join(save_folder, f"all_cells_rec_nbqx_trial{curr_trial}.npy"), all_cells_rec_nbqx)
-
-    # save the simulated traces of this trial to file
-    # pickle simData_traces_acsf and simData_traces_nbqx
-    with open(os.path.join(save_folder, f"simData_traces_acsf_trial{curr_trial}.pkl"), 'wb') as f:
-        pickle.dump(simData_traces_acsf, f)
-    with open(os.path.join(save_folder, f"simData_traces_nbqx_trial{curr_trial}.pkl"), 'wb') as f:
-        pickle.dump(simData_traces_nbqx, f)
 
     # save processed traces to pickle
     with open(os.path.join(save_folder, f"processed_traces_acsf_trial{curr_trial}.pkl"), 'wb') as f:
