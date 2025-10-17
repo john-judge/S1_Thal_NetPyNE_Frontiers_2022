@@ -51,6 +51,8 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
         elif arg.startswith('netParams='):
             netParamsPath = arg.split('netParams=')[1]
 
+    print(f'cmd line cfgPath: {cfgPath}, netParamsPath: {netParamsPath}')
+
     if cfgPath is None and simConfigDefault is not None:
         cfgPath = simConfigDefault
     if netParamsPath is None and netParamsDefault is not None:
@@ -82,6 +84,8 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
     #cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
     #cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
     #cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
+
+    print("CFG after modification for NBQX:", cfg.synWeightFractionEE)
 
     if netParamsPath:
         print(f'Importing netParams from {netParamsPath}')
