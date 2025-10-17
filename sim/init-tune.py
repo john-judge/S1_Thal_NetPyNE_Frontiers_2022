@@ -141,6 +141,21 @@ def build_network(acsf=True):
 if rank == 0:
     start_time = time.time()
 
+
+build_network(acsf=False)
+sim.cfg.filename = 'nbqx_run'
+sim.runSim()                     
+sim.gatherData()  
+sim.pc.barrier()   # Wait for all ranks to finish gatherData
+if rank == 0:
+    try:
+        nbqx_data = copy.deepcopy(dict(sim.allSimData))  # save NBQX data, deep copy
+    except Exception as e:
+        print("Error copying NBQX data:", e)
+        nbqx_data = dict(sim.allSimData)
+
+        
+sim.allSimData = {}  # clear before next sim
 build_network()
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
 sim.cfg.filename = 'acsf_run'
@@ -154,18 +169,6 @@ if rank == 0:
         print("Error copying ACSF data:", e)
         acsf_data = dict(sim.allSimData)
 
-sim.allSimData = {}  # clear before next sim
-build_network(acsf=False)
-sim.cfg.filename = 'nbqx_run'
-sim.runSim()                     
-sim.gatherData()  
-sim.pc.barrier()   # Wait for all ranks to finish gatherData
-if rank == 0:
-    try:
-        nbqx_data = copy.deepcopy(dict(sim.allSimData))  # save NBQX data, deep copy
-    except Exception as e:
-        print("Error copying NBQX data:", e)
-        nbqx_data = dict(sim.allSimData)
 
     sim.allSimData = {'simData': {'acsf': acsf_data, 'nbqx': nbqx_data}}
     sim.saveData()
