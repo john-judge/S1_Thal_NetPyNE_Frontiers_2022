@@ -85,12 +85,8 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
     cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
     cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
 
-    print("CFG after modification for NBQX:", cfg.synWeightFractionEE, 
-          ' experiment_NBQX_global =', cfg.experiment_NBQX_global,
-          ' partial_blockade_fraction =', cfg.partial_blockade_fraction)
-
     if netParamsPath:
-        print(f'Importing netParams from {netParamsPath}')
+        print(f'CFG after modification for NBQX: {cfg.synWeightFractionEE}, Importing netParams from {netParamsPath}')
         if netParamsPath.endswith('py'):
             netParamsModule = sim.loadPythonModule(netParamsPath)
             netParams = netParamsModule.netParams
