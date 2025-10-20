@@ -240,6 +240,9 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
         if os.path.exists(geometry_cache):
             print("Using existing geometry cache for cell:", target_cell.get_cell_id())
             geometry_cache_file = geometry_cache
+        else:
+            print("Geometry cache not found for cell:", target_cell.get_cell_id(),
+                   "; will create new cache at", geometry_cache)
         cam = Camera([target_cell], 
                     me_type_morphology_map, 
                     time,
