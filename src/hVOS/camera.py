@@ -79,6 +79,7 @@ class Camera:
         self.geometry_filename = geometry_cache_filename
 
         if self.geometry_filename and os.path.exists(self.geometry_filename):
+            print("Loading precomputed geometry from", self.geometry_filename)
             self.load_geometry(self.geometry_filename)
 
     def save_geometry(self, filename=None):
