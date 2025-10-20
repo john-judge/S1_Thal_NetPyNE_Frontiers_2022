@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pickle
 import sys
 import time
+import random
 
 sys.path.insert(0, '../src/hVOS')  # import from src/hVOS
 sys.path.insert(0, '..')  # import from src/hVOS/cell
@@ -144,7 +145,15 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     cells[cell_id] for cell_id in cells 
         if any([t_pop in cells[cell_id].get_me_type() for 
                     t_pop in target_hVOS_populations ]) 
-    ][:num_cells_to_draw]
+    ]
+
+    # random choice of num_cells_to_draw cells from target population
+    # seed random for reproducibility
+    random.seed(4332)
+    target_population_cells = random.sample(target_population_cells, 
+                                            min(num_cells_to_draw, 
+                                                len(target_population_cells)))
+
     hvos_readout = hVOSReadout(target_hVOS_populations, 
                                 {cell.get_cell_id(): cell for cell in target_population_cells}, 
                                 me_type_morphology_map,
@@ -235,7 +244,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     for target_cell in target_population_cells:
         cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
-        geometry_cache = all_trial_save_folder + f'/geometry_cache{target_cell.get_cell_id()}.pkl'
+        geometry_cache = all_trial_save_folder + f'geometry_cache_{target_cell.get_cell_id()}.pkl'
         geometry_cache_file = None
         if os.path.exists(geometry_cache):
             print("Using existing geometry cache for cell:", target_cell.get_cell_id())
