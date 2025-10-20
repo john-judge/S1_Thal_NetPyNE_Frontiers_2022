@@ -149,9 +149,9 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
                                 {cell.get_cell_id(): cell for cell in target_population_cells}, 
                                 me_type_morphology_map,
                                 force_overwrite=True)
-    save_folder = '../data/optuna_tuning/'
-    curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(save_folder) if (os.path.isdir(os.path.join(save_folder, d)) and 'gen_' in d)])
-    save_folder = '../data/optuna_tuning/gen_' + str(curr_trial)
+    all_trial_save_folder = '../data/optuna_tuning/'
+    curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(all_trial_save_folder) if (os.path.isdir(os.path.join(all_trial_save_folder, d)) and 'gen_' in d)])
+    save_folder = all_trial_save_folder + 'gen_' + str(curr_trial)
     hvos_readout.compute_optical_signal(save_folder)
 
     ####################################
@@ -235,9 +235,10 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     for target_cell in target_population_cells:
         cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
-        geometry_cache = save_folder + f'/geometry_cache{target_cell.get_cell_id()}.pkl'
+        geometry_cache = all_trial_save_folder + f'/geometry_cache{target_cell.get_cell_id()}.pkl'
         geometry_cache_file = None
-        if not os.path.exists(geometry_cache):
+        if os.path.exists(geometry_cache):
+            print("Using existing geometry cache for cell:", target_cell.get_cell_id())
             geometry_cache_file = geometry_cache
         cam = Camera([target_cell], 
                     me_type_morphology_map, 
@@ -257,7 +258,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
         cam._draw_cell(target_cell)
 
         if geometry_cache_file is None:
-            cam.save_geometry(geometry_cache)
+            cam.save_geometry(filename=geometry_cache)
 
         recording = cam.get_cell_recording()  # returns a CellRecording object
         try:
