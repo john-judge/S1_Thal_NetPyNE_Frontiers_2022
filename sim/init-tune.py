@@ -18,7 +18,7 @@ import sys
 pc = h.ParallelContext()
 rank = int(pc.id())
 
-def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.py'):
+def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.py', acsf=True):
     """
     Based on `netpyne.sim.setup.readCmdLineArgs` but allows
     cfg to be modified to enable NBQX (cfg.experiment_NBQX_global = True)
@@ -78,12 +78,14 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
     # modify cfg here before loading netParams
     # to enable NBQX
     # http://doc.netpyne.org/user_documentation.html#running-a-batch-job-beta
-    cfg.update({'experiment_NBQX_global': True,
-                'synWeightFractionEE': [cfg.partial_blockade_fraction, 1.0],
-                'synWeightFractionEI': [cfg.partial_blockade_fraction, 1.0]}, force_match=True)
-    #cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
-    cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
-    cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
+    if not acsf:
+        print("Modifying cfg for NBQX simulation")
+        cfg.update({'experiment_NBQX_global': True,
+                    'synWeightFractionEE': [cfg.partial_blockade_fraction, 1.0],
+                    'synWeightFractionEI': [cfg.partial_blockade_fraction, 1.0]}, force_match=True)
+        #cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
+        cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
+        cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
 
     if netParamsPath:
         print(f'CFG after modification for NBQX: {cfg.synWeightFractionEE}, Importing netParams from {netParamsPath}')
@@ -105,10 +107,7 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
 
 def build_network(acsf=True):
     cfg, netParams = None, None
-    if acsf:
-        cfg, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
-    else:  # nbqx
-        cfg, netParams = readCmdLineArgs_nbqx(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
+    cfg, netParams = readCmdLineArgs_nbqx(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py', acsf=acsf)
 
     sim.initialize(
         simConfig = cfg, 	
@@ -154,7 +153,7 @@ if rank == 0:
         print("Error copying NBQX data:", e)
         nbqx_data = dict(sim.allSimData)
 
-        
+
 sim.allSimData = {}  # clear before next sim
 build_network()
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)

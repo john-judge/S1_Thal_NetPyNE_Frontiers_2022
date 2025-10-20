@@ -719,7 +719,7 @@ class Camera:
         self._geometry_buffer = []
         return geom
 
-
+'''
     def get_sparse_W(self, cell_id):
         geom = np.array(self.geometry_map[cell_id])
         rows, cols, data = geom[:,0], geom[:,1], geom[:,2]
@@ -736,3 +736,4 @@ class Camera:
         # W is (P, C)
         # result is (P, T)
         P = W @ Vm
+        '''
