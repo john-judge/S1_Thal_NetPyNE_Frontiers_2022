@@ -267,9 +267,9 @@ class Camera:
         if self.precompute_geometry and cell.get_cell_id() in self.geometry_map:
             print("Using precomputed mapping")
             geom = self.geometry_map[cell.get_cell_id()]
-            for (pixel_i, pixel_j, weight) in geom:
+            for (pixel_i, pixel_j, weight, compart) in geom:
                 # directly record the optical intensity without geometric computation
-                self.cell_recording.record_activity(pixel_i, pixel_j, weight, time_step)
+                self.cell_recording.record_activity(pixel_i, pixel_j, weight, time_step, compart=compart)
             return True
 
         x_soma, y_soma, z_soma = cell.get_soma_position()
@@ -700,7 +700,7 @@ class Camera:
             if self.precompute_geometry:
                 if not hasattr(self, "_geometry_buffer"):
                     self._geometry_buffer = []
-                self._geometry_buffer.append((i, j, weight))
+                self._geometry_buffer.append((i, j, weight, decomp_type))
 
             self.record_point_intensity(None, None, x_psf_weighted_bounded, 
                                         t, i_bounds=i_bounds, j_bounds=j_bounds,

@@ -44,7 +44,7 @@ class CellRecording:
     def record_activity(self, i, j, weights, t, i_bounds=None, j_bounds=None,
                                compart=None, spike_mask=None):
         """ Record the activity of the cell in the specified compartment and activity type. """
-        if compart not in self.compartments:
+        if compart is not None and compart not in self.compartments:
             raise ValueError("Compartment not found: " + compart)
         if spike_mask is None:
             spike_mask = np.zeros(weights.shape, dtype=bool)
@@ -62,7 +62,7 @@ class CellRecording:
                   str(spike_mask.shape) + " vs " + str(len(self.time)) + \
                     'weights shape: ' + str(weights.shape) + \
                         "Trimming. Cell id: " + str(self.cell_id) + \
-                            " compartment: " + compart + " i: " + str(i) + " j: " + str(j))
+                            " compartment: " + str(compart) + " i: " + str(i) + " j: " + str(j))
             spike_mask = spike_mask[:len(self.time)]
             weights = weights[:len(self.time)]
         
