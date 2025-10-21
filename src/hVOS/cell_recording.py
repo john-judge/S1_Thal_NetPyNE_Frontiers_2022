@@ -1,6 +1,7 @@
 import numpy as np
 import gc
 import os
+from scipy.ndimage import convolve
 
 
 class CellRecording:
@@ -25,6 +26,23 @@ class CellRecording:
         for compart in self.compartments:
             self.recordings[compart] = self.create_compartment_recording(compart)
 
+    def apply_psf(self, psf, time_step=None):
+        """ Apply a PSF to the recorded data. """
+        
+        if time_step is not None:
+            # apply PSF to a single time step
+            for compart in self.compartments:
+                for activity_type in ['spiking', 'synaptic']:
+                    self.recordings[compart][activity_type][time_step] = \
+                        convolve(self.recordings[compart][activity_type][time_step], psf, mode='constant', cval=0.0)
+        else:
+            # apply PSF to all time steps
+            for compart in self.compartments:
+                for activity_type in ['spiking', 'synaptic']:
+                    for t in range(len(self.time)):
+                        self.recordings[compart][activity_type][t] = \
+                            convolve(self.recordings[compart][activity_type][t], psf, mode='constant', cval=0.0)
+
     def get_non_zero_file_list(self):
         """ Check self.recordings for non-zero numpy arrays and return a list of the filenames. """
         non_zero_files = []
@@ -41,10 +59,13 @@ class CellRecording:
                 non_zero_files.append(syn_mm_fp)
         return non_zero_files
 
-    def record_activity(self, i, j, weights, t, i_bounds=None, j_bounds=None,
+    def record_activity(self, i, j, intensity_value, area_lateral, t, i_bounds=None, j_bounds=None,
                                compart=None, spike_mask=None):
         """ Record the activity of the cell in the specified compartment and activity type. """
-        if compart is not None and compart not in self.compartments:
+        weights = intensity_value * area_lateral
+        if compart is None:
+            raise ValueError("Compartment must be specified, not None.")
+        if compart not in self.compartments:
             raise ValueError("Compartment not found: " + compart)
         if spike_mask is None:
             spike_mask = np.zeros(weights.shape, dtype=bool)

@@ -78,6 +78,11 @@ class Camera:
         self.geometry_map = {}  # cell_id → list of (pixel_idx, weight)
         self.geometry_filename = geometry_cache_filename
 
+        if self.precompute_geometry:
+            # turn off psf, store as post_psf, and apply PSF only on the final image
+            self.post_psf = self.psf
+            self.psf = None
+
         if self.geometry_filename and os.path.exists(self.geometry_filename):
             print("Loading precomputed geometry from", self.geometry_filename)
             self.load_geometry(self.geometry_filename)
@@ -268,9 +273,14 @@ class Camera:
             print("Using precomputed mapping")
             geom = self.geometry_map[cell.get_cell_id()]
             for compart in geom:
-                for (pixel_i, pixel_j, weight) in geom[compart]:
+                for (pixel_i, pixel_j, area_lateral, compartment) in geom[compart]:
                     # directly record the optical intensity without geometric computation
-                    self.cell_recording.record_activity(pixel_i, pixel_j, weight, time_step, compart=compart)
+                    intensity_value = np.array(cell.get_optical_trace("V" + compartment))
+                    self.record_point_intensity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, None, 
+                                            decomp_type=decomp_type,
+                                            spike_mask=spike_mask,
+                                            compartment=compartment)
+                    self.cell_recording.record_activity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, compart=compart)
             return True
 
         x_soma, y_soma, z_soma = cell.get_soma_position()
@@ -298,7 +308,7 @@ class Camera:
                     self._draw_segment(structure[compartment][segment_id], 
                                    intensity_value * optical_tuning_weight,
                                    x_soma, y_soma, z_soma, time_step, 
-                                   decomp_type=decomp_type, spike_mask=spike_mask) \
+                                   decomp_type=decomp_type, compartment=compartment, spike_mask=spike_mask) \
                     or is_cell_in_bounds
             del intensity_value
             gc.collect()
@@ -309,9 +319,12 @@ class Camera:
             # record geometry that was traversed during drawing
             self.geometry_map[cell.get_cell_id()] = self._capture_last_geometry()
 
+        if self.post_psf is not None:
+            self.cell_recording.apply_psf(self.post_psf, time_step=time_step)
+
         return is_cell_in_bounds
 
-    def _draw_segment(self, segment, intensity_value, x_soma, y_soma, z_soma, t, decomp_type=None, spike_mask=None):
+    def _draw_segment(self, segment, intensity_value, x_soma, y_soma, z_soma, t, decomp_type=None, spike_mask=None, compartment=None):
         """ draw the segment of the cell on the camera view. 
         Returns true if the segment is within the camera view, false otherwise."""
         x_seg_prox = float(segment['proximal']['x']) + x_soma
@@ -352,28 +365,32 @@ class Camera:
             # figure out what fraction of the segment falls into each pixel
             return self._draw_weighted_line(x_seg_prox, y_seg_prox, z_seg_prox,
                                             x_seg_dist, y_seg_dist, z_seg_dist,
-                                            intensity_value * area_lateral, t,
+                                            intensity_value, area_lateral, t,
                                             decomp_type=decomp_type,
-                                            spike_mask=spike_mask)
+                                            spike_mask=spike_mask,
+                                            compartment=compartment)
         elif x_seg_dist == x_seg_prox and y_seg_dist == y_seg_prox and z_seg_dist == z_seg_prox:
             return self._draw_weighted_sphere(x_seg_prox, y_seg_prox, z_seg_prox, 
                                               max(diam_seg_prox / 2, diam_seg_dist / 2),
-                                              intensity_value * area_lateral, t,
+                                              intensity_value, area_lateral, t,
                                               decomp_type=decomp_type,
-                                              spike_mask=spike_mask)
+                                              spike_mask=spike_mask,
+                                              compartment=compartment)
             
         else:   
             return self._draw_weighted_frustum(x_seg_prox, y_seg_prox, z_seg_prox,
                                             x_seg_dist, y_seg_dist, z_seg_dist,
                                             diam_seg_prox, diam_seg_dist,
-                                            intensity_value * area_lateral, t,
+                                            intensity_value, area_lateral, t,
                                             decomp_type=decomp_type,
-                                            spike_mask=spike_mask)
+                                            spike_mask=spike_mask,
+                                            compartment=compartment)
         
-    def _draw_weighted_sphere(self, x, y, z, r, weight, t, decomp_type=None, spike_mask=None):
+    def _draw_weighted_sphere(self, x, y, z, r, intensity_value, area_lateral, t, decomp_type=None, spike_mask=None, compartment=None):
         """ Draw a sphere on the camera view of this weight, weighted by weight.
             Determine what fraction of the sphere falls into each pixel.
             """
+        weight = intensity_value * area_lateral
         # calculate the number of steps needed to approximate the sphere
         step_size = 0.5 # in um
         n_steps = int(np.pi * r * 2 / step_size)
@@ -392,7 +409,8 @@ class Camera:
                 is_cell_in_bounds = \
                     self._draw_weighted_point(x1, y1, z1, weight / (n_steps ** 2), t,
                                               decomp_type=decomp_type,
-                                              spike_mask=spike_mask) \
+                                              spike_mask=spike_mask,
+                                              compartment=compartment) \
                     or is_cell_in_bounds
         return is_cell_in_bounds
 
@@ -416,7 +434,7 @@ class Camera:
         return points
         
     def _draw_weighted_frustum(self, x1, y1, z1, x2, y2, z2, d1, d2, 
-                               weight, t, decomp_type=None, spike_mask=None):
+                               intensity_value, area_lateral, t, decomp_type=None, spike_mask=None, compartment=None):
         """ Draw a frustum on the camera view of this weight, weighted by weight.
             Determine what fraction of the frustum falls into each pixel.
             
@@ -424,6 +442,7 @@ class Camera:
             Step around the circumference of the circles and draw lines between the points.
             The step size is 1/3 the camera resolution, so not many lines needed.
             """
+        weight = intensity_value * area_lateral
         # calculate the number of steps needed to approximate the frustum
         step_size = 0.5  # in um
         vector_between_circles = np.array([x2 - x1, y2 - y1, z2 - z1])
@@ -463,7 +482,8 @@ class Camera:
                                                          circle2_points[i_circle][2],
                                                          weight / n_points, t,
                                                          decomp_type=decomp_type,
-                                                         spike_mask=spike_mask) \
+                                                         spike_mask=spike_mask,
+                                                         compartment=compartment) \
                 or is_cell_in_bounds
             
         del circle1_points, circle2_points
@@ -533,9 +553,10 @@ class Camera:
         return points
   
     def _draw_weighted_line(self, x1, y1, z1, x2, y2, z2, 
-                            weight, t, decomp_type=None, spike_mask=None):
+                            intensity_value, area_lateral, t, decomp_type=None, spike_mask=None, compartment=None):
         """ Draw a line on the camera view of this weight, weighted by weight.
             Determine what fraction of the line falls into each pixel."""
+        weight = intensity_value * area_lateral
         # Bresenham's line algorithm
         is_cell_in_bounds = False
         i_start, j_start = self.map_point_to_pixel(x1, y1, z1)
@@ -549,15 +570,17 @@ class Camera:
             if len(zv) <= 2:  # ... if it a very short line, treat as one point
                 del zv
                 gc.collect()
-                return self._draw_weighted_point(x1, y1, z1, weight, t, 
+                return self._draw_weighted_point(x1, y1, z1, intensity_value, area_lateral, t, 
                                                  i=i_start, j=j_start, 
                                                  decomp_type=decomp_type,
-                                                 spike_mask=spike_mask)
+                                                 spike_mask=spike_mask, 
+                                                 compartment=compartment)
             for z_inter in zv:  # ... if it is a longer line, chunk into many points
                 is_cell_in_bounds = self._draw_weighted_point(x1, y1, z_inter, 
-                                                              weight / len(zv), t,
+                                                              intensity_value, area_lateral / len(zv), t,
                                                               decomp_type=decomp_type,
-                                                              spike_mask=spike_mask) \
+                                                              spike_mask=spike_mask, 
+                                                              compartment=compartment) \
                     or is_cell_in_bounds
             return is_cell_in_bounds
 
@@ -570,53 +593,66 @@ class Camera:
         if len(pixels) <= 2:
             del pixels
             gc.collect()
-            r1 = self._draw_weighted_point(x1, y1, z1, weight / 2, t, 
+            r1 = self._draw_weighted_point(x1, y1, z1, intensity_value, area_lateral / 2, t, 
                                            i=i_start, j=j_start, 
                                            decomp_type=decomp_type,
-                                           spike_mask=spike_mask)
-            r2 = self._draw_weighted_point(x2, y2, z2, weight / 2, t, 
+                                           spike_mask=spike_mask, 
+                                           compartment=compartment)
+            r2 = self._draw_weighted_point(x2, y2, z2, intensity_value, area_lateral / 2, t, 
                                            i=i_end, j=j_end, 
                                            decomp_type=decomp_type,
-                                           spike_mask=spike_mask)
+                                           spike_mask=spike_mask, 
+                                           compartment=compartment)
             return r1 or r2
         else:
-            weight_per_pixel = weight / (len(pixels) - 1)
+            area_per_pixel = area_lateral / (len(pixels) - 1)
             for i_px, pt in enumerate(pixels):
                 if i_px == 0 or i_px == len(pixels) - 1:
                     continue
-                is_cell_in_bounds = self._draw_weighted_point(x1, y1, z1, weight_per_pixel, 
+                is_cell_in_bounds = self._draw_weighted_point(x1, y1, z1, intensity_value, area_per_pixel, 
                                                               t, i=pt[0], j=pt[1],
                                                               decomp_type=decomp_type,
-                                                              spike_mask=spike_mask) \
+                                                              spike_mask=spike_mask,
+                                                                compartment=compartment) \
                     or is_cell_in_bounds
                 
             del pixels
             gc.collect()
                 
-            r1 = self._draw_weighted_point(x1, y1, z1, weight_per_pixel / 2, t, 
+            r1 = self._draw_weighted_point(x1, y1, z1, intensity_value, area_per_pixel / 2, t, 
                                            i=i_start, j=j_start, 
                                            decomp_type=decomp_type,
-                                           spike_mask=spike_mask)
-            r2 = self._draw_weighted_point(x2, y2, z2, weight_per_pixel / 2, t, 
+                                           spike_mask=spike_mask,
+                                           compartment=compartment)
+            r2 = self._draw_weighted_point(x2, y2, z2, intensity_value, area_per_pixel / 2, t, 
                                            i=i_end, j=j_end, 
                                            decomp_type=decomp_type,
-                                           spike_mask=spike_mask)
+                                           spike_mask=spike_mask,
+                                           compartment=compartment)
             return r1 or r2 or is_cell_in_bounds
 
-    def _draw_weighted_point(self, x, y, z, weight, t, i=None, j=None, 
-                             decomp_type=None, spike_mask=None):
+    def _draw_weighted_point(self, x, y, z, intensity_value, area_lateral, t, i=None, j=None, 
+                             decomp_type=None, spike_mask=None, compartment=None):
         """ Draw a point on the camera view of this weight,
             convolved with the PSF. 
             Returns true if the point is within the camera view, false otherwise."""
+        weight = intensity_value * area_lateral
         
         if i is None or j is None:
             i, j = self.map_point_to_pixel(x, y, z)
         # print("Drawing point at", i, j, "with weight", weight)
         if self.psf is None:
             if 0 <= i < self.camera_width and 0 <= j < self.camera_height:
+                if self.precompute_geometry:
+                    if not hasattr(self, "_geometry_buffer"):
+                        self._geometry_buffer = {}
+                    if decomp_type not in self._geometry_buffer:
+                        self._geometry_buffer[decomp_type] = []
+                    self._geometry_buffer[decomp_type].append((i, j, area_lateral, compartment))
                 self.record_point_intensity(i, j, weight, t, None, 
                                             decomp_type=decomp_type,
-                                            spike_mask=spike_mask)
+                                            spike_mask=spike_mask,
+                                            compartment=compartment)
             return (0 <= i < self.camera_width and 0 <= j < self.camera_height)
         else:
             # paste the PSF in the recording array centered at the point
@@ -666,13 +702,14 @@ class Camera:
                 z_overlap = z_center_psf + z_overlap
                 psf_slice = self.psf[:, :, z_overlap].copy()
                 
-                # If psf_slice shape is 18x18, and weight is 2000x1x1,
-                #   tile psf_slice to match the weights shape (2000 x 18 x 18)
-                psf_slice = np.tile(psf_slice, (weight.shape[0], 1, 1))
+                # If psf_slice shape is 18x18, and intensity_value is 2000x1x1,
+                #   tile psf_slice to match the intensity_value shape (2000 x 18 x 18)
+                psf_slice = np.tile(psf_slice, (intensity_value.shape[0], 1, 1))
                 # element-wise multiplication of the PSF slice with the weight
-                xy_psf_weighted = psf_slice * weight.reshape(-1, 1, 1)
+                intensity_value = intensity_value.reshape(-1, 1, 1)
+                xy_psf_weighted = psf_slice * np.ones(intensity_value.shape)
             else:
-                xy_psf_weighted = self.psf[:, :, z_overlap] * weight
+                xy_psf_weighted = self.psf[:, :, z_overlap] # * intensity_value
 
             # actual bounds
             i_bounds = [max(0, i + x_psf_lim[0]), min(self.camera_width, i + x_psf_lim[1])]
@@ -697,15 +734,8 @@ class Camera:
                 x_psf_weighted_bounded = \
                     xy_psf_weighted[x_psf_lim[0]-x_psf_lim[0]:x_psf_lim[1]-x_psf_lim[0],
                                     y_psf_lim[0]-y_psf_lim[0]:y_psf_lim[1]-y_psf_lim[0]]
-            
-            if self.precompute_geometry:
-                if not hasattr(self, "_geometry_buffer"):
-                    self._geometry_buffer = {}
-                if decomp_type not in self._geometry_buffer:
-                    self._geometry_buffer[decomp_type] = []
-                self._geometry_buffer[decomp_type].append((i, j, weight, decomp_type))
 
-            self.record_point_intensity(None, None, x_psf_weighted_bounded, 
+            self.record_point_intensity(None, None, x_psf_weighted_bounded, area_lateral,
                                         t, i_bounds=i_bounds, j_bounds=j_bounds,
                                         decomp_type=decomp_type,
                                         spike_mask=spike_mask)
@@ -713,10 +743,10 @@ class Camera:
             gc.collect()
             return True            
         
-    def record_point_intensity(self, i, j, weights, t, i_bounds=None, j_bounds=None,
+    def record_point_intensity(self, i, j, intensity_value, area_lateral, t, i_bounds=None, j_bounds=None,
                                decomp_type=None, spike_mask=None):
         """ Record the intensity of a point on the camera view. """
-        self.cell_recording.record_activity(i, j, weights, t, i_bounds=i_bounds, j_bounds=j_bounds,
+        self.cell_recording.record_activity(i, j, intensity_value, area_lateral, t, i_bounds=i_bounds, j_bounds=j_bounds,
                                             compart=decomp_type, spike_mask=spike_mask)
 
     def _capture_last_geometry(self):
