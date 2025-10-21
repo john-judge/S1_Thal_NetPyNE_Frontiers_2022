@@ -277,9 +277,8 @@ class Camera:
                     # directly record the optical intensity without geometric computation
                     intensity_value = np.array(cell.get_optical_trace("V" + compartment))
                     self.record_point_intensity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, None, 
-                                            decomp_type=decomp_type,
-                                            spike_mask=spike_mask,
-                                            compartment=compartment)
+                                            decomp_type=compart,
+                                            spike_mask=spike_mask)
                     self.cell_recording.record_activity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, compart=compart)
             return True
 
@@ -651,8 +650,7 @@ class Camera:
                     self._geometry_buffer[decomp_type].append((i, j, area_lateral, compartment))
                 self.record_point_intensity(i, j, weight, t, None, 
                                             decomp_type=decomp_type,
-                                            spike_mask=spike_mask,
-                                            compartment=compartment)
+                                            spike_mask=spike_mask)
             return (0 <= i < self.camera_width and 0 <= j < self.camera_height)
         else:
             # paste the PSF in the recording array centered at the point
