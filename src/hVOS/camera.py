@@ -479,7 +479,7 @@ class Camera:
                                                          circle2_points[i_circle][0],
                                                          circle2_points[i_circle][1],
                                                          circle2_points[i_circle][2],
-                                                         weight / n_points, t,
+                                                         intensity_value, area_lateral / n_points, t,
                                                          decomp_type=decomp_type,
                                                          spike_mask=spike_mask,
                                                          compartment=compartment) \
