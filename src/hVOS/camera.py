@@ -648,7 +648,7 @@ class Camera:
                     if decomp_type not in self._geometry_buffer:
                         self._geometry_buffer[decomp_type] = []
                     self._geometry_buffer[decomp_type].append((i, j, area_lateral, compartment))
-                self.record_point_intensity(i, j, weight, t, None, 
+                self.record_point_intensity(i, j, intensity_value, area_lateral, t, None, 
                                             decomp_type=decomp_type,
                                             spike_mask=spike_mask)
             return (0 <= i < self.camera_width and 0 <= j < self.camera_height)
