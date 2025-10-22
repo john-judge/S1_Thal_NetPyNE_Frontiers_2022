@@ -23,6 +23,8 @@ try:
 except:
     from cfg import cfg
 
+print("Here is the value of cfg.synWeightFractionEE from netParams:", cfg.synWeightFractionEE)
+
 #------------------------------------------------------------------------------
 #
 # NETWORK PARAMETERS

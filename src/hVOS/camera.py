@@ -319,6 +319,8 @@ class Camera:
             self.geometry_map[cell.get_cell_id()] = self._capture_last_geometry()
 
         if self.post_psf is not None:
+            print("Applying post-PSF")
+            print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
             self.cell_recording.apply_psf(self.post_psf, time_step=time_step)
 
         return is_cell_in_bounds
