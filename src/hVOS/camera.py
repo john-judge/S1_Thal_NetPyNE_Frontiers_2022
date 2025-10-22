@@ -93,8 +93,10 @@ class Camera:
         filename = filename or self.geometry_filename or (self.data_dir + "geometry_cache.pkl")
         with open(filename, "wb") as f:
             pickle.dump(self.geometry_map, f)
-        key = list(self.geometry_map.keys())[0] if len(self.geometry_map) > 0 else 'N/A'
-        print(f"Saved geometry map with {len(self.geometry_map[key]) if key != 'N/A' else 0} entries to {filename}")
+        total_entries = 0
+        for key in self.geometry_map:
+            total_entries += len(self.geometry_map[key]) if key != 'N/A' else 0
+        print(f"Saved geometry map with {total_entries} entries to {filename}")
 
     def load_geometry(self, filename):
         """Load precomputed geometry map from disk."""
