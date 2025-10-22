@@ -94,7 +94,7 @@ class TraceProperties:
         if self.half_amp_latency_decay is None:
             self.half_amp_latency_decay = float(self.start)
         self.half_width = self.half_amp_latency_decay - self.half_amp_latency
-        if self.half_width < 0:
+        if self.half_width is None or self.half_width < 0:
             self.half_width = 0
         
         #-------------------------------------------------------

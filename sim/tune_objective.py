@@ -304,7 +304,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
         for roi in rois_to_sample:
             x_min, y_min, x_max, y_max = roi
             pixel_id = f"pixel_{x_min}_{y_min}"
-            pixel_traces[pixel_id] = np.average(all_cells_rec[:, y_min:y_max, x_min:x_max], axis=(1,2))
+            pixel_traces[pixel_id] = np.average(all_cells_rec[:, x_min:x_max, y_min:y_max], axis=(1,2))
     return pixel_traces, all_cells_rec
 
 def load_morphologies(simData, cell_id_to_me_type_map, 
@@ -446,19 +446,15 @@ def myObjectiveInner(simData):
     # Then we compute the mean squared error between simulated and experimental
     num_cells = nbqx_features.shape[0]
     # random seed 
-    np.random.seed(4322)
-    exp_ratio = np.random.normal(loc=exp_data['nbqx_acsf_ratio_mean'], scale=exp_data['nbqx_acsf_ratio_std'], size=num_cells)
-    exp_latency = np.random.normal(loc=exp_data['nbqx_latency_mean'], scale=exp_data['nbqx_latency_std'], size=num_cells)
-    exp_hw = np.random.normal(loc=exp_data['nbqx_halfwidth_mean'], scale=exp_data['nbqx_halfwidth_std'], size=num_cells)
-
     sim_ratio = nbqx_features[:, 0]
     sim_latency = nbqx_features[:, 1]
     sim_hw = nbqx_features[:, 2]
 
+    print(f"Simulated ratio: {sim_ratio}, latency: {sim_latency}, half-width: {sim_hw}")
     # return mean squared error cost, normalized to target (experimental) value
-    err_ratio = mse_weights['ratio'] * (np.mean(sim_ratio)-np.mean(exp_ratio))**2 / np.mean(exp_ratio)
-    err_latency = mse_weights['latency'] * (np.mean(sim_latency)-np.mean(exp_latency))**2 / np.mean(exp_latency)
-    err_hw = mse_weights['halfwidth'] * (np.mean(sim_hw)-np.mean(exp_hw))**2 / np.mean(exp_hw)
+    err_ratio = mse_weights['ratio'] * (np.mean(sim_ratio)-exp_data['nbqx_acsf_ratio_mean'])**2 / exp_data['nbqx_acsf_ratio_mean']
+    err_latency = mse_weights['latency'] * (np.mean(sim_latency)-exp_data['nbqx_latency_mean'])**2 / exp_data['nbqx_latency_mean']
+    err_hw = mse_weights['halfwidth'] * (np.mean(sim_hw)-exp_data['nbqx_halfwidth_mean'])**2 / exp_data['nbqx_halfwidth_mean']
     print(
           f"ratio err: {err_ratio}, "
           f"latency err: {err_latency}, "
@@ -475,9 +471,9 @@ def myObjectiveInner(simData):
             'sim_ratio_mean': np.mean(sim_ratio),
             'sim_latency_mean': np.mean(sim_latency),
             'sim_hw_mean': np.mean(sim_hw),
-            'exp_ratio_mean': np.mean(exp_ratio),
-            'exp_latency_mean': np.mean(exp_latency),
-            'exp_hw_mean': np.mean(exp_hw),
+            'exp_ratio_mean': exp_data['nbqx_acsf_ratio_mean'],
+            'exp_latency_mean': exp_data['nbqx_latency_mean'],
+            'exp_hw_mean': exp_data['nbqx_halfwidth_mean'],
         }, f, indent=4)
     print("Files in ", save_folder, ": ", os.listdir(save_folder))
 
