@@ -80,7 +80,7 @@ class Camera:
 
         if self.precompute_geometry:
             # turn off psf, store as post_psf, and apply PSF only on the final image
-            self.post_psf = self.psf
+            self.post_psf = np.average(self.psf, axis=2) if self.psf is not None else None
             self.psf = None
 
         if self.geometry_filename and os.path.exists(self.geometry_filename):
