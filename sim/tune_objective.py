@@ -303,9 +303,8 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     if all_cells_rec is not None:
         for roi in rois_to_sample:
             x_min, y_min, x_max, y_max = roi
-            if np.count_nonzero(all_cells_rec[:, y_min:y_max, x_min:x_max]) > 0:
-                pixel_id = f"pixel_{x_min}_{y_min}"
-                pixel_traces[pixel_id] = np.average(all_cells_rec[:, y_min:y_max, x_min:x_max], axis=(1,2))
+            pixel_id = f"pixel_{x_min}_{y_min}"
+            pixel_traces[pixel_id] = np.average(all_cells_rec[:, y_min:y_max, x_min:x_max], axis=(1,2))
     return pixel_traces, all_cells_rec
 
 def load_morphologies(simData, cell_id_to_me_type_map, 
