@@ -435,6 +435,8 @@ def myObjectiveInner(simData):
     acsf_features, acsf_processed_traces = extract_features(list(simData_traces_acsf.values()), tvec)
     nbqx_features, nbqx_processed_traces = extract_features(list(simData_traces_nbqx.values()), tvec)
 
+    # replace zeroes with small epsilon to avoid Division by Zero
+    acsf_features[acsf_features == 0] = 1e-6
     nbqx_features[:, 0] = nbqx_features[:, 0] / acsf_features[:, 0]  # first col is ratios
 
     # now we have 3 features: ratio, latency, half-width stored in 3 columns
