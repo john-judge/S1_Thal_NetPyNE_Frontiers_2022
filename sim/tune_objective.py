@@ -416,8 +416,8 @@ def myObjectiveInner(simData):
     for _ in range(n_rois):
         attempts = 10
         while True:
-            x = np.random.randint(0, simData_acsf['image'].shape[1] - roi_size)
-            y = np.random.randint(0, simData_acsf['image'].shape[0] - roi_size)
+            x = np.random.randint(0, cam_params['cam_width'] - roi_size)
+            y = np.random.randint(0, cam_params['cam_height'] - roi_size)
             roi = (x, y, x + roi_size, y + roi_size)
             if not any(intersect(roi, r) for r in rois_to_sample):
                 rois_to_sample.append(roi)
@@ -426,7 +426,7 @@ def myObjectiveInner(simData):
             if attempts == 0:
                 print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
                 break
-            
+
     simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
                                                                   me_type_morphology_map, rois_to_sample)
     simData_traces_nbqx, all_cells_rec_nbqx = average_voltage_traces_into_hVOS_pixels(simData_nbqx, cells_nbqx, 
