@@ -138,7 +138,7 @@ def load_cell_id_to_me_type_map(file_path):
             }
     return cell_id_to_me_type_map
 
-def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map,
+def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map, rois_to_sample,
                                             target_hVOS_populations = ("L4_SS", "L4_PC")):
     num_cells_to_draw = 3    
     target_population_cells = [
@@ -301,8 +301,9 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     pixel_traces = {}
     print('all_cells_rec shape:', all_cells_rec.shape)
     if all_cells_rec is not None:
-        for i in range(all_cells_rec.shape[1]):
-            for j in range(all_cells_rec.shape[2]):
+        for roi in rois_to_sample:
+            for px in roi:
+                i, j = px
                 if np.count_nonzero(all_cells_rec[:, i, j]) > 0:
                     pixel_id = f"pixel_{i}_{j}"
                     pixel_traces[pixel_id] = all_cells_rec[:, i, j]
@@ -371,6 +372,17 @@ def load_morphologies(simData, cell_id_to_me_type_map,
 
     return cells, me_type_morphology_map
 
+def intersect(roi1, roi2):
+    # roi = (x1, y1, x2, y2)
+    x1_min, y1_min, x1_max, y1_max = roi1
+    x2_min, y2_min, x2_max, y2_max = roi2
+
+    if (x1_min >= x2_max) or (x2_min >= x1_max):
+        return False
+    if (y1_min >= y2_max) or (y2_min >= y1_max):
+        return False
+    return True
+
 def myObjectiveInner(simData):
     # simData['acsf'] and simData['nbqx'] are the two conditions
     # each is a dict with keys like 'Vsoma', 'Vdend_32', etc
@@ -396,10 +408,29 @@ def myObjectiveInner(simData):
     cells_nbqx, _ = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
     
     # hVOS/optical processing
+    rois_to_sample = []
+    roi_size = 3  # 3x3 pixel ROIs
+    n_rois = 30
+    # randomly sample 60 non-overlapping ROIs of size 3x3 pixels
+    np.random.seed(4321)
+    for _ in range(n_rois):
+        attempts = 10
+        while True:
+            x = np.random.randint(0, simData_acsf['image'].shape[1] - roi_size)
+            y = np.random.randint(0, simData_acsf['image'].shape[0] - roi_size)
+            roi = (x, y, x + roi_size, y + roi_size)
+            if not any(intersect(roi, r) for r in rois_to_sample):
+                rois_to_sample.append(roi)
+                break
+            attempts -= 1
+            if attempts == 0:
+                print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
+                break
+            
     simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
-                                                                  me_type_morphology_map)
+                                                                  me_type_morphology_map, rois_to_sample)
     simData_traces_nbqx, all_cells_rec_nbqx = average_voltage_traces_into_hVOS_pixels(simData_nbqx, cells_nbqx, 
-                                                                  me_type_morphology_map)
+                                                                  me_type_morphology_map, rois_to_sample)
     tvec = np.array(simData_acsf['t'])  # time vector is the same for both conditions
 
     # Compare ACSF vs NBQX
