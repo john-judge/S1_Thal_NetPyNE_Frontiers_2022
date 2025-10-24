@@ -450,6 +450,10 @@ def myObjectiveInner(simData):
     sim_latency = nbqx_features[:, 1]
     sim_hw = nbqx_features[:, 2]
 
+    # filter zeros or None from latency and half-width
+    sim_latency = sim_latency[sim_latency > 0]
+    sim_hw = sim_hw[sim_hw > 0]
+
     print(f"Simulated ratio: {sim_ratio}, latency: {sim_latency}, half-width: {sim_hw}")
     # return mean squared error cost, normalized to target (experimental) value
     err_ratio = mse_weights['ratio'] * (np.mean(sim_ratio)-exp_data['nbqx_acsf_ratio_mean'])**2 / exp_data['nbqx_acsf_ratio_mean']
