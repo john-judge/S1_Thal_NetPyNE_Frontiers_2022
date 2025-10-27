@@ -29,7 +29,7 @@ if __name__ == '__main__':
         'fitnessFunc': myObjective,
         'fitnessFuncArgs': {    
         },
-        'maxiters': 3,  # number of generations, passed to optuna's n_trials
+        'maxiters': 1,  # number of generations, passed to optuna's n_trials
         'maxtime': None,  # gets passed to optuna's timeout. None: no limit
         'maxiter_wait': 500,  # number of iterations (progress checks)
         'time_sleep': 120,  # seconds per iteration
