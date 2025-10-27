@@ -454,6 +454,8 @@ def myObjectiveInner(simData):
 
     print('sim_hw type:', type(sim_hw), sim_hw)
     # filter zeros or None from latency and half-width
+    sim_hw[sim_hw == None] = -1
+    sim_latency[sim_latency == None] = -1
     sim_latency = sim_latency[sim_latency > 0]
     sim_hw = sim_hw[sim_hw > 0]
 
