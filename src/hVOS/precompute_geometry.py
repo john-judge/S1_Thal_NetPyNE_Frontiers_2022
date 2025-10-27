@@ -20,3 +20,7 @@ class PrecomputedCellImage:
     Input: Cell object with morphology attribute populated
     Writes a file cell_{cell_id}_pre_geometry.pkl"""
 
+    def __init__(self, cell, cam):
+        self.cell = cell
+        self.cam = cam
+

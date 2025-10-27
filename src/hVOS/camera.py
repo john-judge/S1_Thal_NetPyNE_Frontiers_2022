@@ -4,6 +4,7 @@ import gc
 from PIL import Image, ImageDraw, ImageFont
 from skimage.measure import block_reduce
 import os
+import time
 from scipy import sparse
 try:
     from src.hVOS.cell_recording import CellRecording
@@ -271,6 +272,8 @@ class Camera:
         Returns true if the cell is within the camera view, false otherwise."""
         print("Drawing", cell)
 
+        geom_timer = time.time()
+
         if self.precompute_geometry and cell.get_cell_id() in self.geometry_map:
             print("Using precomputed mapping")
             geom = self.geometry_map[cell.get_cell_id()]
@@ -282,6 +285,9 @@ class Camera:
                                             decomp_type=compart,
                                             spike_mask=None)
                     self.cell_recording.record_activity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, compart=compart)
+
+            end_timer = time.time()
+            print(f"Used precomputed geometry for cell {cell.get_cell_id()} in {end_timer - geom_timer:.2f} seconds")
             return True
 
         x_soma, y_soma, z_soma = cell.get_soma_position()
@@ -324,7 +330,8 @@ class Camera:
             print("Applying post-PSF")
             print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
             self.cell_recording.apply_psf(self.post_psf, time_step=time_step)
-
+        end_timer = time.time()
+        print(f"Fully computed geometry for cell {cell.get_cell_id()} in {end_timer - geom_timer:.2f} seconds")
         return is_cell_in_bounds
 
     def _draw_segment(self, segment, intensity_value, x_soma, y_soma, z_soma, t, decomp_type=None, spike_mask=None, compartment=None):
