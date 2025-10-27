@@ -95,14 +95,15 @@ def extract_features(traces, tvec, start_time=500):
     int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
     features = []
     processed_traces = []
+    fit_poly_order = 3
     for tr in traces:
         # flatten the trace from start_time to end
         # i.e. draw a line from the value at start_time to the value at end_time
         # and subtract that line from the trace
         x_ = np.array([start_time, tr.shape[0]-1])
         y = np.array([tr[start_time], tr[-1]])
-        m, b = np.polyfit(x_, y, 1)
-        trend = np.polyval([m, b], np.arange(tr.shape[0]))
+        coeffs = np.polyfit(x_, y, fit_poly_order)
+        trend = np.polyval(coeffs, np.arange(tr.shape[0]))
         tr = tr - trend
         tr = -tr[start_time:]  # only analyze from start_time onward, and invert
         tr -= np.min(tr)  # baseline to 0

@@ -106,9 +106,13 @@ def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.
     return cfg, netParams
 
 def build_network(acsf=True):
+    
     cfg, netParams = None, None
     cfg, netParams = readCmdLineArgs_nbqx(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py', acsf=acsf)
-
+    if acsf:
+        cfg.filename = 'acsf_run'
+    else:
+        cfg.filename = 'nbqx_run'
     sim.initialize(
         simConfig = cfg, 	
         netParams = netParams)  				# create network object and set cfg and net params
@@ -142,7 +146,8 @@ if rank == 0:
 
 
 build_network(acsf=False)
-sim.cfg.filename = 'nbqx_run'
+print("Here is the NBQX value of sim.cfg.synWeightFractionEE from init-tune.py:", sim.cfg.synWeightFractionEE)
+#sim.cfg.filename = 'nbqx_run'
 sim.runSim()                     
 sim.gatherData()  
 sim.pc.barrier()   # Wait for all ranks to finish gatherData
@@ -152,12 +157,14 @@ if rank == 0:
     except Exception as e:
         print("Error copying NBQX data:", e)
         nbqx_data = dict(sim.allSimData)
-
+sim.pc.done()
 
 sim.allSimData = {}  # clear before next sim
 build_network()
+print("Here is the ACSF value of sim.cfg.synWeightFractionEE from init-tune.py:", sim.cfg.synWeightFractionEE)
+
 # ACSF trial first (no blockade; experiment_NBQX_global should be set to False in cfg-tune.py)
-sim.cfg.filename = 'acsf_run'
+#sim.cfg.filename = 'acsf_run'
 sim.runSim()                      			# run parallel Neuron simulation  
 sim.gatherData()                  			# gather spiking data and cell info from each node
 sim.pc.barrier()   # Wait for all ranks to finish gatherData
@@ -175,3 +182,4 @@ if rank == 0:
     end_time = time.time()
     print(f"Total iteration simulation time (both ACSF and NBQX): {(end_time - start_time)/60} minutes")
 
+sim.pc.done()
