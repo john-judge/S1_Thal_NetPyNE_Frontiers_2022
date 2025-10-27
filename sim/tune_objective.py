@@ -445,12 +445,14 @@ def myObjectiveInner(simData):
     # let's generate a Gaussian distribution of experimental values
     # with the same number of samples as we have simulated cells
     # Then we compute the mean squared error between simulated and experimental
-    num_cells = nbqx_features.shape[0]
     # random seed 
+    print("ACSF features shape:", acsf_features.shape)
+    print("NBQX features shape:", nbqx_features.shape)
     sim_ratio = nbqx_features[:, 0]
     sim_latency = nbqx_features[:, 1]
     sim_hw = nbqx_features[:, 2]
 
+    print('sim_hw type:', type(sim_hw), sim_hw)
     # filter zeros or None from latency and half-width
     sim_latency = sim_latency[sim_latency > 0]
     sim_hw = sim_hw[sim_hw > 0]
