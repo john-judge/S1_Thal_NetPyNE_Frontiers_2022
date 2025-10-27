@@ -285,7 +285,10 @@ class Camera:
                                             decomp_type=compart,
                                             spike_mask=None)
                     self.cell_recording.record_activity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, compart=compart)
-
+            if self.post_psf is not None:
+                print("Applying post-PSF")
+                print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
+                self.cell_recording.apply_psf(self.post_psf, time_step=time_step)
             end_timer = time.time()
             print(f"Used precomputed geometry for cell {cell.get_cell_id()} in {end_timer - geom_timer:.2f} seconds")
             return True
@@ -332,6 +335,7 @@ class Camera:
             self.cell_recording.apply_psf(self.post_psf, time_step=time_step)
         end_timer = time.time()
         print(f"Fully computed geometry for cell {cell.get_cell_id()} in {end_timer - geom_timer:.2f} seconds")
+        print(f"Was cell {cell.get_cell_id()} in bounds? {is_cell_in_bounds}")
         return is_cell_in_bounds
 
     def _draw_segment(self, segment, intensity_value, x_soma, y_soma, z_soma, t, decomp_type=None, spike_mask=None, compartment=None):
