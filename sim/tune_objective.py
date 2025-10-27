@@ -141,7 +141,7 @@ def load_cell_id_to_me_type_map(file_path):
 
 def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map, rois_to_sample,
                                             target_hVOS_populations = ("L4_SS", "L4_PC")):
-    num_cells_to_draw = 1  # testing with 1 cell   
+    num_cells_to_draw = 3  # testing with 1 cell, tune with 3+
     target_population_cells = [
     cells[cell_id] for cell_id in cells 
         if any([t_pop in cells[cell_id].get_me_type() for 
@@ -453,11 +453,13 @@ def myObjectiveInner(simData):
     sim_hw = nbqx_features[:, 2]
 
     print('sim_hw type:', type(sim_hw), sim_hw)
-    # filter zeros or None from latency and half-width
+    # filter zeros or None from latency and half-width and amp
+    sim_ratio[sim_ratio == None] = -1
     sim_hw[sim_hw == None] = -1
     sim_latency[sim_latency == None] = -1
     sim_latency = sim_latency[sim_latency > 0]
     sim_hw = sim_hw[sim_hw > 0]
+    sim_ratio = sim_ratio[sim_ratio > 0]
 
     print(f"Simulated ratio: {sim_ratio}, latency: {sim_latency}, half-width: {sim_hw}")
     # return mean squared error cost, normalized to target (experimental) value
@@ -510,6 +512,6 @@ def myObjectiveInner(simData):
 
     # end timer
     end_timer = time.time()
-    print(f"Objective function computation time: {end_timer - timer} seconds")
+    print(f"Objective function computation time: {(end_timer - timer) / 60} minutes")
 
     return err_ratio + err_latency + err_hw
