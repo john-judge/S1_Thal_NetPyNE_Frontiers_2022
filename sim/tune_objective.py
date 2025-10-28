@@ -408,8 +408,8 @@ def myObjectiveInner(simData):
     
     # hVOS/optical processing
     rois_to_sample = []
-    roi_size = 3  # 3x3 pixel ROIs
-    n_rois = 30
+    roi_size = 2  # 3x3 pixel ROIs
+    n_rois = 400
     # randomly sample 60 non-overlapping ROIs of size 3x3 pixels
     np.random.seed(4321)
     for _ in range(n_rois):
