@@ -102,12 +102,24 @@ def extract_features(traces, tvec, start_time=500):
         # and subtract that line from the trace
         x_ = np.arange(tr.shape[0])[start_time:]
         y = tr[start_time:]
-        coeffs = np.polyfit(x_, y, fit_poly_order)
+        exclusion_mask = (x_ < 500) | (x_ > 800)
+        coeffs = np.polyfit(x_[exclusion_mask], y[exclusion_mask], fit_poly_order)
         trend = np.polyval(coeffs, np.arange(tr.shape[0]))
         tr = tr - trend
         tr = -tr[start_time:]  # only analyze from start_time onward, and invert
         tr -= np.min(tr)  # baseline to 0
-        tp = TraceProperties(tr, start=0, width=400, int_pts=int_pts)
+        # if trace is monotonic decreasing at start, crop to zero until first increase
+        # this avoids compute errors in TraceProperties
+        i_start = 0
+        for i in range(1, len(tr)):
+            if tr[i] > tr[i-1]:
+                i_start = i
+                break
+            else:
+                tr[i] = 0.0
+        tp = TraceProperties(tr, start=i_start, 
+                             width=max(400, tr.shape[0] - i_start), 
+                             int_pts=int_pts)
         tp.measure_properties()
         features.append([tp.get_max_amp(), tp.get_half_amp_latency(), tp.get_half_width()])
         processed_traces.append(tr)
