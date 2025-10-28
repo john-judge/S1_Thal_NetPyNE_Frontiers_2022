@@ -286,8 +286,8 @@ class Camera:
                                             spike_mask=None)
                     self.cell_recording.record_activity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, compart=compart)
             if self.post_psf is not None:
-                print("Applying post-PSF")
-                print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
+                #print("Applying post-PSF")
+                #print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
                 self.cell_recording.apply_psf(self.post_psf, time_step=time_step)
             end_timer = time.time()
             print(f"Used precomputed geometry for cell {cell.get_cell_id()} in {end_timer - geom_timer:.2f} seconds")
@@ -330,8 +330,8 @@ class Camera:
             self.geometry_map[cell.get_cell_id()] = self._capture_last_geometry()
 
         if self.post_psf is not None:
-            print("Applying post-PSF")
-            print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
+            #print("Applying post-PSF")
+            #print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
             self.cell_recording.apply_psf(self.post_psf, time_step=time_step)
         end_timer = time.time()
         print(f"Fully computed geometry for cell {cell.get_cell_id()} in {end_timer - geom_timer:.2f} seconds")
@@ -421,7 +421,8 @@ class Camera:
                 y1 = y + r * np.sin(ph) * np.sin(th)
                 z1 = z + r * np.cos(ph)
                 is_cell_in_bounds = \
-                    self._draw_weighted_point(x1, y1, z1, weight / (n_steps ** 2), t,
+                    self._draw_weighted_point(x1, y1, z1, intensity_value, 
+                                              area_lateral / (n_steps ** 2), t,
                                               decomp_type=decomp_type,
                                               spike_mask=spike_mask,
                                               compartment=compartment) \
