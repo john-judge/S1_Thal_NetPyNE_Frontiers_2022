@@ -118,7 +118,7 @@ def extract_features(traces, tvec, start_time=500):
             else:
                 tr[i] = 0.0
         tp = TraceProperties(tr, start=i_start, 
-                             width=max(400, tr.shape[0] - i_start), 
+                             width=min(400, tr.shape[0] - i_start - 1), 
                              int_pts=int_pts)
         tp.measure_properties()
         features.append([tp.get_max_amp(), tp.get_half_amp_latency(), tp.get_half_width()])
