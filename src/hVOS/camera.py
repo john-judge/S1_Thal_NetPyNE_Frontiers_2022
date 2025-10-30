@@ -281,10 +281,8 @@ class Camera:
                 for (pixel_i, pixel_j, area_lateral, compartment) in geom[compart]:
                     # directly record the optical intensity without geometric computation
                     intensity_value = np.array(cell.get_optical_trace("V" + compartment))
-                    self.record_point_intensity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, None, 
-                                            decomp_type=compart,
-                                            spike_mask=None)
-                    self.cell_recording.record_activity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, compart=compart)
+                    self.record_point_intensity(pixel_i, pixel_j, intensity_value, area_lateral, time_step, 
+                                            decomp_type=compart)
             if self.post_psf is not None:
                 #print("Applying post-PSF")
                 #print(self.post_psf.shape, self.post_psf.sum(), self.post_psf)
