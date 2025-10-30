@@ -41,55 +41,6 @@ mse_weights = {
     'ratio': 1.0,
 }
 
-def extract_traces(simData):
-    # return a dict populated by traces[cell_id][compartment] = trace
-    traces = {}
-    num_prints = 5
-    for k in simData:
-        for compart in ['soma', 'dend', 'apic', 'axon']:
-            if compart in k:
-                for cell_id in simData[k]:
-                    if cell_id not in traces:
-                        traces[cell_id] = {}
-                    traces[cell_id][k] = np.array(simData[k][cell_id])
-                    if num_prints > 0:
-                        num_prints -= 1
-                        print(f"Extracted trace for cell {cell_id} compartment {compart} with shape {traces[cell_id][k].shape}")
-
-    # Average over each 5 cells and call it a pixel
-    # this at least roughly preserves the soma:neurite ratio and multi-cell blurring
-    avg_traces = {}
-    for cell_id in traces:
-        # avoid dividing by zero if no traces
-        if len(traces[cell_id].keys()) == 0:
-            continue
-        avg_traces_ = np.array([traces[cell_id][k] for k in traces[cell_id]])
-        # avoid dividing by zero if no traces
-        if avg_traces_.shape[0] == 0:
-            continue
-        try:
-            avg_traces[cell_id] = np.average(avg_traces_, axis=0)
-        except ZeroDivisionError as e:
-            print("ZeroDivisionError for cell_id:", cell_id, "with avg_traces shape:", avg_traces_.shape)
-    # create random subsets of 5 cells and average them to create "pixels"
-    cell_ids = list(avg_traces.keys())
-    np.random.seed(42)  # for reproducibility
-    np.random.shuffle(cell_ids)
-    pixel_traces = {}
-    for i in range(0, len(cell_ids), 5):
-        pixel_id = f"pixel_{i//5}"
-        subset = cell_ids[i:i+5]
-        if len(subset) == 0:
-            continue
-        pixel_traces[pixel_id] = np.mean([avg_traces[cid] for cid in subset if cid in avg_traces], axis=0)
-
-    # gc cleanup traces to save memory
-    del traces
-    del avg_traces
-    gc.collect()
-
-    return pixel_traces
-
 def extract_features(traces, tvec, start_time=450):
     """Return amplitude, latency, half-width."""
     int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
@@ -407,7 +358,6 @@ def myObjectiveInner(simData):
     """
     # start timer
     timer = time.time()
-    start_time=500
 
     simData = simData['simData']
     

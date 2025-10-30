@@ -1,6 +1,6 @@
 import os
 from neuron import h
-from tune_objective import process_traces, load_morphologies, average_voltage_traces_into_hVOS_pixels, load_cell_id_to_me_type_map, extract_features, extract_traces, intersect
+from tune_objective import load_morphologies, average_voltage_traces_into_hVOS_pixels, load_cell_id_to_me_type_map, intersect
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim, specs
 import time
