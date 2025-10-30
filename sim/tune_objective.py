@@ -90,7 +90,7 @@ def extract_traces(simData):
 
     return pixel_traces
 
-def extract_features(traces, tvec, start_time=500):
+def extract_features(traces, tvec, start_time=450):
     """Return amplitude, latency, half-width."""
     int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
     features = []
@@ -420,7 +420,7 @@ def myObjectiveInner(simData):
     
     # hVOS/optical processing
     rois_to_sample = []
-    roi_size = 2  # 3x3 pixel ROIs
+    roi_size = 3  # 3x3 pixel ROIs
     n_rois = 400
     # randomly sample 60 non-overlapping ROIs of size 3x3 pixels
     np.random.seed(4321)

@@ -21,6 +21,10 @@ class TraceProperties:
         self.pro_data = pro_data
         self.start = start
         self.width = width
+
+        # truncate width if start + width exceeds data length
+        if self.start + self.width > len(self.pro_data):
+            self.width = len(self.pro_data) - self.start - 1
         self.int_pts = int_pts
         self.per_amp = per_amp
         self.rli = rli
