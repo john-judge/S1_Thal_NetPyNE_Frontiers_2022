@@ -1,11 +1,6 @@
 import os
 from neuron import h
-"""
-init.py
-
-Starting script to tune ACSF and NBQX simulations of NetPyNE-based S1 model.
-"""
-
+from tune_objective import process_traces, load_morphologies, average_voltage_traces_into_hVOS_pixels, load_cell_id_to_me_type_map, extract_features, extract_traces, intersect
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
 from netpyne import sim, specs
 import time
@@ -13,107 +8,57 @@ import copy
 from netpyne import specs
 import importlib.util, os
 import sys
+import numpy as np
+from cam_params import cam_params_tune as cam_params
 
 
 pc = h.ParallelContext()
 rank = int(pc.id())
 sim.clearAll()
 
-def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.py', acsf=True):
-    """
-    Based on `netpyne.sim.setup.readCmdLineArgs` but allows
-    cfg to be modified to enable NBQX (cfg.experiment_NBQX_global = True)
-    before netParams is loaded.
+def process_and_save_traces(simData_acsf, propVelocity):
+    #simData = simData['simData']
+    
+    #simData_acsf = simData['acsf']
+    #simData_nbqx = simData['nbqx']
 
-    Parameters
-    ----------
-    simConfigDefault : str
+    cell_id_to_me_type_map = load_cell_id_to_me_type_map('../data/cell_id_to_me_type_map.json')
+    cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
+    
+    # hVOS/optical processing
+    rois_to_sample = []
+    roi_size = 3  # 3x3 pixel ROIs
+    n_rois = 400
+    # randomly sample 60 non-overlapping ROIs of size 3x3 pixels
+    np.random.seed(4321)
+    for _ in range(n_rois):
+        attempts = 10
+        while True:
+            x = np.random.randint(0, cam_params['cam_width'] - roi_size)
+            y = np.random.randint(0, cam_params['cam_height'] - roi_size)
+            roi = (x, y, x + roi_size, y + roi_size)
+            if not any(intersect(roi, r) for r in rois_to_sample):
+                rois_to_sample.append(roi)
+                break
+            attempts -= 1
+            if attempts == 0:
+                print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
+                break
 
-    netParamsDefault : str
+    simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
+                                                                  me_type_morphology_map, rois_to_sample)
+
+    tvec = np.array(simData_acsf['t'])  # time vector is the same for both conditions
 
 
-    """
-
-    import __main__
-    from netpyne import sim, specs
-
-    if len(sys.argv) > 1:
-        print(
-            '\nReading command line arguments using syntax: python file.py [simConfig=filepath] [netParams=filepath]'
-        )
-    cfgPath = None
-    netParamsPath = None
-
-    # read simConfig and netParams paths
-    for arg in sys.argv:
-        if arg.startswith('simConfig='):
-            cfgPath = arg.split('simConfig=')[1]
-
-        elif arg.startswith('netParams='):
-            netParamsPath = arg.split('netParams=')[1]
-
-    print(f'cmd line cfgPath: {cfgPath}, netParamsPath: {netParamsPath}')
-
-    if cfgPath is None and simConfigDefault is not None:
-        cfgPath = simConfigDefault
-    if netParamsPath is None and netParamsDefault is not None:
-        netParamsPath = netParamsDefault
-
-    if cfgPath:
-        print(f'Importing simConfig from {cfgPath}')
-        if cfgPath.endswith('.py'):
-            cfgModule = sim.loadPythonModule(cfgPath)
-            cfg = cfgModule.cfg
-        else:
-            cfg = sim.loadSimCfg(cfgPath, setLoaded=False)
-        __main__.cfg = cfg
-
-        if not cfg:
-            print('\nWarning: Could not load cfg from command line path or from default cfg.py')
-            print('This usually occurs when cfg.py crashes.  Please ensure that your cfg.py file')
-            print('completes successfully on its own (i.e. execute "python cfg.py" and fix any bugs).')
-    else:
-        print('\nNo command line argument or default value for cfg provided.')
-        cfg = None
-
-    # modify cfg here before loading netParams
-    # to enable NBQX
-    # http://doc.netpyne.org/user_documentation.html#running-a-batch-job-beta
-    if not acsf:
-        print("Modifying cfg for NBQX simulation")
-        cfg.update({'experiment_NBQX_global': True,
-                    'synWeightFractionEE': [cfg.partial_blockade_fraction, 1.0],
-                    'synWeightFractionEI': [cfg.partial_blockade_fraction, 1.0]}, force_match=True)
-        #cfg.experiment_NBQX_global = True  # if ACSF is False, then NBQX is True
-        cfg.synWeightFractionEE[0] = cfg.partial_blockade_fraction
-        cfg.synWeightFractionEI[0] = cfg.partial_blockade_fraction
-
-    if netParamsPath:
-        print(f'CFG after modification for NBQX: {cfg.synWeightFractionEE}, Importing netParams from {netParamsPath}')
-        if netParamsPath.endswith('py'):
-            netParamsModule = sim.loadPythonModule(netParamsPath)
-            netParams = netParamsModule.netParams
-        else:
-            netParams = sim.loadNetParams(netParamsPath, setLoaded=False)
-
-        if not netParams:
-            print('\nWarning: Could not load netParams from command line path or from default netParams.py')
-            print('This usually occurs when netParams.py crashes.  Please ensure that your netParams.py file')
-            print('completes successfully on its own (i.e. execute "python netParams.py" and fix any bugs).')
-    else:
-        print('\nNo command line argument or default value for netParams provided.')
-        netParams = None
-
-    return cfg, netParams
+    # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
+    all_trial_save_folder = '../data/grid_acsf/'
+    np.save(os.path.join(all_trial_save_folder, f"all_cells_rec_acsf_trial{int(propVelocity)}.npy"), all_cells_rec_acsf)
 
 def build_network(acsf=True):
     
-    cfg, netParams = None, None
-    cfg, netParams = readCmdLineArgs_nbqx(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py', acsf=acsf)
-    if acsf:
-        cfg.filename = 'acsf_run'
-    else:
-        cfg.filename = 'nbqx_run'
+    cfg, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
+
     sim.initialize(
         simConfig = cfg, 	
         netParams = netParams)  				# create network object and set cfg and net params
@@ -157,9 +102,10 @@ sim.pc.barrier()   # Wait for all ranks to finish gatherData
 if rank == 0:
 
     sim.saveData()
-
+    process_and_save_traces(sim.allSimData, sim.cfg.propVelocity, rank)
     end_time = time.time()
-    print(f"Total iteration simulation time (ACSF only): {(end_time - start_time)/60} minutes")
+    print(f"Total iteration simulation and optical processing time (ACSF only): {(end_time - start_time)/60} minutes")
+
+    
 
 sim.pc.done()
-sim.clearAll()
