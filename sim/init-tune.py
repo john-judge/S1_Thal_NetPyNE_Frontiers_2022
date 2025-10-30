@@ -17,6 +17,7 @@ import sys
 
 pc = h.ParallelContext()
 rank = int(pc.id())
+sim.clearAll()
 
 def readCmdLineArgs_nbqx(simConfigDefault='cfg.py', netParamsDefault='netParams.py', acsf=True):
     """
@@ -158,6 +159,8 @@ if rank == 0:
         print("Error copying NBQX data:", e)
         nbqx_data = dict(sim.allSimData)
 sim.pc.done()
+sim.clearAll()
+pc = h.ParallelContext()
 
 sim.allSimData = {}  # clear before next sim
 build_network()
@@ -183,3 +186,4 @@ if rank == 0:
     print(f"Total iteration simulation time (both ACSF and NBQX): {(end_time - start_time)/60} minutes")
 
 sim.pc.done()
+sim.clearAll()
