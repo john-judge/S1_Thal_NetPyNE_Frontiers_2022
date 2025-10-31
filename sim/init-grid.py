@@ -9,6 +9,7 @@ from netpyne import specs
 import importlib.util, os
 import sys
 import numpy as np
+import gc
 from cam_params import cam_params_tune as cam_params
 
 
@@ -54,6 +55,8 @@ def process_and_save_traces(simData_acsf, propVelocity):
     # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
     all_trial_save_folder = '../data/grid_acsf/'
     np.save(os.path.join(all_trial_save_folder, f"all_cells_rec_acsf_trial{int(propVelocity)}.npy"), all_cells_rec_acsf)
+    del all_cells_rec_acsf, simData_traces_acsf
+    gc.collect()
 
 def build_network(acsf=True):
     
@@ -107,5 +110,9 @@ if rank == 0:
     print(f"Total iteration simulation and optical processing time (ACSF only): {(end_time - start_time)/60} minutes")
 
     
-
+sim.clearAll()
 sim.pc.done()
+
+# free memory
+del sim.allSimData
+gc.collect()

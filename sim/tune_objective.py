@@ -345,6 +345,12 @@ def intersect(roi1, roi2):
         return False
     return True
 
+def load_grid_acsf_map():
+    grid_acsf_filename = '../../grid_acsf_map.pkl'
+    with open(grid_acsf_filename, 'rb') as f:
+        grid_acsf_map = pickle.load(f)
+    return grid_acsf_map
+
 def myObjectiveInner(simData):
     # simData['acsf'] and simData['nbqx'] are the two conditions
     # each is a dict with keys like 'Vsoma', 'Vdend_32', etc
@@ -359,10 +365,23 @@ def myObjectiveInner(simData):
     # start timer
     timer = time.time()
 
-    simData = simData['simData']
+    simData_nbqx = simData['simData']
     
-    simData_acsf = simData['acsf']
-    simData_nbqx = simData['nbqx']
+    # change: now simData_acsf traces are loaded from staging
+    #simData_acsf = simData['acsf']
+    #simData_nbqx = simData['nbqx']
+
+    propVelocity = sim.cfg.propVelocity
+    print("Propagation velocity (um/ms):", propVelocity)
+    
+    grid_acsf_map = load_grid_acsf_map()
+    grid_velocities = list(grid_acsf_map.keys())
+    grid_velocities.sort()
+    grid_resolution = grid_velocities[1] - grid_velocities[0]
+    if propVelocity not in grid_acsf_map:
+        # round to nearest multiple of grid_resolution
+        propVelocity = int(round(propVelocity / grid_resolution) * grid_resolution)
+    simData_acsf = grid_acsf_map[propVelocity]
 
     cell_id_to_me_type_map = load_cell_id_to_me_type_map('../data/cell_id_to_me_type_map.json')
     cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
