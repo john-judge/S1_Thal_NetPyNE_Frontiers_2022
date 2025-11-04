@@ -105,7 +105,7 @@ sim.pc.barrier()   # Wait for all ranks to finish gatherData
 if rank == 0:
 
     sim.saveData()
-    process_and_save_traces(sim.allSimData, sim.cfg.propVelocity, rank)
+    process_and_save_traces(sim.allSimData, sim.cfg.propVelocity)
     end_time = time.time()
     print(f"Total iteration simulation and optical processing time (ACSF only): {(end_time - start_time)/60} minutes")
 
