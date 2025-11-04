@@ -26,7 +26,7 @@ if __name__ == '__main__':
     b.saveFolder = '../data/' + b.batchLabel
     b.method = 'grid'
     b.runCfg = {'type': 'mpi_direct',
-            'mpiCommand': 'mpiexec -n 8 nrniv -python -mpi -u init-grid.py', 
+            'mpiCommand': 'mpiexec -n 1 nrniv -python -mpi -u init-grid.py', 
             'skip': True}
 
     b.run()
