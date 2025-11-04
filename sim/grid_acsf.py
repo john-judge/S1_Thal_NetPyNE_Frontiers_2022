@@ -15,7 +15,10 @@ NBQX simulation tuning iterations.
 
 def grid():
     params = specs.ODict()
-    params[('propVelocity')] = list(np.arange(0.0, 150.0, 10.0))
+    params[('propVelocity')] = [0.001, 0.1, 0.5, 1] + \
+                                list(np.arange(2.0, 10.0, 2.0)) + \
+                                list(np.arange(10.0, 40.0, 3.0))  + \
+                                list(np.arange(40.0, 151.0, 5.0))
 
     b = Batch(params=params, netParamsFile='netParams.py', cfgFile='cfg-tune.py')
     return b

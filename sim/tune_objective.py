@@ -84,22 +84,27 @@ def myObjective(simData):
         traceback.print_exc()   # will print full traceback to your terminal
         raise
 
-def load_cell_id_to_me_type_map(file_path):
+def load_cell_id_to_me_type_map(net_data, curr_trial=None):
     cell_id_to_me_type_map = {}
-    save_folder = '../data/optuna_tuning'
-    curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(save_folder) if (os.path.isdir(os.path.join(save_folder, d)) and 'gen_' in d)])
-    target_dir_net = f'../data/optuna_tuning/gen_{curr_trial}/trial_{curr_trial}_data.pkl'
 
-    with open(target_dir_net, 'rb') as f:
-        data = pickle.load(f)
-        print(data.keys())
-        for cell_dict in data['net']['cells']:
-            cell_id_to_me_type_map[cell_dict['gid']] = {
-                'me_type': cell_dict['tags']['cellType'],
-                'x': cell_dict['tags']['x'],
-                'y': cell_dict['tags']['y'],
-                'z': cell_dict['tags']['z']
-            }
+    if curr_trial is None:
+        save_folder = '../data/optuna_tuning'
+        curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(save_folder) if (os.path.isdir(os.path.join(save_folder, d)) and 'gen_' in d)])
+
+    if net_data is None:
+        target_dir_net = f'../data/optuna_tuning/gen_{curr_trial}/trial_{curr_trial}_data.pkl'
+
+        with open(target_dir_net, 'rb') as f:
+            data = pickle.load(f)
+            net_data = data['net']
+
+    for cell_dict in net_data['cells']:
+        cell_id_to_me_type_map[cell_dict['gid']] = {
+            'me_type': cell_dict['tags']['cellType'],
+            'x': cell_dict['tags']['x'],
+            'y': cell_dict['tags']['y'],
+            'z': cell_dict['tags']['z']
+        }
     return cell_id_to_me_type_map
 
 def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map, rois_to_sample,
@@ -383,7 +388,7 @@ def myObjectiveInner(simData):
         propVelocity = int(round(propVelocity / grid_resolution) * grid_resolution)
     simData_acsf = grid_acsf_map[propVelocity]
 
-    cell_id_to_me_type_map = load_cell_id_to_me_type_map('../data/cell_id_to_me_type_map.json')
+    cell_id_to_me_type_map = load_cell_id_to_me_type_map(None)
     cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
     cells_nbqx, _ = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
     

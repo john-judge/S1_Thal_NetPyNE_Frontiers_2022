@@ -23,7 +23,7 @@ def process_and_save_traces(simData_acsf, propVelocity):
     #simData_acsf = simData['acsf']
     #simData_nbqx = simData['nbqx']
 
-    cell_id_to_me_type_map = load_cell_id_to_me_type_map('../data/cell_id_to_me_type_map.json')
+    cell_id_to_me_type_map = load_cell_id_to_me_type_map(simData_acsf['net'], curr_trial=propVelocity)
     cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
     
     # hVOS/optical processing

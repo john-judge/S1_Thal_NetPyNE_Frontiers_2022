@@ -10,7 +10,7 @@ def tune_optuna():
     params[('propVelocity')] = [0.0, 150.0]  # range (min, max)
     params[('partial_blockade_fraction')] = [0.0, 0.05]
 
-    b = Batch(params=params, netParamsFile='netParams.py', cfgFile='cfg-tune.py')
+    b = Batch(params=params, netParamsFile='netParams.py', cfgFile='cfg-tune-nbqx.py')
     return b
 
 if __name__ == '__main__':
