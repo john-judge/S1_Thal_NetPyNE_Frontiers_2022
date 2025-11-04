@@ -54,6 +54,7 @@ def process_and_save_traces(simData_acsf, propVelocity):
 
     # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
     all_trial_save_folder = '../data/grid_acsf/'
+    lablel = str(propVelocity).replace('.', 'p')
     np.save(os.path.join(all_trial_save_folder, f"all_cells_rec_acsf_trial{int(propVelocity)}.npy"), all_cells_rec_acsf)
     del all_cells_rec_acsf, simData_traces_acsf
     gc.collect()

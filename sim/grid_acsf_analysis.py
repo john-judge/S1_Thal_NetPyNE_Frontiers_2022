@@ -2,7 +2,7 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-import subprocess
+from tune_objective import average_voltage_traces_into_hVOS_pixels
 
 # gather ACSF simulation data into a map for easy lookup during NBQX tuning
 # To be run on Condor after grid_acsf.py has completed
