@@ -54,12 +54,12 @@ def process_and_save_traces(simData_acsf, propVelocity):
 
     # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
     all_trial_save_folder = '../data/grid_acsf/'
-    lablel = str(propVelocity).replace('.', 'p')
-    np.save(os.path.join(all_trial_save_folder, f"all_cells_rec_acsf_trial{int(propVelocity)}.npy"), all_cells_rec_acsf)
+    label = str(propVelocity).replace('.', 'p')
+    np.save(os.path.join(all_trial_save_folder, f"all_cells_rec_acsf_trial{label}.npy"), all_cells_rec_acsf)
     del all_cells_rec_acsf, simData_traces_acsf
     gc.collect()
 
-def build_network(acsf=True):
+def build_network():
     
     cfg, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
 
@@ -72,23 +72,6 @@ def build_network(acsf=True):
     sim.net.connectCells()  
     sim.net.addStims() 							# add network stimulation
     sim.setupRecording()              			# setup variables to record for each cell (spikes, V traces, etc)
-
-    try:
-        print(sim.cfg.synWeightFractionEE[0], "cfg.synWeightFractionEE[0] for ACSF = ", acsf)
-    except Exception as e:
-        print("Error accessing synWeightFractionEE[0]:", e)
-    net_p = None
-    try:
-        net_p = sim.net.connParams
-    except Exception as e:
-        try:
-            net_p = sim.netParams.connParams
-        except Exception as e2:
-            print("Error accessing sim.netParams.connParams:", e2)
-    if net_p is not None:
-        key0 = list(net_p.keys())[0]
-        synMechWeightFactor = net_p[key0].get('synMechWeightFactor', None)
-        print(f"Example synMechWeightFactor from connParams: {synMechWeightFactor} for ACSF = ", acsf)
 
 # start timer 
 if rank == 0:
