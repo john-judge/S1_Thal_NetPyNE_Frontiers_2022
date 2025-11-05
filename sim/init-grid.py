@@ -15,7 +15,6 @@ pc = h.ParallelContext()
 rank = int(pc.id())
 sim.clearAll()
 
-
 def build_network():
     
     cfg, netParams = sim.readCmdLineArgs(simConfigDefault='cfg-tune.py', netParamsDefault='netParams.py')
@@ -34,7 +33,6 @@ def build_network():
 if rank == 0:
     start_time = time.time()
 
-
 build_network()
 print("Here is the ACSF value of sim.cfg.synWeightFractionEE from init-tune.py:", sim.cfg.synWeightFractionEE)
 
@@ -48,7 +46,6 @@ if rank == 0:
     sim.saveData()
     end_time = time.time()
     print(f"Total iteration simulation and optical processing time (ACSF only): {(end_time - start_time)/60} minutes")
-
     
 sim.clearAll()
 sim.pc.done()
