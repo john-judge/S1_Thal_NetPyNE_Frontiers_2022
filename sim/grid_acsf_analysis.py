@@ -13,7 +13,7 @@ if len(sys.argv) > 1:
     job_id = int(sys.argv[1])
 job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 
-data_dir = f'S1_Thal_NetPyNE_Frontiers_2022/grid/grid_acsf/'
+data_dir = f'../grid/grid_acsf/'
 grid_acsf_map = {}
 for file in os.listdir(data_dir):
     if file.endswith('.pkl'):
