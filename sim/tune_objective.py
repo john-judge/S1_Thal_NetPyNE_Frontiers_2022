@@ -351,10 +351,15 @@ def intersect(roi1, roi2):
     return True
 
 def load_grid_acsf_map():
-    grid_acsf_filename = '../../grid_acsf_map.pkl'
-    with open(grid_acsf_filename, 'rb') as f:
-        grid_acsf_map = pickle.load(f)
-    return grid_acsf_map
+    full_grid_acsf_map = {}
+    for file in os.listdir('../../'):
+        if file.startswith('grid_acsf_map') and file.endswith('.pkl'):
+            grid_acsf_filename = os.path.join('../../', file)
+            
+        with open(grid_acsf_filename, 'rb') as f:
+            grid_acsf_map = pickle.load(f)
+            full_grid_acsf_map.update(grid_acsf_map)
+    return full_grid_acsf_map
 
 def myObjectiveInner(simData):
     # simData['acsf'] and simData['nbqx'] are the two conditions
