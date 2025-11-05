@@ -7,7 +7,7 @@ universe = container
 # custom args 
 jobID = $(Process)
 
-executable = myExecutableTune.sh
+executable = myExecutableGridAcsf.sh
 arguments = $(jobID)
 
 # require staging and transfer input files
