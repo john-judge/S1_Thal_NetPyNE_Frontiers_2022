@@ -33,9 +33,6 @@ rm S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 #cp /staging/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
 #tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 
-cp /staging/jjudge3/grid_acsf_map*.tar.gz ./
-tar -xvsf grid_acsf_map*.tar.gz
-rm grid_acsf_map*.tar.gz
 
 cd S1_Thal_NetPyNE_Frontiers_2022
 git pull
@@ -46,9 +43,10 @@ git pull
 
 cd sim
 nrnivmodl mod .
-echo "Finished nrnivmodl. Running tune.py..."
+echo "Finished nrnivmodl. Running grid-acsf.py..."
 #python write_batch_parameters.py "$1"
-python tune.py
+python grid_acsf.py "$1"
+python grid_acsf_analysis.py "$1"
 #mpiexec -n 8 nrniv -python -mpi init.py
 #mpiexec -n 8 nrniv -python -mpi init.py
 cd ..
@@ -61,8 +59,10 @@ cd ..
 
 # tar output directory
 #tar -czvf tune.tar.gz --exclude="S1_Thal_NetPyNE_Frontiers_2022/data/optuna_tuning/gen*" S1_Thal_NetPyNE_Frontiers_2022/data
-tar -czvf tune.tar.gz --exclude="*.mm" "S1_Thal_NetPyNE_Frontiers_2022/data"
-mv tune.tar.gz /staging/jjudge3/
+tar -czvf "grid${1}.tar.gz" --include="*all_cells_rec_acsf_trial*" "S1_Thal_NetPyNE_Frontiers_2022/data"
+mv "grid${1}.tar.gz" /staging/jjudge3/
 
+tar -czvf "grid_acsf_map${1}.tar.gz" "grid_acsf_map.pkl"
+mv "grid_acsf_map${1}.tar.gz" /staging/jjudge3/
 
 
