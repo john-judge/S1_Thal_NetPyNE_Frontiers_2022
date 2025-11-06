@@ -60,13 +60,13 @@ if len(sys.argv) > 1:
         job_id = int(sys.argv[1])
 job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 
-print(os.getcwd())
 data_dir = f'../data/grid_acsf/'
 grid_acsf_map = {}
 for file in os.listdir(data_dir):
     if file.endswith('.pkl'):
         with open(os.path.join(data_dir, file), 'rb') as f:
             simData_acsf = pickle.load(f)
+            print(simData_acsf.keys())
             processed_traces = process_and_save_traces(simData_acsf, simData_acsf['simConfig']['propVelocity'])
             grid_acsf_map[simData_acsf['simConfig']['propVelocity']] = processed_traces
 
