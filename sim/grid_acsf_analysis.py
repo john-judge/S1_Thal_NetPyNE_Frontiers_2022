@@ -2,7 +2,7 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-from tune_objective import load_morphologies, average_voltage_traces_into_hVOS_pixels, load_cell_id_to_me_type_map, intersect
+from tune_objective import load_morphologies, average_voltage_traces_into_hVOS_pixels, load_cell_id_to_me_type_map, intersect, sample_seeded_rand_rois
 import sys
 from cam_params import cam_params_tune as cam_params
 import gc
@@ -10,7 +10,6 @@ import gc
 
 def process_and_save_traces(simData_acsf, propVelocity):
     #simData = simData['simData']
-    
     #simData_acsf = simData['acsf']
     #simData_nbqx = simData['nbqx']
 
@@ -18,24 +17,7 @@ def process_and_save_traces(simData_acsf, propVelocity):
     cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf['simData'], cell_id_to_me_type_map)
     
     # hVOS/optical processing
-    rois_to_sample = []
-    roi_size = 3  # 3x3 pixel ROIs
-    n_rois = 400
-    # randomly sample 60 non-overlapping ROIs of size 3x3 pixels
-    np.random.seed(4321)
-    for _ in range(n_rois):
-        attempts = 10
-        while True:
-            x = np.random.randint(0, cam_params['cam_width'] - roi_size)
-            y = np.random.randint(0, cam_params['cam_height'] - roi_size)
-            roi = (x, y, x + roi_size, y + roi_size)
-            if not any(intersect(roi, r) for r in rois_to_sample):
-                rois_to_sample.append(roi)
-                break
-            attempts -= 1
-            if attempts == 0:
-                print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
-                break
+    rois_to_sample = sample_seeded_rand_rois(cam_params['cam_width'], cam_params['cam_height'])
 
     simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf['simData'],
                                                                   cells_acsf, 

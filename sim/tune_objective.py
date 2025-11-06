@@ -363,6 +363,24 @@ def load_grid_acsf_map():
             full_grid_acsf_map.update(grid_acsf_map)
     return full_grid_acsf_map
 
+def sample_seeded_rand_rois(cam_width, cam_height, n_rois=395, roi_size=3, seed=4321):
+    rois_to_sample = []
+    np.random.seed(seed)
+    for _ in range(n_rois):
+        attempts = 10
+        while True:
+            x = np.random.randint(0, cam_width - roi_size)
+            y = np.random.randint(0, cam_height - roi_size)
+            roi = (x, y, x + roi_size, y + roi_size)
+            if not any(intersect(roi, r) for r in rois_to_sample):
+                rois_to_sample.append(roi)
+                break
+            attempts -= 1
+            if attempts == 0:
+                print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
+                break
+    return rois_to_sample
+
 def myObjectiveInner(simData):
     # simData['acsf'] and simData['nbqx'] are the two conditions
     # each is a dict with keys like 'Vsoma', 'Vdend_32', etc
@@ -393,37 +411,17 @@ def myObjectiveInner(simData):
     if propVelocity not in grid_acsf_map:
         # round to nearest multiple of grid_resolution
         propVelocity = int(round(propVelocity / grid_resolution) * grid_resolution)
-    simData_acsf = grid_acsf_map[propVelocity]
+    
+    simData_traces_acsf = grid_acsf_map[propVelocity]
 
     cell_id_to_me_type_map = load_cell_id_to_me_type_map(None)
-    cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
-    cells_nbqx, _ = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
+    cells_nbqx, me_type_morphology_map = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
     
     # hVOS/optical processing
-    rois_to_sample = []
-    roi_size = 3  # 3x3 pixel ROIs
-    n_rois = 400
-    # randomly sample 60 non-overlapping ROIs of size 3x3 pixels
-    np.random.seed(4321)
-    for _ in range(n_rois):
-        attempts = 10
-        while True:
-            x = np.random.randint(0, cam_params['cam_width'] - roi_size)
-            y = np.random.randint(0, cam_params['cam_height'] - roi_size)
-            roi = (x, y, x + roi_size, y + roi_size)
-            if not any(intersect(roi, r) for r in rois_to_sample):
-                rois_to_sample.append(roi)
-                break
-            attempts -= 1
-            if attempts == 0:
-                print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
-                break
-
-    simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
-                                                                  me_type_morphology_map, rois_to_sample)
+    rois_to_sample = sample_seeded_rand_rois(cam_params['cam_width'], cam_params['cam_height'])
     simData_traces_nbqx, all_cells_rec_nbqx = average_voltage_traces_into_hVOS_pixels(simData_nbqx, cells_nbqx, 
                                                                   me_type_morphology_map, rois_to_sample)
-    tvec = np.array(simData_acsf['t'])  # time vector is the same for both conditions
+    tvec = np.array(simData_nbqx['t'])  # time vector is the same for both conditions
 
     # Compare ACSF vs NBQX
     acsf_features, acsf_processed_traces = extract_features(list(simData_traces_acsf.values()), tvec)
@@ -482,7 +480,6 @@ def myObjectiveInner(simData):
     print("Files in ", save_folder, ": ", os.listdir(save_folder))
 
     # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
-    np.save(os.path.join(save_folder, f"all_cells_rec_acsf_trial{curr_trial}.npy"), all_cells_rec_acsf)
     np.save(os.path.join(save_folder, f"all_cells_rec_nbqx_trial{curr_trial}.npy"), all_cells_rec_nbqx)
 
     # save processed traces to pickle
