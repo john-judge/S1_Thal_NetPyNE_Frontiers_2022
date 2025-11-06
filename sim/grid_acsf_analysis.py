@@ -54,7 +54,10 @@ def process_and_save_traces(simData_acsf, propVelocity):
 # grid_acsf_map[propVelocity] = simData_acsf
 n_jobs = 10
 if len(sys.argv) > 1:
-    job_id = int(sys.argv[1])
+    if sys.argv[1] == '':
+        job_id = 0
+    else:
+        job_id = int(sys.argv[1])
 job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 
 print(os.getcwd())
