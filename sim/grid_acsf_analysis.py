@@ -66,8 +66,7 @@ for file in os.listdir(data_dir):
     if file.endswith('.pkl'):
         with open(os.path.join(data_dir, file), 'rb') as f:
             simData_acsf = pickle.load(f)
-            print(simData_acsf.keys())
-            processed_traces = process_and_save_traces(simData_acsf, simData_acsf['simConfig']['propVelocity'])
+            processed_traces = process_and_save_traces(simData_acsf['simData'], simData_acsf['simConfig']['propVelocity'])
             grid_acsf_map[simData_acsf['simConfig']['propVelocity']] = processed_traces
 
 with open(f'../../grid_acsf_map{job_id}.pkl', 'wb') as f:
