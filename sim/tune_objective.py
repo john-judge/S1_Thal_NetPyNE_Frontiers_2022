@@ -108,7 +108,8 @@ def load_cell_id_to_me_type_map(net_data, curr_trial=None):
     return cell_id_to_me_type_map
 
 def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map, rois_to_sample,
-                                            target_hVOS_populations = ("L4_SS", "L4_PC")):
+                                            target_hVOS_populations = ("L4_SS", "L4_PC"),
+                                            all_trial_save_folder='../data/optuna_tuning/'):
     num_cells_to_draw = 3  # testing with 1 cell, tune with 3+
     target_population_cells = [
     cells[cell_id] for cell_id in cells 
@@ -127,9 +128,12 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
                                 {cell.get_cell_id(): cell for cell in target_population_cells}, 
                                 me_type_morphology_map,
                                 force_overwrite=True)
-    all_trial_save_folder = '../data/optuna_tuning/'
-    curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(all_trial_save_folder) if (os.path.isdir(os.path.join(all_trial_save_folder, d)) and 'gen_' in d)])
-    save_folder = all_trial_save_folder + 'gen_' + str(curr_trial)
+    save_folder = None
+    if 'optuna_tuning' in all_trial_save_folder:
+        curr_trial = max([int(d.split("gen_")[-1]) for d in os.listdir(all_trial_save_folder) if (os.path.isdir(os.path.join(all_trial_save_folder, d)) and 'gen_' in d)])
+        save_folder = all_trial_save_folder + 'gen_' + str(curr_trial)
+    else:
+        save_folder = all_trial_save_folder
     hvos_readout.compute_optical_signal(save_folder)
 
     ####################################
