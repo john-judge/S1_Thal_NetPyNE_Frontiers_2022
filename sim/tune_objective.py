@@ -290,6 +290,7 @@ def load_morphologies(simData, cell_id_to_me_type_map,
     cells = {}
     me_type_morphology_map = {}
     loaded_compart_data = {}
+    print('simData keys:', simData.keys())
     for k in simData:
         if any([compart in k for compart in ['soma', 'dend', 'apic', 'axon']]):
             for cell_id in simData[k]:
