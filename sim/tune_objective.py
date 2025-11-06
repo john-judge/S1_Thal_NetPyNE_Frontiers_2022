@@ -123,7 +123,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     target_population_cells = random.sample(target_population_cells, 
                                             min(num_cells_to_draw, 
                                                 len(target_population_cells)))
-
+    print("target population cells:", target_population_cells)    
     hvos_readout = hVOSReadout(target_hVOS_populations, 
                                 {cell.get_cell_id(): cell for cell in target_population_cells}, 
                                 me_type_morphology_map,
@@ -257,8 +257,7 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
         if all_cells_rec is None:
             all_cells_rec = recording
         else:
-            for compart in comparts:
-                all_cells_rec[:] += recording[:]
+            all_cells_rec[:] += recording[:]
 
         psf_nonzero_files = cam.get_cell_recording().get_non_zero_file_list()
         print("PSF non-zero files:", psf_nonzero_files)
@@ -272,7 +271,6 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
         gc.collect()
 
     pixel_traces = {}
-    print('all_cells_rec shape:', all_cells_rec.shape)
     if all_cells_rec is not None:
         for roi in rois_to_sample:
             x_min, y_min, x_max, y_max = roi
