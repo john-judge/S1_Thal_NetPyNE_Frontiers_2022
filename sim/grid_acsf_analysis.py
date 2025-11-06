@@ -15,7 +15,7 @@ def process_and_save_traces(simData_acsf, propVelocity):
     #simData_nbqx = simData['nbqx']
 
     cell_id_to_me_type_map = load_cell_id_to_me_type_map(simData_acsf['net'], curr_trial=propVelocity)
-    cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf, cell_id_to_me_type_map)
+    cells_acsf, me_type_morphology_map = load_morphologies(simData_acsf['simData'], cell_id_to_me_type_map)
     
     # hVOS/optical processing
     rois_to_sample = []
@@ -37,7 +37,8 @@ def process_and_save_traces(simData_acsf, propVelocity):
                 print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
                 break
 
-    simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf['simData'], cells_acsf, 
+    simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf['simData'],
+                                                                  cells_acsf, 
                                                                   me_type_morphology_map, rois_to_sample,
                                                                   all_trial_save_folder='../data/grid_acsf/')
 
