@@ -37,7 +37,7 @@ def process_and_save_traces(simData_acsf, propVelocity):
                 print("Could not find non-overlapping ROI after 10 attempts, stopping ROI selection.")
                 break
 
-    simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf, cells_acsf, 
+    simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf['simData'], cells_acsf, 
                                                                   me_type_morphology_map, rois_to_sample,
                                                                   all_trial_save_folder='../data/grid_acsf/')
 
@@ -66,7 +66,7 @@ for file in os.listdir(data_dir):
     if file.endswith('.pkl'):
         with open(os.path.join(data_dir, file), 'rb') as f:
             simData_acsf = pickle.load(f)
-            processed_traces = process_and_save_traces(simData_acsf['simData'], simData_acsf['simConfig']['propVelocity'])
+            processed_traces = process_and_save_traces(simData_acsf, simData_acsf['simConfig']['propVelocity'])
             grid_acsf_map[simData_acsf['simConfig']['propVelocity']] = processed_traces
 
 with open(f'../../grid_acsf_map{job_id}.pkl', 'wb') as f:
