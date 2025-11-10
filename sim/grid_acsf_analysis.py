@@ -46,9 +46,13 @@ job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 data_dir = f'../data/grid_acsf/'
 grid_acsf_map = {}
 for file in os.listdir(data_dir):
-    if file.endswith('.pkl'):
+    if file.endswith('data.pkl') and 'grid_acsf_' in file:
         with open(os.path.join(data_dir, file), 'rb') as f:
             simData_acsf = pickle.load(f)
+            if 'simConfig' not in simData_acsf:
+                print(f"Skipping file {file} as it does not contain 'simConfig'")
+                print("keys found:", simData_acsf.keys())
+                continue
             processed_traces = process_and_save_traces(simData_acsf, simData_acsf['simConfig']['propVelocity'])
             grid_acsf_map[simData_acsf['simConfig']['propVelocity']] = processed_traces
 
