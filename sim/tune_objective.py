@@ -352,7 +352,9 @@ def intersect(roi1, roi2):
         return False
     return True
 
-def load_grid_acsf_map():
+def load_grid_acsf_map(propVelocity=None):
+
+    # TO DO: If propVelocity is given, only load the file needed for that velocity
     full_grid_acsf_map = {}
     for file in os.listdir('../../'):
         if file.startswith('grid_acsf_map') and file.endswith('.pkl'):
@@ -406,13 +408,10 @@ def myObjectiveInner(simData):
     
     grid_acsf_map = load_grid_acsf_map()
     grid_velocities = list(grid_acsf_map.keys())
-    grid_velocities.sort()
-    grid_resolution = grid_velocities[1] - grid_velocities[0]
-    if propVelocity not in grid_acsf_map:
-        # round to nearest multiple of grid_resolution
-        propVelocity = int(round(propVelocity / grid_resolution) * grid_resolution)
-    
-    simData_traces_acsf = grid_acsf_map[propVelocity]
+    grid_v_deltas = [abs(v - propVelocity) for v in grid_velocities]
+    closest_velocity = grid_velocities[np.argmin(grid_v_deltas)]
+
+    simData_traces_acsf = grid_acsf_map[closest_velocity]
 
     cell_id_to_me_type_map = load_cell_id_to_me_type_map(None)
     cells_nbqx, me_type_morphology_map = load_morphologies(simData_nbqx, cell_id_to_me_type_map)
