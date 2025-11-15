@@ -47,6 +47,9 @@ print("Here is the NBQX value of sim.cfg.synWeightFractionEE from init-tune.py:"
 #sim.cfg.filename = 'nbqx_run'
 sim.runSim()                     
 sim.gatherData()  
+if rank == 0:
+
+    sim.saveData()
 '''sim.pc.barrier()   # Wait for all ranks to finish gatherData
 if rank == 0:
     try:
