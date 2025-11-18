@@ -7,6 +7,7 @@ import sys
 from cam_params import cam_params_tune as cam_params
 import gc
 
+acsf_str = sys.argv[1] # 'acsf' or 'nbqx'
 
 def process_and_save_traces(simData_acsf, propVelocity):
     #simData = simData['simData']
@@ -46,7 +47,7 @@ job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 data_dir = f'../data/grid_acsf/'
 grid_acsf_map = {}
 for file in os.listdir(data_dir):
-    if file.endswith('data.pkl') and 'grid_acsf_' in file:
+    if file.endswith('data.pkl') and f'grid_{acsf_str}_' in file:
         with open(os.path.join(data_dir, file), 'rb') as f:
             simData_acsf = pickle.load(f)
             if 'simConfig' not in simData_acsf:
@@ -56,6 +57,6 @@ for file in os.listdir(data_dir):
             processed_traces = process_and_save_traces(simData_acsf, simData_acsf['simConfig']['propVelocity'])
             grid_acsf_map[simData_acsf['simConfig']['propVelocity']] = processed_traces
 
-with open(f'../../grid_acsf_map{job_id}.pkl', 'wb') as f:
+with open(f'../../grid_{acsf_str}_map{job_id}.pkl', 'wb') as f:
     pickle.dump(grid_acsf_map, f)
-print(f"Saved grid_acsf_map{job_id}.pkl with {len(grid_acsf_map)} entries.")
+print(f"Saved grid_{acsf_str}_map{job_id}.pkl with {len(grid_acsf_map)} entries.")
