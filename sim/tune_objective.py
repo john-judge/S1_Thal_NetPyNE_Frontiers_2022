@@ -41,9 +41,10 @@ mse_weights = {
     'ratio': 1.0,
 }
 
-def extract_features(traces, tvec, start_time=450):
+def extract_features(traces, tvec, start_time=450, int_pts=None):
     """Return amplitude, latency, half-width."""
-    int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
+    if int_pts is None:
+        int_pts = tvec[1] - tvec[0]  # integration points (sampling interval)
     features = []
     processed_traces = []
     fit_poly_order = 3
