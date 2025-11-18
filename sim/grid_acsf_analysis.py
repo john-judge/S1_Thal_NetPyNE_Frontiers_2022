@@ -7,7 +7,7 @@ import sys
 from cam_params import cam_params_tune as cam_params
 import gc
 
-acsf_str = sys.argv[1] # 'acsf' or 'nbqx'
+acsf_str = sys.argv[2] # 'acsf' or 'nbqx'
 
 def process_and_save_traces(simData_acsf, propVelocity):
     #simData = simData['simData']
