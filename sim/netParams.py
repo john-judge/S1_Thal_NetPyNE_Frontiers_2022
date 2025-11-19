@@ -24,6 +24,7 @@ except:
     from cfg import cfg
 
 print("Here is the value of cfg.synWeightFractionEE from netParams:", cfg.synWeightFractionEE)
+print("value of cfg.experiment_NBQX_global in netParams:", cfg.experiment_NBQX_global)
 
 #------------------------------------------------------------------------------
 #
