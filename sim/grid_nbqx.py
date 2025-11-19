@@ -38,11 +38,11 @@ if __name__ == '__main__':
     job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 
     b = grid(job_id, n_jobs)
-    b.batchLabel = 'grid_acsf'
+    b.batchLabel = 'grid_nbqx'
     b.saveFolder = '../data/' + b.batchLabel
     b.method = 'grid'
     b.runCfg = {'type': 'mpi_direct',
-            'mpiCommand': 'mpiexec -n 1 nrniv -python -mpi -u init-grid.py', 
+            'mpiCommand': 'mpiexec -n 1 nrniv -python -mpi -u init-grid-nbqx.py', 
             'skip': True}
 
     b.run()
