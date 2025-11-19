@@ -23,7 +23,7 @@ def process_and_save_traces(simData_acsf, propVelocity):
     simData_traces_acsf, all_cells_rec_acsf = average_voltage_traces_into_hVOS_pixels(simData_acsf['simData'],
                                                                   cells_acsf, 
                                                                   me_type_morphology_map, rois_to_sample,
-                                                                  all_trial_save_folder='../data/grid_acsf/')
+                                                                  all_trial_save_folder=f'../data/grid_{acsf_str}/')
 
     # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
     #all_trial_save_folder = '../data/grid_acsf/'
@@ -44,7 +44,7 @@ if len(sys.argv) > 1:
         job_id = int(sys.argv[1])
 job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 
-data_dir = f'../data/grid_acsf/'
+data_dir = f'../data/grid_{acsf_str}/'
 grid_acsf_map = {}
 for file in os.listdir(data_dir):
     if file.endswith('data.pkl') and f'grid_{acsf_str}_' in file:
