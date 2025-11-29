@@ -353,17 +353,17 @@ def intersect(roi1, roi2):
         return False
     return True
 
-def load_grid_acsf_map(propVelocity=None):
+def load_grid_acsf_map(src_file='grid_acsf_map', propVelocity=None):
 
     # TO DO: If propVelocity is given, only load the file needed for that velocity
     full_grid_acsf_map = {}
     for file in os.listdir('../../'):
-        if file.startswith('grid_acsf_map') and file.endswith('.pkl'):
+        if file.startswith(src_file) and file.endswith('.pkl'):
             grid_acsf_filename = os.path.join('../../', file)
             
-        with open(grid_acsf_filename, 'rb') as f:
-            grid_acsf_map = pickle.load(f)
-            full_grid_acsf_map.update(grid_acsf_map)
+            with open(grid_acsf_filename, 'rb') as f:
+                grid_acsf_map = pickle.load(f)
+                full_grid_acsf_map.update(grid_acsf_map)
     return full_grid_acsf_map
 
 def sample_seeded_rand_rois(cam_width, cam_height, n_rois=395, roi_size=3, seed=4321):
