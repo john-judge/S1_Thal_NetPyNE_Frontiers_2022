@@ -409,6 +409,7 @@ def myObjectiveInner(simData):
     
     grid_acsf_map = load_grid_acsf_map()
     grid_velocities = list(grid_acsf_map.keys())
+    print(grid_velocities[0])
     grid_v_deltas = [abs(v - propVelocity) for v in grid_velocities]
     closest_velocity = grid_velocities[np.argmin(grid_v_deltas)]
 
