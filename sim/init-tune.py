@@ -48,6 +48,8 @@ print("Here is the NBQX value of sim.cfg.synWeightFractionEE from init-tune.py:"
 sim.runSim()                     
 sim.gatherData()  
 if rank == 0:
+    propVelocity = sim.cfg.propVelocity
+    sim.allSimData['propVelocity'] = propVelocity
 
     sim.saveData()
 '''sim.pc.barrier()   # Wait for all ranks to finish gatherData

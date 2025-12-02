@@ -403,7 +403,7 @@ def myObjectiveInner(simData):
     #simData_acsf = simData['acsf']
     #simData_nbqx = simData['nbqx']
 
-    propVelocity = sim.cfg.propVelocity
+    propVelocity = simData['propVelocity']
     print("Propagation velocity (um/ms):", propVelocity)
     
     grid_acsf_map = load_grid_acsf_map()
