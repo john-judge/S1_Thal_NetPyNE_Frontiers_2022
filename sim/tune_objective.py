@@ -397,6 +397,10 @@ def myObjectiveInner(simData):
     """
     # start timer
     timer = time.time()
+    print('simData keys:', simData.keys()
+    )
+    print('simData simData key keys:', simData['simData'].keys()
+    )
 
     simData_nbqx = simData['simData']
     
