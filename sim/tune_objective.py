@@ -397,14 +397,16 @@ def myObjectiveInner(simData):
     """
     # start timer
     timer = time.time()
-    simData_nbqx = simData['simData']
+    #simData_nbqx = simData['simData']
+    simData_ = simData['simData']
     
     # change: now simData_acsf traces are loaded from staging
     #simData_acsf = simData['acsf']
-    #simData_nbqx = simData['nbqx']
+    simData_nbqx = simData_['nbqx']
 
     propVelocity = simData['propVelocity']
     print("Propagation velocity (um/ms):", propVelocity)
+    print(simData_nbqx.keys())
     
     grid_acsf_map = load_grid_acsf_map()
     grid_velocities = list(grid_acsf_map.keys())

@@ -50,6 +50,9 @@ sim.gatherData()
 if rank == 0:
     propVelocity = sim.cfg.propVelocity
     sim.allSimData['propVelocity'] = propVelocity
+    nbqx_data = dict(sim.allSimData)
+
+    sim.allSimData = {'simData': {'nbqx': nbqx_data}}
 
     sim.saveData()
 '''sim.pc.barrier()   # Wait for all ranks to finish gatherData
