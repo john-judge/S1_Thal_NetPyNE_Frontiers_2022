@@ -111,7 +111,7 @@ def load_cell_id_to_me_type_map(net_data, curr_trial=None):
 def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map, rois_to_sample,
                                             target_hVOS_populations = ("L4_SS", "L4_PC"),
                                             all_trial_save_folder='../data/optuna_tuning/'):
-    num_cells_to_draw = 3  # testing with 1 cell, tune with 3+
+    num_cells_to_draw = 15  # testing with 1 cell, tune with 3+
     target_population_cells = [
     cells[cell_id] for cell_id in cells 
         if any([t_pop in cells[cell_id].get_me_type() for 
