@@ -8,7 +8,7 @@ from netpyne import sim
 def tune_optuna():
     params = specs.ODict()
     params[('propVelocity')] = [0.0, 150.0]  # range (min, max)
-    params[('partial_blockade_fraction')] = [0.0, 0.05]
+    params[('partial_blockade_fraction')] = [0.04, 0.2]
 
     b = Batch(params=params, netParamsFile='netParams.py', cfgFile='cfg-tune-nbqx.py')
     return b
@@ -29,7 +29,7 @@ if __name__ == '__main__':
         'fitnessFunc': myObjective,
         'fitnessFuncArgs': {    
         },
-        'maxiters': 5,  # number of generations, passed to optuna's n_trials
+        'maxiters': 15,  # number of generations, passed to optuna's n_trials
         'maxtime': None,  # gets passed to optuna's timeout. None: no limit
         'maxiter_wait': 500,  # number of iterations (progress checks)
         'time_sleep': 120,  # seconds per iteration
