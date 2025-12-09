@@ -482,6 +482,12 @@ def myObjectiveInner(simData):
     # save all_cells_rec_acsf and all_cells_rec_nbqx to npy files
     np.save(os.path.join(save_folder, f"all_cells_rec_nbqx_trial{curr_trial}.npy"), all_cells_rec_nbqx)
 
+    # save raw data to pickle
+    with open(os.path.join(save_folder, f"raw_traces_acsf_trial{curr_trial}.pkl"), 'wb') as f:
+        pickle.dump(simData_traces_acsf, f)
+    with open(os.path.join(save_folder, f"raw_traces_nbqx_trial{curr_trial}.pkl"), 'wb') as f:
+        pickle.dump(simData_traces_nbqx, f)
+
     # save processed traces to pickle
     with open(os.path.join(save_folder, f"processed_traces_acsf_trial{curr_trial}.pkl"), 'wb') as f:
         pickle.dump(acsf_processed_traces, f)
