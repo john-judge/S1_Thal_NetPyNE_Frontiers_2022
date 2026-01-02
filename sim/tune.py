@@ -8,7 +8,7 @@ from netpyne import sim
 def tune_optuna():
     params = specs.ODict()
     params[('propVelocity')] = [0.0, 150.0]  # range (min, max)
-    params[('partial_blockade_fraction')] = [0.04, 0.2]
+    params[('partial_blockade_fraction')] = [0.15, 0.8]
 
     b = Batch(params=params, netParamsFile='netParams.py', cfgFile='cfg-tune-nbqx.py')
     return b
