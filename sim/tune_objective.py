@@ -111,7 +111,7 @@ def load_cell_id_to_me_type_map(net_data, curr_trial=None):
 def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_map, rois_to_sample,
                                             target_hVOS_populations = ("L4_SS", "L4_PC"),
                                             all_trial_save_folder='../data/optuna_tuning/'):
-    num_cells_to_draw = 10  # testing with 1 cell, tune with 3+
+    num_cells_to_draw = None  # testing with 1 cell, tune with 3+; None: all cells
     target_population_cells = [
     cells[cell_id] for cell_id in cells 
         if any([t_pop in cells[cell_id].get_me_type() for 
@@ -121,9 +121,11 @@ def average_voltage_traces_into_hVOS_pixels(simData, cells, me_type_morphology_m
     # random choice of num_cells_to_draw cells from target population
     # seed random for reproducibility
     random.seed(4332)
-    target_population_cells = random.sample(target_population_cells, 
-                                            min(num_cells_to_draw, 
-                                                len(target_population_cells)))
+    if num_cells_to_draw is not None:
+        target_population_cells = random.sample(target_population_cells, 
+                                                min(num_cells_to_draw, 
+                                                    len(target_population_cells)))
+
     print("target population cells:", target_population_cells)    
     hvos_readout = hVOSReadout(target_hVOS_populations, 
                                 {cell.get_cell_id(): cell for cell in target_population_cells}, 
