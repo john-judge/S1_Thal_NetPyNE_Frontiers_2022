@@ -201,7 +201,7 @@ for psf_type in all_cells_rec.keys():
 ###############################################
 # make each array into an animated gif using Camera.animate_frames_to_video
 ###############################################
-cam = Camera([], [], time, init_dummy=True)
+cam = Camera([], [], time, init_dummy=True, precompute_geometry=True)
 final_arr =  {}
 for psf_type in all_cells_rec.keys():
     for compart_type in all_cells_rec[psf_type].keys():
