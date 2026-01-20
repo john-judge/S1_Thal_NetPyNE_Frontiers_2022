@@ -335,6 +335,16 @@ if not no_psf_only:
     for target_cell in cells_to_draw:
         cell_model_rec_out_dir = model_rec_out_dir + 'psf/' + target_cell.get_cell_id() + '/'
         os.makedirs(cell_model_rec_out_dir, exist_ok=True)
+
+        # look for precomputed geometry files in current directory
+        geometry_cache = f'geometry_cache_{target_cell.get_cell_id()}.pkl'
+        geometry_cache_file = None
+        if os.path.exists(geometry_cache):
+            print("Using existing geometry cache for cell:", target_cell.get_cell_id())
+            geometry_cache_file = geometry_cache
+        else:
+            print("Geometry cache not found for cell:", target_cell.get_cell_id(),
+                   "; will create new cache at", geometry_cache)
         cam = Camera([target_cell], 
                     me_type_morphology_map, 
                     time,
@@ -345,9 +355,13 @@ if not no_psf_only:
                     psf=psf,
                     data_dir=cell_model_rec_out_dir, 
                     use_2d_psf=False,
-                    soma_dend_hVOS_ratio=soma_dend_hVOS_ratio
+                    soma_dend_hVOS_ratio=soma_dend_hVOS_ratio,
+                    geometry_cache_filename=geometry_cache_file,
+                    precompute_geometry=True
                     )
         cam._draw_cell(target_cell)
+        if geometry_cache_file is None:
+            cam.save_geometry(filename=geometry_cache)
 
         psf_nonzero_files = cam.get_cell_recording().get_non_zero_file_list()
         print("PSF non-zero files:", psf_nonzero_files)
