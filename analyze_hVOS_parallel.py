@@ -404,7 +404,7 @@ if not psf_only:
         cam_no_psf._draw_cell(target_cell)
         
         if geometry_cache_file is None:
-            cam.save_geometry(filename=geometry_cache)
+            cam_no_psf.save_geometry(filename=geometry_cache)
 
         '''for compart_id in ['soma', 'axon', 'apic', 'dend']:
             for activity_type in ['synaptic', 'spiking']:
