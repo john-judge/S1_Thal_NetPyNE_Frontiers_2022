@@ -219,9 +219,9 @@ cfg.cellParamLabels = cellParam
 ## only L4 SS and L4 PC
 target_me_types = ['L4_SS', 'L4_PC']  # only used if cfg.cellsrec = 2 or 3. if None, record all cells
 ## only PV+ interneurons
-target_me_types = ['L23_LBC', 'L4_LBC', 'L5_LBC', 'L6_LBC',
-                               'L23_NBC', 'L4_NBC', 'L5_NBC', 'L6_NBC',
-                               'L23_ChC', 'L4_ChC', 'L5_ChC', 'L6_ChC']
+#target_me_types = ['L23_LBC', 'L4_LBC', 'L5_LBC', 'L6_LBC',
+#                               'L23_NBC', 'L4_NBC', 'L5_NBC', 'L6_NBC',
+#                               'L23_ChC', 'L4_ChC', 'L5_ChC', 'L6_ChC']
 fraction_record = 1.0  # fraction of cells to record (randomly selected) only used if cfg.cellsrec = 3
 
 cfg.allpops = cfg.cellParamLabels
