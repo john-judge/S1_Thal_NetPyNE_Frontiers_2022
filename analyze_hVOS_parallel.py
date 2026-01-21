@@ -50,6 +50,11 @@ if len(sys.argv) > 2:
     except ValueError:
         total_jobs = 50
 
+# allow command line to choose which cell subpopulation to target
+hVOS_pop_choice = None
+if len(sys.argv) > 3:
+    hVOS_pop_choice = sys.argv[3]
+
 random.seed(4322)
 
 no_psf_only = False
@@ -68,7 +73,18 @@ soma_dend_hVOS_ratio = 0.5
 #####################################
 # Find data in CHTC staging and extract data just for this job's cell
 #####################################
+
+# scnn1a-cre
 target_hVOS_populations = ["L4_SS", "L4_PC"]
+if 'scnn1a' in hVOS_pop_choice:
+    target_hVOS_populations = ["L4_SS", "L4_PC"]
+
+# PV-Cre: LBC and NBC (basket cells)
+if 'PV' in hVOS_pop_choice:
+    target_hVOS_populations = ['L23_LBC', 'L4_LBC', 'L5_LBC', 'L6_LBC',
+                               'L23_NBC', 'L4_NBC', 'L5_NBC', 'L6_NBC',
+                               'L23_ChC', 'L4_ChC', 'L5_ChC', 'L6_ChC']
+
 target_sparsity = 1.0
 optical_type = "hVOS"
 t_max = 999 # number of points to write to disk
