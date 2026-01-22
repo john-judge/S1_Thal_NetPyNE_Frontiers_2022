@@ -75,12 +75,14 @@ soma_dend_hVOS_ratio = 0.5
 #####################################
 
 # scnn1a-cre
+hVOS_pop_choice = "PV"
 target_hVOS_populations = ["L4_SS", "L4_PC"]
 if 'scnn1a' in hVOS_pop_choice:
     target_hVOS_populations = ["L4_SS", "L4_PC"]
 
 # PV-Cre: LBC and NBC (basket cells)
 if 'PV' in hVOS_pop_choice:
+    print("Targeting PV+ interneurons")
     target_hVOS_populations = ['L23_LBC', 'L4_LBC', 'L5_LBC', 'L6_LBC',
                                'L23_NBC', 'L4_NBC', 'L5_NBC', 'L6_NBC',
                                'L23_ChC', 'L4_ChC', 'L5_ChC', 'L6_ChC']
