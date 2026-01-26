@@ -119,7 +119,6 @@ loaded_compart_data.load_existing_mmap(analyze_dir + 'v7_batch1_0_0_hash_map.pkl
 
 # check get in loaded_compart_data
 for cell_id in loaded_compart_data.hash_map:
-    print(cell_id)
     for comp in loaded_compart_data.hash_map[cell_id]:
         i_data, mmfp = loaded_compart_data.get_item(cell_id, comp)
         #print(' check get in loaded_compart_data', mmfp[i_data])
@@ -150,6 +149,7 @@ if os.path.exists(me_type_map_file):
 cells = {}
 me_type_morphology_map = {}
 for cell_id in loaded_compart_data.hash_map.keys():
+    print(cell_id)
     axons, apics, dends, soma = {}, {}, {}, None
     for compart in loaded_compart_data.hash_map[cell_id].keys():
         data = loaded_compart_data.get_item(cell_id, compart)
