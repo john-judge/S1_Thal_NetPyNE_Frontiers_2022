@@ -327,7 +327,7 @@ if any([cell.get_morphology() == None
     # report which cells are missing morphology
     for cell in target_population_cells:
         if cell.get_morphology() is None:
-            raise("Cell", cell.get_cell_id(), "is missing morphology for me_type", cell.get_me_type())
+            print("Cell", cell.get_cell_id(), "is missing morphology for me_type", cell.get_me_type())
         
 
 #######################################
