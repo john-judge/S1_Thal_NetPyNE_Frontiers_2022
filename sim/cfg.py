@@ -49,7 +49,7 @@ cfg.enable_neighbor_barrel_model = False
 #run 10: no stim
 #run 8: baseline stim
 #run 11: NBQX + no stim
-cfg.experiment_NBQX_global = True
+cfg.experiment_NBQX_global = False
 cfg.partial_blockade_fraction = 0.05  # fraction of AMPA synaptic weight to keep (0=full blockade, 1=no blockade)
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
 cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
