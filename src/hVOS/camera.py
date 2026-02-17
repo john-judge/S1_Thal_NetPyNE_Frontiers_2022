@@ -293,7 +293,11 @@ class Camera:
             return True
 
         x_soma, y_soma, z_soma = cell.get_soma_position()
-        structure = cell.get_morphology().get_structure()
+        structure = cell.get_morphology()
+        if structure is None:
+            print("Cell", cell.get_cell_id(), "has no morphology. Skipping.")
+            return False
+        structure = structure.get_structure()
         is_cell_in_bounds = False
         
         # follow the morphology of the cell, pulling optical trace from each compartment
