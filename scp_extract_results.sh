@@ -1,10 +1,10 @@
 #!/bin/bash
 
-REMOTE_HOST="jjudge3@ap2002.chtc.wisc.edu:/staging/jjudge3/"
+REMOTE_HOST="jjudge3@ap2002.chtc.wisc.edu:/staging/j/jjudge3/"
 
 # Check that a remote path was provided
 if [ -z "$1" ]; then
-    echo "Usage: $0 <dir in jjudge3@ap2002.chtc.wisc.edu:/staging/jjudge3/>"
+    echo "Usage: $0 <dir in jjudge3@ap2002.chtc.wisc.edu:/staging/j/jjudge3/>"
     exit 1
 fi
 
