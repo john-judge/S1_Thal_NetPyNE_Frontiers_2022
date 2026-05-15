@@ -33,9 +33,12 @@ rm S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 #cp /staging/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
 #tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 
+GRID_FILE_PATTERN="grid_acsf_map*.tar.gz"
 cp /staging/jjudge3/grid_acsf_map*.tar.gz ./
-tar -xvsf grid_acsf_map*.tar.gz
-rm grid_acsf_map*.tar.gz
+for file in $GRID_FILE_PATTERN; do
+	tar -xvsf "$file"
+	rm "$file"
+done 
 
 cd S1_Thal_NetPyNE_Frontiers_2022
 git pull

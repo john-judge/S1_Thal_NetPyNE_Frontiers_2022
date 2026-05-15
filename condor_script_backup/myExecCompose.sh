@@ -6,11 +6,11 @@ echo "Hello CHTC from Job $1. Proceeding to run workload..."
 # clone from Github
 
 # un-tar and move input to the repository subdirectory
-cp /staging/jjudge3/in-silico-hVOS-env.tar.gz ./
-cp /staging/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
+cp /staging/j/jjudge3/in-silico-hVOS-env.tar.gz ./
+cp /staging/j/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
 mkdir analyze_output
 cd analyze_output
-cp /staging/jjudge3/output_dir_*.tar.gz ./
+cp /staging/j/jjudge3/output_dir_*.tar.gz ./
 cd ..
 tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 
@@ -39,5 +39,5 @@ python compose_parallel.py
 cd ..
 
 tar -czvf composed_output.tar.gz composed_output
-cp composed_output.tar.gz /staging/jjudge3/
+cp composed_output.tar.gz /staging/j/jjudge3/
 

@@ -1,0 +1,5 @@
+JOB grid_acsf grid-acsf-sim.sub
+JOB tune tune.sub
+
+# Define the connections
+PARENT grid_acsf CHILD tune

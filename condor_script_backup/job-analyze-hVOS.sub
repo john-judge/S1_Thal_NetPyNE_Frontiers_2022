@@ -33,4 +33,4 @@ request_memory = 30GB
 request_disk = 90GB
 
 # 307 jobs for 307 cells in target population
-queue 50
+queue 50 

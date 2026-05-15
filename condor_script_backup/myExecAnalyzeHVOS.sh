@@ -6,10 +6,10 @@ echo "Hello CHTC from Job $1. Proceeding to run workload..."
 # clone from Github
 
 # un-tar and move input to the repository subdirectory
-cp /staging/jjudge3/S1_results.tar.gz ./
-cp /staging/jjudge3/in-silico-hVOS-env.tar.gz ./
-cp /staging/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
-cp /staging/jjudge3/NMC_model.tar.gz ./
+cp /staging/j/jjudge3/S1_results.tar.gz ./
+cp /staging/j/jjudge3/in-silico-hVOS-env.tar.gz ./
+cp /staging/j/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
+cp /staging/j/jjudge3/NMC_model.tar.gz ./
 tar -xvsf NMC_model.tar.gz
 tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 tar -xvsf S1_results.tar.gz
@@ -32,7 +32,19 @@ tar -xzf $ENVNAME.tar.gz -C $ENVDIR
 #git clone -4 https://github.com/john-judge/S1_Thal_NetPyNE_Frontiers_2022.git
 
 cd S1_Thal_NetPyNE_Frontiers_2022
-python analyze_hVOS_parallel.py "$1" no_psf_only
+
+# copy precomputed cell geometry caches to speed up cell drawings
+cp /staging/j/jjudge3/geometry_cache.tar . 
+tar -xzvf geometry_cache.tar
+mv geometry_cache/* .
+
+python analyze_hVOS_parallel.py "$1" no_psf_only PV
+
+# temporary: capture precomp geom
+mv geometry_cache_*.pkl geometry_cache
+tar -czvf geometry_cache.tar geometry_cache
+mv geometry_cache.tar /staging/j/jjudge3/
+
 cd ..
 
 # Before the script exits, make sure to remove the file(s) from the working directory
@@ -43,7 +55,5 @@ cd ..
 # tar output directory
 filename="output_dir_${1}.tar.gz"
 tar -czvf "$filename" "analyze_output/model_rec_final"
-mv "$filename" /staging/jjudge3/
-
-
+mv "$filename" /staging/j/jjudge3/
 

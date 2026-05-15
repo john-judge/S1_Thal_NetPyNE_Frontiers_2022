@@ -6,7 +6,7 @@ echo "Hello CHTC from Job $1. Proceeding to run workload..."
 # clone from Github
 
 # un-tar and move input to the repository subdirectory
-#cp /staging/j/jjudge3/in-silico-hVOS-env.tar.gz ./
+#cp /staging/jjudge3/in-silico-hVOS-env.tar.gz ./
 
 # have job exit if any command returns with non-zero exit status (aka failure)
 #set -e
@@ -23,22 +23,35 @@ echo "Hello CHTC from Job $1. Proceeding to run workload..."
 #. $ENVDIR/bin/activate
 
 # Command for myprogram, which will use files from the working directory
+cp /staging/jjudge3/NMC_model.tar.gz ./
+tar -xvsf NMC_model.tar.gz
 
-cp /staging/j/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
+cp /staging/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
 tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 rm S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 #git clone -4 https://github.com/john-judge/S1_Thal_NetPyNE_Frontiers_2022.git
-#cp /staging/j/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
+#cp /staging/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
 #tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 
 
 cd S1_Thal_NetPyNE_Frontiers_2022
 git pull
+
+# continue tuning from saved file
+#cp /staging/jjudge3/tune.tar.gz ./
+#tar -xvf tune.tar.gz
+
 cd sim
 nrnivmodl mod .
-echo "Finished nrnivmodl. Running batch.py..."
-python write_batch_parameters.py "$1"
-python batch.py
+echo "Finished nrnivmodl. "
+#python write_batch_parameters.py "$1"
+python grid_nbqx.py "$1"
+
+# copy precomputed cell geometry caches to speed up cell drawings
+cp /staging/jjudge3/geometry_cache_*.pkl ../data/grid_nbqx/
+
+python grid_acsf_analysis.py "$1" nbqx
+
 #mpiexec -n 8 nrniv -python -mpi init.py
 #mpiexec -n 8 nrniv -python -mpi init.py
 cd ..
@@ -50,16 +63,11 @@ cd ..
 #rm "./RealisticBarrel/Input data/an171923_2012_06_04_data_struct.mat"
 
 # tar output directory
-#tar -czvf S1-Thal-output.tar.gz "S1_Thal_NetPyNE_Frontiers_2022/data"
-# mv S1-Thal-output.tar.gz /staging/j/jjudge3/
+#tar -czvf tune.tar.gz --exclude="S1_Thal_NetPyNE_Frontiers_2022/data/optuna_tuning/gen*" S1_Thal_NetPyNE_Frontiers_2022/data
+#tar -czvf "grid${1}.tar.gz" --include="*all_cells_rec_acsf_trial*" "S1_Thal_NetPyNE_Frontiers_2022/data"
+#mv "grid${1}.tar.gz" /staging/jjudge3/
 
-# find file name dst
-ext=".tar.gz"
-for file in *"$ext"; do
-	if [[ -f "$file" ]]; then
-		tar -czvf $file "S1_Thal_NetPyNE_Frontiers_2022/data"
-		mv $file /staging/j/jjudge3/
-	fi
-done
+tar -czvf "grid_nbqx_map${1}.tar.gz" "grid_nbqx_map${1}.pkl"
+mv "grid_nbqx_map${1}.tar.gz" /staging/jjudge3/
 
 

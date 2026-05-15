@@ -1,0 +1,9 @@
+JOB S1_Thal job.sub
+JOB extract_format job-extract.sub
+JOB optical job-analyze-hVOS.sub
+#JOB compose job-compose.sub
+
+# Define the connections
+PARENT S1_Thal CHILD extract_format
+PARENT extract_format CHILD optical
+#PARENT optical CHILD compose

@@ -7,7 +7,7 @@ universe = container
 # custom args 
 jobID = $(Process)
 
-executable = myExecutableGridAcsf.sh
+executable = myExecutableGridNbqx.sh
 arguments = $(jobID)
 
 # require staging and transfer input files
