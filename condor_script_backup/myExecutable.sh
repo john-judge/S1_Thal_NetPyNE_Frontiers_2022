@@ -31,14 +31,28 @@ rm S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 #cp /staging/j/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
 #tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 
+# see if argument --dag_run_id <dag_run_id> is passed to the script after the job number ($1)
+# and if so, set the variable dag_run_id to that value
+if [ "$#" -ge 2 ] && [ "$2" = "--dag_run_id" ]; then
+	dag_run_id="$3"
+	echo "DAG run ID: $dag_run_id"
+else
+	dag_run_id=""
+fi
 
 cd S1_Thal_NetPyNE_Frontiers_2022
 git pull
 cd sim
 nrnivmodl mod .
 echo "Finished nrnivmodl. Running batch.py..."
-python write_batch_parameters.py "$1"
-python batch.py
+# if dag_run_id is not empty, pass it to write_batch_parameters.py
+if [ -n "$dag_run_id" ]; then
+	python write_batch_parameters.py "$1" --dag_run_id "$dag_run_id"
+else
+	python write_batch_parameters.py "$1"
+fi
+
+python batch.py 
 #mpiexec -n 8 nrniv -python -mpi init.py
 #mpiexec -n 8 nrniv -python -mpi init.py
 cd ..

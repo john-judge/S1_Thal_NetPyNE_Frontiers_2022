@@ -13,6 +13,7 @@ import os
 import numpy as np
 
 from recordTraceBatchSettings import record_trace_setting
+from dag_run_map import partial_nbqx_fractions_map, partial_nbqx_fractions_map_PV
 
 
 cfg = specs.SimConfig()  
@@ -50,7 +51,10 @@ cfg.enable_neighbor_barrel_model = False
 #run 8: baseline stim
 #run 11: NBQX + no stim
 cfg.experiment_NBQX_global = True
-cfg.partial_blockade_fraction = 0.54   # fraction of AMPA synaptic weight to keep (0=full blockade, 1=no blockade)
+cfg.partial_blockade_fraction = None   # fraction of AMPA synaptic weight to keep (0=full blockade, 1=no blockade)
+if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] in partial_nbqx_fractions_map:
+    cfg.partial_blockade_fraction = partial_nbqx_fractions_map[record_trace_setting['dag_run_id']]
+    print(f"Setting partial_blockade_fraction to {cfg.partial_blockade_fraction} based on DAG run ID {record_trace_setting['dag_run_id']}")
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
 cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
 cfg.target_hVOS_subpopulation = 'scnn1a'

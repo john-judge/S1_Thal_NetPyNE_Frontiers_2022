@@ -15,6 +15,15 @@ if len(sys.argv) > 1:
     job_id = int(sys.argv[1])
 job_id %= n_jobs  # make sure job_id is in range 0 to n_jobs-1
 
+# next arg is dag_run_id, if present
+dag_run_id = None
+if len(sys.argv) > 2 and sys.argv[2] == '--dag_run_id':
+    if len(sys.argv) > 3:
+        dag_run_id = sys.argv[3]
+    else:
+        print("Error: --dag_run_id flag provided but no value given.")
+        sys.exit(1)
+
 # soma: only 1 job: 
 # axons: 1 job
 # apic: <180 segments, 9 jobs (IDs 11-19)
@@ -72,6 +81,9 @@ if os.path.exists('recordTraceBatchSettings.py'):
 
 # write to file
 f = open('recordTraceBatchSettings.py', 'w')
-f.write('record_trace_setting = {\'compartment\': \''+compartment+'\', \'cell_num_start\': '+str(cell_num_start)+', \'cell_num_end\': '+str(cell_num_end)+'}')
+f.write('record_trace_setting = {"compartment": "'+compartment+ \
+                             '", "cell_num_start": '+str(cell_num_start)+ \
+                              ', "cell_num_end": '+str(cell_num_end)+ \
+                              ', "dag_run_id": "' + str(dag_run_id) + '"}')
 f.close()
 print('recordTraceBatchSettings.py written. compartment:', compartment, 'cell_num_start:', cell_num_start, 'cell_num_end:', cell_num_end)
