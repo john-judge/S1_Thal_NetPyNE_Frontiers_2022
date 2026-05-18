@@ -2,6 +2,7 @@ JOB S1_Thal subdag-job.sub
 JOB extract_format job-extract.sub
 JOB optical job-analyze-hVOS.sub
 #JOB package job-compose.sub
+JOB package package.sub
 
 VARS S1_Thal run_name=$(run_name)
 
@@ -10,4 +11,3 @@ PARENT S1_Thal CHILD extract_format
 PARENT extract_format CHILD optical
 #PARENT optical CHILD compose
 
-SCRIPT POST package_results_for_export.sh $(run_name)
