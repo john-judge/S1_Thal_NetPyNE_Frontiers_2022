@@ -25,5 +25,11 @@ mv "$BASE_PATH"/S1_results.tar.gz "$TARGET_DIR"
 # Confirm the move
 echo "Moved files (if any) from $BASE_PATH to $TARGET_DIR, ready for export via scp"
 
+# compress the output directory into a single tar.gz file for easier transfer
+tar -czvf "$TARGET_DIR"/output_dir_*.tar.gz -C "$TARGET_DIR"
+
+# remove the original output_dir_*.tar.gz files after compression
+rm "$TARGET_DIR"/output_dir_*.tar.gz
+
 
 
