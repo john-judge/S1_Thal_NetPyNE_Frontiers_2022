@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 
 
@@ -48,9 +50,16 @@ class Cell:
     def load_optical_data(self, mm_file):
         return np.memmap(mm_file, dtype='float32', mode='r')
     
-    def write_data(self, mm_file, data):
-        fp = np.memmap(mm_file, dtype='float32', mode='w+', shape=data.shape)
-        fp[:] = data[:]
+    def write_data(self, mm_file, data, atomic=True):
+        if not atomic:
+            fp = np.memmap(mm_file, dtype='float32', mode='w+', shape=data.shape)
+            fp[:] = data[:]
+        else:
+            tmp = mm_file + ".tmp"
+            fp = np.memmap(tmp, mode='w+', shape=data.shape)
+            fp[:] = data
+            del fp
+            os.replace(tmp, mm_file)
     
     def get_list_compartment_ids(self):
         return list(self.axons.keys()) + \
