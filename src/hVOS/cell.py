@@ -65,7 +65,7 @@ class Cell:
                 print("size:", np.size(data))
                 print("mod 4 bytes:", (np.size(data) * 4))
             tmp = mm_file + ".tmp"
-            fp = np.memmap(mm_file, dtype='float32', mode='w+', shape=data.shape)
+            fp = np.memmap(tmp, mode='w+', dtype='float32', shape=data.shape)
             fp[:] = data[:]
             del fp
             os.replace(tmp, mm_file)
