@@ -48,6 +48,8 @@ class Cell:
         return mmap_fp[i_data, :]
     
     def load_optical_data(self, mm_file):
+        if os.path.getsize(mm_file) % 4 != 0:
+            raise ValueError(f"Corrupt memmap file: {mm_file}")
         return np.memmap(mm_file, dtype='float32', mode='r')
     
     def write_data(self, mm_file, data, atomic=True):
@@ -57,7 +59,7 @@ class Cell:
         else:
             tmp = mm_file + ".tmp"
             fp = np.memmap(tmp, mode='w+', shape=data.shape)
-            fp[:] = data
+            fp[:] = data[:]
             del fp
             os.replace(tmp, mm_file)
     
