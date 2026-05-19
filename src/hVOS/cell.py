@@ -49,7 +49,7 @@ class Cell:
     
     def load_optical_data(self, mm_file):
         if os.path.getsize(mm_file) % 4 != 0:
-            raise ValueError(f"Corrupt memmap file: {mm_file}")
+            raise ValueError(f"Corrupt memmap file: {mm_file}, size: {os.path.getsize(mm_file)}")
         return np.memmap(mm_file, dtype='float32', mode='r')
     
     def write_data(self, mm_file, data, atomic=True):
@@ -57,6 +57,13 @@ class Cell:
             fp = np.memmap(mm_file, dtype='float32', mode='w+', shape=data.shape)
             fp[:] = data[:]
         else:
+            if 'optical_cell_9698_Vaxon_0' in mm_file:
+                print("Writing optical trace to memmap file:", mm_file)
+                print("TRACE INFO")
+                print("shape:", np.shape(data))
+                print("dtype:", getattr(data, "dtype", None))
+                print("size:", np.size(data))
+                print("mod 4 bytes:", (np.size(data) * 4))
             tmp = mm_file + ".tmp"
             fp = np.memmap(tmp, mode='w+', shape=data.shape)
             fp[:] = data[:]
