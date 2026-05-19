@@ -4,6 +4,8 @@
 container_image = docker://jjudge3/neuron:12
 universe = container
 
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
 # custom args 
 jobID = $(Process)
 

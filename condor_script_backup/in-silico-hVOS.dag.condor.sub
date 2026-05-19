@@ -18,4 +18,5 @@ on_exit_remove = (ExitSignal =?= 11 || (ExitCode =!= UNDEFINED && ExitCode >=0 &
 arguments = "-f -l . -Lockfile in-silico-hVOS.dag.lock -Dag in-silico-hVOS.dag -CsdVersion $CondorVersion:' '25.10.0' '2026-04-21' 'BuildID:' '900018' 'PackageID:' '25.10.0-0.900018' 'GitSHA:' 'f6aba35b' 'RC' '$ -notification COMPLETE -dagman /usr/bin/condor_dagman -AutoRescue 1 -force"
 environment = "_CONDOR_DAGMAN_LOG=in-silico-hVOS.dag.dagman.out _CONDOR_MAX_DAGMAN_LOG=0 _CONDOR_SCHEDD_ADDRESS_FILE=/var/lib/condor/spool/.schedd_address _CONDOR_SCHEDD_DAEMON_AD_FILE=/var/lib/condor/spool/.schedd_classad"
 notification = COMPLETE
+DAGMAN_USE_DIRECT_SUBMIT=False
 queue
