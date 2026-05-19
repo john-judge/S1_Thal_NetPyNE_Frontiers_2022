@@ -99,8 +99,12 @@ camera_resolution = cam_params['cam_resolution']
 #   each memmap file contains the voltage trace for each compartment of the cell
 #   in the format 'v7_batch_1_0_0_V<compartment_id>_<cell_id>.dat'
 run_id = 2
-data_dir = '../analyze_output/'
-morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
+
+print("PYTHON PWD:", os.getcwd(), flush=True)
+
+# dirs need to be combined with os.getcwd() to get full path
+data_dir = os.path.join(os.getcwd(), '../analyze_output/')
+morphology_data_dir = os.path.join(os.getcwd(), '../NMC_model/NMC.NeuronML2/')
 model_rec_out_dir = data_dir + 'model_rec/'
 model_rec_final_out_dir = data_dir + 'model_rec_final/'
 if not os.path.exists(model_rec_out_dir):
@@ -227,7 +231,7 @@ while i_t < len(target_population_cells):
     if i_t < len(target_population_cells):
         i_target_cells.append(i_t)
     i_t += total_jobs
-print("Job id:", job_id, "of", total_jobs, "processing cells:", i_target_cells)
+print("Job id:", job_id, "of", total_jobs, ", \tprocessing cells:", i_target_cells)
 
 
 '''print("=== Diagnostic Count 2: target_population_cells BEFORE sparsity ===")
