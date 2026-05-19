@@ -12,6 +12,8 @@ jobID = $(Process)
 executable = myExecutable.sh
 arguments = $(jobID) --dag_run_id $(run_name)
 
+initialdir = $(run_name)
+
 # require staging and transfer input files
 requirements = (Target.HasCHTCStaging == True)
 #transfer_input_files = file:///staging/jjudge3/NMC_model.tar.gz

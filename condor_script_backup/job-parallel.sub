@@ -9,6 +9,8 @@ executable = myExecutableParallel.sh
 # require staging and transfer input files
 requirements = (Target.HasCHTCStaging == True)
 transfer_input_files = file:///staging/jjudge3/NMC_model.tar.gz
+
+initialdir = $(run_name)
 # The first line specifies the path and name of the output file
 # relative to the main directory of the working machine. 
 # The second line defines where that file should go, 
