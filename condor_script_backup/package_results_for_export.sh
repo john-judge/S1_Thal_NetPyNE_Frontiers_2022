@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_PATH="/staging/jjudge3/"
+BASE_PATH="/staging/j/jjudge3/"
 
 # Check if the user provided an argument
 if [ -z "$1" ]; then
