@@ -86,4 +86,6 @@ f.write('record_trace_setting = {"compartment": "'+compartment+ \
                               ', "cell_num_end": '+str(cell_num_end)+ \
                               ', "dag_run_id": "' + str(dag_run_id) + '"}')
 f.close()
-print('recordTraceBatchSettings.py written. compartment:', compartment, 'cell_num_start:', cell_num_start, 'cell_num_end:', cell_num_end)
+print('recordTraceBatchSettings.py written. compartment:', compartment, 
+      'cell_num_start:', cell_num_start, 'cell_num_end:', cell_num_end,
+      'dag_run_id:', dag_run_id)
