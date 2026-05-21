@@ -2,22 +2,22 @@
 # run15_58
 ############################
 
-JOB run15_58_S1 subdag-job.sub
-VARS run15_58_S1 run_id="run15_58"
+#JOB run15_58_S1 subdag-job.sub
+#VARS run15_58_S1 run_name="run15_58"
 
-JOB run15_58_extract job-extract.sub
-VARS run15_58_extract run_id="run15_58"
+#JOB run15_58_extract job-extract.sub
+#VARS run15_58_extract run_name="run15_58"
 
-JOB run15_58_optical job-analyze-hVOS.sub
-VARS run15_58_optical run_id="run15_58"
+#JOB run15_58_optical job-analyze-hVOS.sub
+#VARS run15_58_optical run_name="run15_58"
 
 JOB run15_58_package package.sub
-VARS run15_58_package run_id="run15_58"
+VARS run15_58_package run_name="run15_58"
 
 
-PARENT run15_58_S1 CHILD run15_58_extract
-PARENT run15_58_extract CHILD run15_58_optical
-PARENT run15_58_optical CHILD run15_58_package
+#PARENT run15_58_S1 CHILD run15_58_extract
+#PARENT run15_58_extract CHILD run15_58_optical
+#PARENT run15_58_optical CHILD run15_58_package
 
 
 ############################
@@ -25,16 +25,16 @@ PARENT run15_58_optical CHILD run15_58_package
 ############################
 
 JOB run15_59_S1 subdag-job.sub
-VARS run15_59_S1 run_id="run15_59"
+VARS run15_59_S1 run_name="run15_59"
 
 JOB run15_59_extract job-extract.sub
-VARS run15_59_extract run_id="run15_59"
+VARS run15_59_extract run_name="run15_59"
 
 JOB run15_59_optical job-analyze-hVOS.sub
-VARS run15_59_optical run_id="run15_59"
+VARS run15_59_optical run_name="run15_59"
 
 JOB run15_59_package package.sub
-VARS run15_59_package run_id="run15_59"
+VARS run15_59_package run_name="run15_59"
 
 
 PARENT run15_59_S1 CHILD run15_59_extract
