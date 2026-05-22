@@ -55,6 +55,8 @@ cfg.partial_blockade_fraction = None   # fraction of AMPA synaptic weight to kee
 if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] in partial_nbqx_fractions_map:
     cfg.partial_blockade_fraction = partial_nbqx_fractions_map[record_trace_setting['dag_run_id']]
     print(f"Setting partial_blockade_fraction to {cfg.partial_blockade_fraction} based on DAG run ID {record_trace_setting['dag_run_id']}")
+else:
+    print(f"No partial blockade fraction found for DAG run ID {record_trace_setting.get('dag_run_id', None)}. Using default value {cfg.partial_blockade_fraction} (full blockade).")
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
 cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
 cfg.target_hVOS_subpopulation = 'scnn1a'
