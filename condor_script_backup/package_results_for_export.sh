@@ -3,10 +3,10 @@
 BASE_PATH="/staging/j/jjudge3/"
 
 # Check if the user provided an argument
-if [ -z "$1" ]; then
-	    echo "Usage: $0 <directory-name>"
-	        exit 1
-fi
+#if [ -z "$1" ]; then
+#	    echo "Usage: $0 <directory-name>"
+#	        exit 1
+#fi
 
 # Assign the first argument to a variable
 TARGET_DIR="$BASE_PATH/$1"
@@ -26,10 +26,10 @@ mv "$BASE_PATH"/S1_results.tar.gz "$TARGET_DIR"
 echo "Moved files (if any) from $BASE_PATH to $TARGET_DIR, ready for export via scp"
 
 # compress the output directory into a single tar.gz file for easier transfer
-tar -czvf "$TARGET_DIR"/output_dir_*.tar.gz -C "$TARGET_DIR"
+tar -czvf "$TARGET_DIR".tar.gz "$TARGET_DIR"
 
-# remove the original output_dir_*.tar.gz files after compression
-rm "$TARGET_DIR"/output_dir_*.tar.gz
+# remove the original target dir after compressioni
+rm -rf "$TARGET_DIR"
 
 
 
