@@ -8,6 +8,9 @@ BASE_PATH="/staging/j/jjudge3/"
 #	        exit 1
 #fi
 
+# print the value of $1 for debugging
+echo "Argument provided: $1"
+
 # Assign the first argument to a variable
 TARGET_DIR="$BASE_PATH/$1"
 
@@ -27,8 +30,9 @@ echo "Moved files (if any) from $BASE_PATH to $TARGET_DIR, ready for export via 
 
 # compress the output directory into a single tar.gz file for easier transfer
 tar -czvf "$TARGET_DIR".tar.gz "$TARGET_DIR"
+echo "Compressed $TARGET_DIR into $TARGET_DIR.tar.gz for export"
 
-# remove the original target dir after compressioni
+# remove the original target dir after compression
 rm -rf "$TARGET_DIR"
 
 
