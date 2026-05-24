@@ -22,7 +22,8 @@ if [ ! -d "$TARGET_DIR" ]; then
 		    echo "Directory already exists: $TARGET_DIR"
 fi
 
-mv "$BASE_PATH"/output_dir_*.tar.gz "$TARGET_DIR" 
+mv "$BASE_PATH"/* "$TARGET_DIR" 
+mv "$BASE_PATH"/output_dir* "$TARGET_DIR" 
 mv "$BASE_PATH"/S1_results.tar.gz "$TARGET_DIR" 
 
 # Confirm the move
