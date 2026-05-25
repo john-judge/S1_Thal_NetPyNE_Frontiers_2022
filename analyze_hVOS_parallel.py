@@ -483,7 +483,7 @@ if job_id ==0 and not psf_only:
 ###########################################
 # Copy non-zero files to model_rec_final_out_dir
 ###########################################
-os.makedirs(model_rec_final_out_dir, exist_ok=True)
+'''os.makedirs(model_rec_final_out_dir, exist_ok=True)
 if not no_psf_only:
     for file in psf_nonzero_files:
         file_name = "psf_" + file.split('/')[-1]
@@ -512,4 +512,4 @@ if not psf_only:
             os.makedirs(target_subdir)
         target_file = model_rec_final_out_dir + cell_subdir + file_name
         if not os.path.exists(target_file):
-            os.system('cp ' + file + ' ' + target_file)
+            os.system('cp ' + file + ' ' + target_file)'''
