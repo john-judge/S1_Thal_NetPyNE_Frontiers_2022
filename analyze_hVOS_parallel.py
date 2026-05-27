@@ -103,8 +103,8 @@ run_id = 2
 print("PYTHON PWD:", os.getcwd(), flush=True)
 
 # dirs need to be combined with os.getcwd() to get full path
-data_dir = os.path.join(os.getcwd(), '../analyze_output/')
-morphology_data_dir = os.path.join(os.getcwd(), '../NMC_model/NMC.NeuronML2/')
+data_dir = '../analyze_output/'
+morphology_data_dir = '../NMC_model/NMC.NeuronML2/'
 model_rec_out_dir = data_dir + 'model_rec/'
 model_rec_final_out_dir = data_dir + 'model_rec_final/'
 if not os.path.exists(model_rec_out_dir):
@@ -483,7 +483,7 @@ if job_id ==0 and not psf_only:
 ###########################################
 # Copy non-zero files to model_rec_final_out_dir
 ###########################################
-'''os.makedirs(model_rec_final_out_dir, exist_ok=True)
+os.makedirs(model_rec_final_out_dir, exist_ok=True)
 if not no_psf_only:
     for file in psf_nonzero_files:
         file_name = "psf_" + file.split('/')[-1]
@@ -512,4 +512,4 @@ if not psf_only:
             os.makedirs(target_subdir)
         target_file = model_rec_final_out_dir + cell_subdir + file_name
         if not os.path.exists(target_file):
-            os.system('cp ' + file + ' ' + target_file)'''
+            os.system('cp ' + file + ' ' + target_file)
