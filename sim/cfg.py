@@ -225,7 +225,7 @@ cfg.cellParamLabels = cellParam
 
 ## only L4 SS and L4 PC
 target_me_types = None
-if cfg.target_hVOS_subpopulation == 'scnn1a':
+if cfg.target_hVOS_subpopulation == 'PV':
     target_me_types = ['L4_SS', 'L4_PC']  # only used if cfg.cellsrec = 2 or 3. if None, record all cells
 elif cfg.target_hVOS_subpopulation == 'PV':
     ## only PV+ interneurons
