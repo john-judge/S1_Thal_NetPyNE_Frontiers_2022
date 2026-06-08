@@ -189,7 +189,11 @@ for cell_id in loaded_compart_data.hash_map.keys():
         # load morphology
         # find files in morphology_data_dir with me_type in the name
         print("Loading morphology for me_type:", me_type)
-        me_type_part1, me_type_part2, me_type_part3 = me_type.split("_")
+        try:
+            me_type_part1, me_type_part2, me_type_part3 = me_type.split("_")
+        except ValueError:
+            print("Unexpected me_type format (expected 3 parts separated by underscores):", me_type)
+            continue
         m_type, e_type = me_type_part1 + "_" + me_type_part2, me_type_part3
         me_type_files = [f for f in os.listdir(morphology_data_dir) if (m_type in f and e_type in f and f.endswith('.cell.nml'))]
         if len(me_type_files) == 0:
