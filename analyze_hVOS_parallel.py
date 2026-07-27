@@ -75,9 +75,10 @@ soma_dend_hVOS_ratio = 0.5
 #####################################
 
 # scnn1a-cre
-hVOS_pop_choice = "PV"
+hVOS_pop_choice = "scnn1a"
 target_hVOS_populations = ["L4_SS", "L4_PC"]
 if 'scnn1a' in hVOS_pop_choice:
+    print("Targeting scnn1a excitatory neurons")
     target_hVOS_populations = ["L4_SS", "L4_PC"]
 
 # PV-Cre: LBC and NBC (basket cells)

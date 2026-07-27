@@ -66,7 +66,11 @@ cfg.target_hVOS_subpopulation = 'scnn1a'
 #------------------------------------------------------------------------------
 cfg.duration = 99.8 ## Duration of the sim, in ms  
 cfg.dt = 0.025
-cfg.seeds = {'cell': 4322, 'conn': 4322, 'stim': 4322, 'loc': 4322} 
+cfg.seeds = {'cell': 4322, 'conn': 4322, 'stim': 4322, 'loc': 4322}
+change_seeds_constant = 37
+for seed in cfg.seeds:
+    cfg.seeds[seed] += change_seeds_constant
+
 cfg.hParams = {'celsius': 34, 'v_init': -65} # room temperature (slice)
 cfg.verbose = True
 cfg.createNEURONObj = True
@@ -225,7 +229,7 @@ cfg.cellParamLabels = cellParam
 
 ## only L4 SS and L4 PC
 target_me_types = None
-if cfg.target_hVOS_subpopulation == 'PV':
+if cfg.target_hVOS_subpopulation == 'scnn1a':
     target_me_types = ['L4_SS', 'L4_PC']  # only used if cfg.cellsrec = 2 or 3. if None, record all cells
 elif cfg.target_hVOS_subpopulation == 'PV':
     ## only PV+ interneurons
