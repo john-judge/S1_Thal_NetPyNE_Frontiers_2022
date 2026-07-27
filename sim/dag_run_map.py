@@ -107,7 +107,7 @@ partial_nbqx_fractions_map = {
 # or chaotic
     'run_16_00'
     'run16_00': 0.5,   #
-    'run16_01': 0.0,   #
+    'run16_01': 1.0,   #
     'run16_02': 0.49,   #
     'run16_03': 0.52,   #
     'run16_04': 0.48,   #
