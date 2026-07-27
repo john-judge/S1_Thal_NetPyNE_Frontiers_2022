@@ -46,7 +46,9 @@ cfg.enable_neighbor_barrel_model = False
 #------------------------------------------------------------------------------
 # Experiments
 #------------------------------------------------------------------------------
-
+cfg.target_hVOS_subpopulation = 'scnn1a'
+if cfg.target_hVOS_subpopulation == 'PV':
+    partial_nbqx_fractions_map = partial_nbqx_fractions_map_PV
 #run 10: no stim
 #run 8: baseline stim
 #run 11: NBQX + no stim
@@ -57,9 +59,11 @@ if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] i
     print(f"Setting partial_blockade_fraction to {cfg.partial_blockade_fraction} based on DAG run ID {record_trace_setting['dag_run_id']}")
 else:
     print(f"No partial blockade fraction found for DAG run ID {record_trace_setting.get('dag_run_id', None)}. Using default value {cfg.partial_blockade_fraction} (full blockade).")
+if cfg.partial_blockade_fraction == 1.0:
+    cfg.experiment_NBQX_global = False  # no NBQX effect if fraction is 1.0
 cfg.experiment_dendritic_somatic_inhibition = False  # for run12
 cfg.export_xstim_targets = False  # used in init.py to export xstim targets based on structure
-cfg.target_hVOS_subpopulation = 'scnn1a'
+
 
 #------------------------------------------------------------------------------
 # Run parameters
