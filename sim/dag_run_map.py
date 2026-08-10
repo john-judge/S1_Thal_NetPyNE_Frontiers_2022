@@ -105,7 +105,6 @@ partial_nbqx_fractions_map = {
 # run 16: re-test some of run15 with 
 # new random seeds to see if the results are consistent
 # or chaotic
-    'run_16_00'
     'run16_00': 0.5,   #
     'run16_01': 1.0,   #
     'run16_02': 0.49,   #
