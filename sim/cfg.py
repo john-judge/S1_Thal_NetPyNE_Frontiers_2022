@@ -13,7 +13,7 @@ import os
 import numpy as np
 
 from recordTraceBatchSettings import record_trace_setting
-from dag_run_map import partial_nbqx_fractions_map, partial_nbqx_fractions_map_PV
+from dag_run_map import partial_nbqx_fractions_map, partial_nbqx_fractions_map_PV, scale_IEGain_map
 
 
 cfg = specs.SimConfig()  
@@ -49,10 +49,13 @@ cfg.enable_neighbor_barrel_model = False
 cfg.target_hVOS_subpopulation = 'scnn1a'
 if cfg.target_hVOS_subpopulation == 'PV':
     partial_nbqx_fractions_map = partial_nbqx_fractions_map_PV
-#run 10: no stim
-#run 8: baseline stim
-#run 11: NBQX + no stim
-cfg.experiment_NBQX_global = True
+
+cfg.scale_IEGain = 2.0
+if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] in scale_IEGain_map:
+    cfg.scale_IEGain = scale_IEGain_map[record_trace_setting['dag_run_id']]
+    print(f"Setting scale_IEGain to {cfg.scale_IEGain} based on DAG run ID {record_trace_setting['dag_run_id']}")
+
+cfg.experiment_NBQX_global = False
 cfg.partial_blockade_fraction = None   # fraction of AMPA synaptic weight to keep (0=full blockade, 1=no blockade)
 if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] in partial_nbqx_fractions_map:
     cfg.partial_blockade_fraction = partial_nbqx_fractions_map[record_trace_setting['dag_run_id']]
@@ -355,6 +358,8 @@ if cfg.experiment_NBQX_global:
     cfg.synWeightFractionEI = [cfg.partial_blockade_fraction, 1.0] # E -> I AMPA to NMDA ratio
     #cfg.EEGain = 0.05
     #cfg.EIGain = 0.05
+if cfg.scale_IEGain is not None:
+    cfg.IEGain = 1.0 * cfg.scale_IEGain
 
 #------------------------------------------------------------------------------
 ## Th->Th 

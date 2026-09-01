@@ -269,3 +269,14 @@ partial_nbqx_fractions_map_PV = {
 
 
 }
+
+scale_IEGain_map = {
+    'run17_00': 1, # baseline
+    'run17_01': 0.5, # half the gain
+    'run17_02': 0.25, # quarter the gain
+    'run17_03': 0.75, # three-quarters the gain
+    'run17_04': 1.5, # one and a half times the gain
+    'run17_05': 2.0, # double the gain
+    'run17_06': 3.0, # triple the gain
+    'run17_07': 4.0, # quadruple the gain  
+}
