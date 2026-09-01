@@ -52,6 +52,7 @@ def build_dag(run_number: str, start_run_id: str, end_run_id: str) -> str:
         raise ValueError("start_run_id must be less than or equal to end_run_id")
 
     width = max(len(start_run_id), len(end_run_id))
+    width = max(width, 2)  # ensure at least 2 digits for run_id formatting
     run_names = [format_run_id(run_number, run_id, width) for run_id in range(start, end + 1)]
 
     lines: list[str] = []
