@@ -23,12 +23,12 @@ echo "Hello CHTC from Job $1. Proceeding to run workload..."
 #. $ENVDIR/bin/activate
 
 # Command for myprogram, which will use files from the working directory
-cp /staging/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
+cp /staging/j/jjudge3/S1_Thal_NetPyNE_Frontiers_2022.tar.gz ./
 tar -xvsf S1_Thal_NetPyNE_Frontiers_2022.tar.gz
 #git clone -4 https://github.com/john-judge/S1_Thal_NetPyNE_Frontiers_2022.git
 
 mkdir run2
-cp /staging/jjudge3/S1-Thal-output-*.tar.gz run2/
+cp /staging/j/jjudge3/S1-Thal-output-*.tar.gz run2/
 
 
 
@@ -37,7 +37,7 @@ python extract_format_parallel.py
 cd ..
 
 tar -czvf S1_results.tar.gz analyze_output
-cp S1_results.tar.gz /staging/jjudge3/
+cp S1_results.tar.gz /staging/j/jjudge3/
 
 
 echo "extract and format finished. S1-Thal-output-*.tar.gz have been reformatted into S1_results.tar.gz, ready for job-analyze-hVOS.sub to run"

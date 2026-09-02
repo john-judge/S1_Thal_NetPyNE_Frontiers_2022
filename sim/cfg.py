@@ -50,7 +50,7 @@ cfg.target_hVOS_subpopulation = 'scnn1a'
 if cfg.target_hVOS_subpopulation == 'PV':
     partial_nbqx_fractions_map = partial_nbqx_fractions_map_PV
 
-cfg.scale_IEGain = 2.0
+cfg.scale_IEGain = 1.0  # 1.0 default for run14 - run16
 if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] in scale_IEGain_map:
     cfg.scale_IEGain = scale_IEGain_map[record_trace_setting['dag_run_id']]
     print(f"Setting scale_IEGain to {cfg.scale_IEGain} based on DAG run ID {record_trace_setting['dag_run_id']}")
@@ -74,7 +74,7 @@ cfg.export_xstim_targets = False  # used in init.py to export xstim targets base
 cfg.duration = 99.8 ## Duration of the sim, in ms  
 cfg.dt = 0.025
 cfg.seeds = {'cell': 4322, 'conn': 4322, 'stim': 4322, 'loc': 4322}
-change_seeds_constant = 37
+change_seeds_constant = 0  # 0 - run14/15, 37 - run16
 for seed in cfg.seeds:
     cfg.seeds[seed] += change_seeds_constant
 
