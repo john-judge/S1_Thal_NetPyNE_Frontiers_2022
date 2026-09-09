@@ -46,7 +46,7 @@ cfg.enable_neighbor_barrel_model = False
 #------------------------------------------------------------------------------
 # Experiments
 #------------------------------------------------------------------------------
-cfg.target_hVOS_subpopulation = 'scnn1a'
+cfg.target_hVOS_subpopulation = 'PV'
 if cfg.target_hVOS_subpopulation == 'PV':
     partial_nbqx_fractions_map = partial_nbqx_fractions_map_PV
 
