@@ -55,7 +55,7 @@ if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] i
     cfg.scale_IEGain = scale_IEGain_map[record_trace_setting['dag_run_id']]
     print(f"Setting scale_IEGain to {cfg.scale_IEGain} based on DAG run ID {record_trace_setting['dag_run_id']}")
 
-cfg.experiment_NBQX_global = False
+cfg.experiment_NBQX_global = True
 cfg.partial_blockade_fraction = None   # fraction of AMPA synaptic weight to keep (0=full blockade, 1=no blockade)
 if 'dag_run_id' in record_trace_setting and record_trace_setting['dag_run_id'] in partial_nbqx_fractions_map:
     cfg.partial_blockade_fraction = partial_nbqx_fractions_map[record_trace_setting['dag_run_id']]
